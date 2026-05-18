@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
-import 'home/home_page.dart';
-import 'closet/wardrobe_page.dart';
 import 'camera/camera_page.dart';
+import 'closet/closet_page.dart';
+import 'home/home_page.dart';
 import 'outfit/outfit_page.dart';
 import 'profile/profile_page.dart';
 
@@ -15,76 +15,161 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
+  late final PageController _pageController;
 
-  final List<Widget> _pages = [
+  static const _icons = [
+    Icons.home_rounded,
+    Icons.checkroom_rounded,
+    Icons.camera_alt_rounded,
+    Icons.auto_awesome_rounded,
+    Icons.person_rounded,
+  ];
+
+  late final List<Widget> _pages = [
     const HomePage(),
-    const WardrobePage(),
-    const CameraPage(),
+    const ClosetPage(),
+    CameraPage(onClose: () => _onTapNav(1)),
     const OutfitPage(),
     const ProfilePage(),
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: _currentIndex);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _onTapNav(int index) {
+    if (_currentIndex == index) return;
+    setState(() => _currentIndex = index);
+    _pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 320),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final hideBottomNav = _currentIndex == 2;
+
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
+      extendBody: true,
+      body: PageView(
+        controller: _pageController,
+        physics: const NeverScrollableScrollPhysics(),
+        onPageChanged: (index) => setState(() => _currentIndex = index),
         children: _pages,
       ),
-      bottomNavigationBar: _buildBottomNav(),
-    );
-  }
+      bottomNavigationBar: AnimatedSlide(
+        duration: const Duration(milliseconds: 240),
+        curve: Curves.easeOutCubic,
+        offset: hideBottomNav ? const Offset(0, 1.2) : Offset.zero,
+        child: AnimatedOpacity(
+          duration: const Duration(milliseconds: 180),
+          opacity: hideBottomNav ? 0 : 1,
+          child: IgnorePointer(
+            ignoring: hideBottomNav,
+            child: SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                child: Container(
+                  height: 78,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(26),
+                    border: Border.all(
+                      color: AppColors.primary.withValues(alpha: 0.08),
+                      width: 1,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withValues(alpha: 0.12),
+                        blurRadius: 26,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: List.generate(_icons.length, (index) {
+                      final active = _currentIndex == index;
 
-  Widget _buildBottomNav() {
-    return Container(
-      padding: const EdgeInsets.only(top: 10, bottom: 20),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFDFAF6),
-        border: Border(top: BorderSide(color: AppColors.primary.withOpacity(0.08))),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildNavItem(Icons.people, 'Cộng đồng', 0),
-          _buildNavItem(Icons.grid_view, 'Tủ đồ', 1),
-          _buildNavItem(Icons.camera_alt, 'Chụp ảnh', 2),
-          _buildNavItem(Icons.checkroom, 'Phối đồ', 3),
-          _buildNavItem(Icons.person, 'Cá nhân', 4),
-        ],
-      ),
-    );
-  }
+                      if (index == 2) {
+                        return GestureDetector(
+                          onTap: () => _onTapNav(index),
+                          child: Transform.translate(
+                            offset: const Offset(0, -16),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 220),
+                              width: 58,
+                              height: 58,
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [
+                                    AppColors.primary,
+                                    AppColors.primaryLight,
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppColors.primary.withValues(
+                                      alpha: active ? 0.38 : 0.28,
+                                    ),
+                                    blurRadius: active ? 22 : 16,
+                                    offset: const Offset(0, 8),
+                                  ),
+                                ],
+                              ),
+                              child: const Icon(
+                                Icons.camera_alt_rounded,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        );
+                      }
 
-  Widget _buildNavItem(IconData icon, String label, int index) {
-    final isActive = _currentIndex == index;
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _currentIndex = index;
-        });
-      },
-      behavior: HitTestBehavior.opaque,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (isActive)
-            Container(
-              width: 4,
-              height: 4,
-              decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
-            ),
-          const SizedBox(height: 4),
-          Icon(icon, color: isActive ? AppColors.primary : const Color(0xFF8B7355), size: 24),
-          const SizedBox(height: 3),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-              color: isActive ? AppColors.primary : const Color(0xFF8B7355),
+                      return GestureDetector(
+                        onTap: () => _onTapNav(index),
+                        behavior: HitTestBehavior.opaque,
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 220),
+                          curve: Curves.easeOutCubic,
+                          width: 46,
+                          height: 46,
+                          decoration: BoxDecoration(
+                            color: active
+                                ? AppColors.primary.withValues(alpha: 0.12)
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: Icon(
+                            _icons[index],
+                            color: active
+                                ? AppColors.primary
+                                : const Color(0xFF9A897B),
+                            size: 24,
+                          ),
+                        ),
+                      );
+                    }),
+                  ),
+                ),
+              ),
             ),
           ),
-        ],
+        ),
       ),
     );
   }

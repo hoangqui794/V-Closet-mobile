@@ -1,93 +1,220 @@
-import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../data/datasources/wardrobe_api_service.dart';
 import '../../../../domain/entities/clothing_item.dart';
 
-class ClosetPage extends StatelessWidget {
+class ClosetPage extends StatefulWidget {
   const ClosetPage({super.key});
 
-  // Dữ liệu giả (Mock Data) để làm demo UI/UX
-  static final List<ClothingItem> mockItems = [
-    ClothingItem(
-      id: '1',
-      name: 'Áo Hoodie Oversize',
-      imageUrl: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=400',
-      category: 'Áo',
-      price: 450000,
-    ),
-    ClothingItem(
-      id: '2',
-      name: 'Quần Jean ống rộng',
-      imageUrl: 'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=400',
-      category: 'Quần',
-      price: 590000,
-    ),
-    ClothingItem(
-      id: '3',
-      name: 'Giày Sneaker White',
-      imageUrl: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=400',
-      category: 'Giày',
-      price: 1200000,
-    ),
-    ClothingItem(
-      id: '4',
-      name: 'Áo Khoác Da Biker',
-      imageUrl: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?q=80&w=400',
-      category: 'Áo khoác',
-      price: 2500000,
-    ),
-  ];
+  @override
+  State<ClosetPage> createState() => _ClosetPageState();
+}
+
+class _ClosetPageState extends State<ClosetPage> {
+  final WardrobeApiService _apiService = GetIt.I<WardrobeApiService>();
+  List<ClothingItem> _items = [];
+  bool _isLoading = true;
+  String _selectedCategory = 'Tất cả';
+
+  final Map<String, String> _categoryMap = {
+    'Tất cả': '',
+    'Áo': 'Top',
+    'Quần/Váy': 'Bottom',
+    'Đầm': 'Dress',
+    'Áo khoác': 'Outerwear',
+    'Giày': 'Shoes',
+    'Túi': 'Bag',
+    'Phụ kiện': 'Accessory',
+  };
+
+  final Map<String, String> _categoryLabel = {
+    'Top': 'Áo',
+    'Bottom': 'Quần/Váy',
+    'Dress': 'Đầm',
+    'Outerwear': 'Áo khoác',
+    'Shoes': 'Giày',
+    'Bag': 'Túi',
+    'Accessory': 'Phụ kiện',
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchItems();
+  }
+
+  Future<void> _fetchItems() async {
+    setState(() => _isLoading = true);
+
+    try {
+      final category = _categoryMap[_selectedCategory];
+      final result = await _apiService.getItems(
+        category: category == null || category.isEmpty ? null : category,
+      );
+
+      if (mounted) {
+        setState(() {
+          _items = result;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Không thể tải dữ liệu tủ đồ: $e')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1A1A2E),
-      appBar: AppBar(
-        title: const Text('Tủ Đồ Cá Nhân', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      backgroundColor: AppColors.background,
+      body: SafeArea(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Filter Chips Demo
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
               child: Row(
-                children: ['Tất cả', 'Áo', 'Quần', 'Giày', 'Phụ kiện'].map((cat) {
+                children: [
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Tủ đồ của tôi',
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                        SizedBox(height: 2),
+                        Text(
+                          'Kho lưu trữ thời trang hằng ngày',
+                          style: TextStyle(color: Color(0x994A3728)),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: _fetchItems,
+                    icon: const Icon(
+                      Icons.refresh_rounded,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              child: FadeInDown(
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [AppColors.primary, AppColors.primaryLight],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(22),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Tổng số món đồ',
+                              style: TextStyle(color: Colors.white70),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              _isLoading ? '--' : '${_items.length}',
+                              style: const TextStyle(
+                                fontSize: 34,
+                                fontWeight: FontWeight.w900,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        width: 56,
+                        height: 56,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.18),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: const Icon(
+                          Icons.checkroom_rounded,
+                          color: Colors.white,
+                          size: 28,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 54,
+              child: ListView(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                scrollDirection: Axis.horizontal,
+                children: _categoryMap.keys.map((label) {
+                  final active = _selectedCategory == label;
                   return Padding(
-                    padding: const EdgeInsets.only(right: 8.0),
-                    child: Chip(
-                      label: Text(cat),
-                      backgroundColor: cat == 'Tất cả' ? Colors.purpleAccent : Colors.white10,
-                      labelStyle: TextStyle(color: cat == 'Tất cả' ? Colors.white : Colors.white70),
-                      side: BorderSide.none,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    padding: const EdgeInsets.only(right: 8),
+                    child: ChoiceChip(
+                      selected: active,
+                      onSelected: (_) {
+                        if (_selectedCategory == label) return;
+                        setState(() => _selectedCategory = label);
+                        _fetchItems();
+                      },
+                      label: Text(label),
+                      labelStyle: TextStyle(
+                        color: active ? Colors.white : AppColors.primary,
+                        fontWeight: active ? FontWeight.w700 : FontWeight.w600,
+                      ),
                     ),
                   );
                 }).toList(),
               ),
             ),
-            const SizedBox(height: 20),
-            // Items Grid
+            const SizedBox(height: 8),
             Expanded(
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  childAspectRatio: 0.75,
-                ),
-                itemCount: mockItems.length,
-                itemBuilder: (context, index) {
-                  final item = mockItems[index];
-                  return FadeInUp(
-                    delay: Duration(milliseconds: 100 * index),
-                    child: _buildItemCard(item),
-                  );
-                },
-              ),
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _items.isEmpty
+                  ? _emptyState()
+                  : GridView.builder(
+                      physics: const BouncingScrollPhysics(),
+                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 110),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 14,
+                            mainAxisSpacing: 14,
+                            childAspectRatio: 0.68,
+                          ),
+                      itemCount: _items.length,
+                      itemBuilder: (context, index) {
+                        return FadeInUp(
+                          delay: Duration(milliseconds: 45 * (index % 8)),
+                          child: _itemCard(_items[index]),
+                        );
+                      },
+                    ),
             ),
           ],
         ),
@@ -95,45 +222,132 @@ class ClosetPage extends StatelessWidget {
     );
   }
 
-  Widget _buildItemCard(ClothingItem item) {
+  Widget _emptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.dry_cleaning_rounded,
+            size: 76,
+            color: AppColors.primary.withValues(alpha: 0.25),
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            'Chưa có món đồ nào',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              color: AppColors.primary,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Hãy chụp món đồ đầu tiên từ tab Camera.',
+            style: TextStyle(color: AppColors.primary.withValues(alpha: 0.6)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _itemCard(ClothingItem item) {
+    final imageUrl = item.imageUrl;
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white10),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.06),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
             child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-              child: Image.network(
-                item.imageUrl,
-                fit: BoxFit.cover,
-                width: double.infinity,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(22),
+              ),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  if (imageUrl.isEmpty)
+                    Container(
+                      color: AppColors.secondary,
+                      child: const Icon(
+                        Icons.image_not_supported_outlined,
+                        color: AppColors.primary,
+                      ),
+                    )
+                  else
+                    Image.network(
+                      imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        color: AppColors.secondary,
+                        child: const Icon(
+                          Icons.broken_image_outlined,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ),
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.92),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        _categoryLabel[item.category] ?? item.category,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(12.0),
+            padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  item.name,
+                  item.name.isEmpty ? 'Món đồ chưa đặt tên' : item.name,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.primary,
+                  ),
                 ),
+                const SizedBox(height: 2),
                 Text(
-                  item.category,
-                  style: const TextStyle(color: Colors.white54, fontSize: 12),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${item.price.toInt()}đ',
-                  style: const TextStyle(color: Colors.purpleAccent, fontWeight: FontWeight.bold),
+                  item.brand?.isNotEmpty == true
+                      ? item.brand!
+                      : 'Chưa có thương hiệu',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppColors.primary.withValues(alpha: 0.55),
+                  ),
                 ),
               ],
             ),

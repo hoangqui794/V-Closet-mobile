@@ -8,95 +8,151 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFAF9F6),
-      appBar: AppBar(
-        title: const Text('CÁ NHÂN', style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: -0.5, fontSize: 20)),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings, color: AppColors.primary),
-            onPressed: () {},
-          )
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(height: 20),
-            // Avatar
-            Center(
-              child: Stack(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: const Color(0xFFD4A373), width: 3),
-                    ),
-                    child: const CircleAvatar(
-                      radius: 50,
-                      backgroundImage: AssetImage('assets/images/avatar1.png'),
-                    ),
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: CustomScrollView(
+          physics: const BouncingScrollPhysics(),
+          slivers: [
+            SliverToBoxAdapter(
+              child: Container(
+                margin: const EdgeInsets.fromLTRB(20, 14, 20, 0),
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [AppColors.primary, AppColors.primaryLight],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                  Positioned(
-                    bottom: 0,
-                    right: 0,
-                    child: Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: const BoxDecoration(
+                  borderRadius: BorderRadius.circular(26),
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        const CircleAvatar(
+                          radius: 34,
+                          backgroundImage: AssetImage(
+                            'assets/images/avatar1.png',
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        const Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Lan Anh',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                              SizedBox(height: 2),
+                              Text(
+                                '@lananh.style',
+                                style: TextStyle(color: Colors.white70),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: IconButton(
+                            onPressed: () {},
+                            icon: const Icon(
+                              Icons.settings_outlined,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 18),
+                    Row(
+                      children: const [
+                        Expanded(
+                          child: _StatCard(value: '128', label: 'Bài viết'),
+                        ),
+                        SizedBox(width: 10),
+                        Expanded(
+                          child: _StatCard(
+                            value: '12K',
+                            label: 'Người theo dõi',
+                          ),
+                        ),
+                        SizedBox(width: 10),
+                        Expanded(
+                          child: _StatCard(
+                            value: '256',
+                            label: 'Đang theo dõi',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 22, 20, 0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Tùy chọn',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
                         color: AppColors.primary,
-                        shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.edit, color: Colors.white, size: 20),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 10),
+                    _menuTile(
+                      Icons.favorite_border_rounded,
+                      'Danh sách yêu thích',
+                    ),
+                    _menuTile(Icons.shopping_bag_outlined, 'Đơn hàng của tôi'),
+                    _menuTile(
+                      Icons.credit_card_outlined,
+                      'Phương thức thanh toán',
+                    ),
+                    _menuTile(Icons.notifications_outlined, 'Thông báo'),
+                    const SizedBox(height: 18),
+                    const Text(
+                      'Hỗ trợ',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    _menuTile(Icons.help_outline_rounded, 'Trung tâm trợ giúp'),
+                    _menuTile(Icons.policy_outlined, 'Chính sách bảo mật'),
+                    _menuTile(Icons.description_outlined, 'Điều khoản dịch vụ'),
+                    const SizedBox(height: 26),
+                    OutlinedButton.icon(
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (_) => const LoginPage()),
+                        );
+                      },
+                      icon: const Icon(Icons.logout_rounded),
+                      label: const Text('Đăng xuất'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.error,
+                      ),
+                    ),
+                    const SizedBox(height: 120),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Lan Anh',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: AppColors.primary,
-              ),
-            ),
-            Text(
-              '@lananh.style',
-              style: TextStyle(
-                fontSize: 14,
-                color: AppColors.primary.withOpacity(0.6),
-              ),
-            ),
-            const SizedBox(height: 24),
-            
-            // Stats
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildStatItem('Bài viết', '128'),
-                _buildStatItem('Người theo dõi', '12k'),
-                _buildStatItem('Đang theo dõi', '256'),
-              ],
-            ),
-            const SizedBox(height: 32),
-            
-            // Menu
-            _buildMenuItem(Icons.favorite_border, 'Mục yêu thích'),
-            _buildMenuItem(Icons.shopping_bag_outlined, 'Đơn hàng của tôi'),
-            _buildMenuItem(Icons.payment, 'Phương thức thanh toán'),
-            _buildMenuItem(Icons.help_outline, 'Trung tâm trợ giúp'),
-            const Divider(),
-            ListTile(
-              leading: const Icon(Icons.logout, color: Colors.red),
-              title: const Text('Đăng xuất', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
-              onTap: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const LoginPage()),
-                );
-              },
             ),
           ],
         ),
@@ -104,41 +160,70 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  Widget _buildStatItem(String label, String value) {
-    return Column(
-      children: [
-        Text(
-          value,
+  Widget _menuTile(IconData icon, String title) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.04),
+            blurRadius: 14,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: ListTile(
+        leading: Icon(icon, color: AppColors.primary),
+        title: Text(
+          title,
           style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
             color: AppColors.primary,
+            fontWeight: FontWeight.w700,
           ),
         ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: AppColors.primary.withOpacity(0.6),
-          ),
+        trailing: const Icon(
+          Icons.chevron_right_rounded,
+          color: AppColors.primary,
         ),
-      ],
+        onTap: () {},
+      ),
     );
   }
+}
 
-  Widget _buildMenuItem(IconData icon, String title) {
-    return ListTile(
-      leading: Icon(icon, color: AppColors.primary),
-      title: Text(
-        title,
-        style: const TextStyle(
-          color: AppColors.primary,
-          fontWeight: FontWeight.w600,
-        ),
+class _StatCard extends StatelessWidget {
+  final String value;
+  final String label;
+
+  const _StatCard({required this.value, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(14),
       ),
-      trailing: const Icon(Icons.chevron_right, color: AppColors.primary),
-      onTap: () {},
+      child: Column(
+        children: [
+          Text(
+            value,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+              fontSize: 20,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: const TextStyle(color: Colors.white70, fontSize: 12),
+          ),
+        ],
+      ),
     );
   }
 }
