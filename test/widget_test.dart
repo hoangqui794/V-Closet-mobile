@@ -6,8 +6,9 @@ void main() {
     // Build our app and trigger a frame.
     // Note: In real tests with DI, you might need to mock dependencies
     await tester.pumpWidget(const VClosetApp());
+    await tester.pumpAndSettle();
 
     // Verify that our app shows the welcome text
-    expect(find.text('V-Closet Premium'), findsOneWidget);
+    expect(find.text('V-CLOSET'), findsOneWidget);
   });
 }
