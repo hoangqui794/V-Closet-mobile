@@ -5,6 +5,7 @@ import 'data/datasources/api_service.dart';
 
 import 'data/datasources/bg_removal_service.dart';
 import 'data/datasources/wardrobe_api_service.dart';
+import 'data/datasources/tryon_api_service.dart';
 
 final sl = GetIt.instance; // sl: Service Locator
 
@@ -20,5 +21,6 @@ Future<void> init() async {
   //! Features - V-Closet
   sl.registerLazySingleton(() => BgRemovalService(sl()));
   sl.registerLazySingleton(() => WardrobeApiService(sl()));
+  sl.registerLazySingleton(() => TryOnApiService(sl()));
   // Register your Repositories, UseCases here
 }
