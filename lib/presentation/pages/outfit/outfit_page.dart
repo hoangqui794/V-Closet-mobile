@@ -9,7 +9,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:dio/dio.dart';
 import 'package:image_gallery_saver_plus/image_gallery_saver_plus.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../data/datasources/outfit_api_service.dart';
 import '../../../data/datasources/tryon_api_service.dart';
 import '../../../data/datasources/wardrobe_api_service.dart';
 import '../../../domain/entities/clothing_item.dart';
@@ -23,7 +22,6 @@ class OutfitPage extends StatefulWidget {
 
 class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
   final TryOnApiService _tryOnApiService = GetIt.I<TryOnApiService>();
-  final OutfitApiService _outfitApiService = GetIt.I<OutfitApiService>();
   final WardrobeApiService _wardrobeApiService = GetIt.I<WardrobeApiService>();
   final ImagePicker _picker = ImagePicker();
 
@@ -48,34 +46,41 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
   String _loadingMessage = 'Đang khởi tạo AI...';
   String? _errorMessage;
   bool _isSavingImage = false;
-  bool _isSavingOutfit = false;
-  bool _isLoadingSavedOutfits = false;
-  List<Map<String, dynamic>> _savedOutfits = [];
 
   // Scanning Animation
   late AnimationController _scanController;
   late Animation<double> _scanAnimation;
 
-  // Pre-defined sample models from Unsplash
+  // Pre-defined sample models – full-body shots
   final List<Map<String, String>> _sampleModels = [
     {
       'name': 'Mẫu Nữ 1',
-      'url': 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=600&auto=format&fit=crop',
+      'url': 'https://images.unsplash.com/photo-1617922001439-4a2e6562f328?q=80&w=600&auto=format&fit=crop',
+      'gender': 'female'
+    },
+    {
+      'name': 'Mẫu Nữ 2',
+      'url': 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?q=80&w=600&auto=format&fit=crop',
       'gender': 'female'
     },
     {
       'name': 'Mẫu Nam 1',
-      'url': 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?q=80&w=600&auto=format&fit=crop',
+      'url': 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=600&auto=format&fit=crop',
       'gender': 'male'
     },
     {
-      'name': 'Mẫu Nữ 2',
-      'url': 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=600&auto=format&fit=crop',
+      'name': 'Mẫu Nam 2',
+      'url': 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=600&auto=format&fit=crop',
+      'gender': 'male'
+    },
+    {
+      'name': 'Mẫu Nữ 3',
+      'url': 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?q=80&w=600&auto=format&fit=crop',
       'gender': 'female'
     },
     {
-      'name': 'Mẫu Nam 2',
-      'url': 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=600&auto=format&fit=crop',
+      'name': 'Mẫu Nam 3',
+      'url': 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=600&auto=format&fit=crop',
       'gender': 'male'
     },
   ];
@@ -84,7 +89,6 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _fetchWardrobe();
-    _fetchSavedOutfits();
 
     // Setup scanning animation
     _scanController = AnimationController(
@@ -126,25 +130,8 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
     }
   }
 
-  Future<void> _fetchSavedOutfits() async {
-    setState(() => _isLoadingSavedOutfits = true);
-    try {
-      final outfits = await _outfitApiService.getUserOutfits();
-      setState(() {
-        _savedOutfits = outfits;
-        _isLoadingSavedOutfits = false;
-      });
-    } catch (e) {
-      setState(() => _isLoadingSavedOutfits = false);
-      debugPrint('Load saved outfits failed: $e');
-    }
-  }
-
   Future<void> _refreshAllData() async {
-    await Future.wait([
-      _fetchWardrobe(),
-      _fetchSavedOutfits(),
-    ]);
+    await _fetchWardrobe();
   }
 
   // Pick custom model photo
@@ -193,27 +180,15 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
   void _toggleGarmentSelection(ClothingItem item) {
     setState(() {
       final isSelected = _selectedGarments.any((g) => g.id == item.id);
-      
+
       if (isSelected) {
+        // Bỏ chọn
         _selectedGarments.removeWhere((g) => g.id == item.id);
       } else {
-        final cat = item.category.toLowerCase();
-        
-        // Remove conflicting categories
-        if (cat == 'top') {
-          _selectedGarments.removeWhere((g) => g.category.toLowerCase() == 'top' || g.category.toLowerCase() == 'dress');
-        } else if (cat == 'bottom') {
-          _selectedGarments.removeWhere((g) => g.category.toLowerCase() == 'bottom' || g.category.toLowerCase() == 'dress');
-        } else if (cat == 'dress') {
-          _selectedGarments.removeWhere((g) => g.category.toLowerCase() == 'top' || g.category.toLowerCase() == 'bottom' || g.category.toLowerCase() == 'dress');
-        } else {
-          // Remove same category items
-          _selectedGarments.removeWhere((g) => g.category.toLowerCase() == cat);
-        }
-        
+        // Thêm vào danh sách – cho phép chọn nhiều món đồ tự do
         _selectedGarments.add(item);
       }
-      
+
       // Auto-set the best Fashn AI tryon category
       final selectedCats = _selectedGarments.map((g) => g.category.toLowerCase()).toList();
       if (selectedCats.contains('dress')) {
@@ -296,75 +271,6 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
       return const Rect.fromLTWH(330, 600, 220, 160);
     }
     return const Rect.fromLTWH(330, 200, 220, 220);
-  }
-
-  List<Map<String, dynamic>> _buildCanvasItemsPayload() {
-    final payload = <Map<String, dynamic>>[];
-    for (int i = 0; i < _selectedGarments.length; i++) {
-      final garment = _selectedGarments[i];
-      final rect = _targetRectForCategory(garment.category.toLowerCase());
-      payload.add({
-        'wardrobeItemId': garment.id,
-        'posX': rect.left,
-        'posY': rect.top,
-        'scale': 1.0,
-        'rotation': 0.0,
-        'zIndex': i,
-      });
-    }
-    return payload;
-  }
-
-  Future<void> _saveOutfitToCloset() async {
-    if (_selectedGarments.isEmpty || _isSavingOutfit) {
-      return;
-    }
-
-    setState(() => _isSavingOutfit = true);
-    try {
-      final collageBytes = await _generateCollageBytes();
-      final created = await _outfitApiService.createOutfit(
-        title: 'Outfit ${DateTime.now().toIso8601String()}',
-        isPublic: false,
-        snapshotBytes: collageBytes,
-        items: _buildCanvasItemsPayload(),
-      );
-      final createdId = created['id']?.toString();
-      await _fetchSavedOutfits();
-
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            "Saved outfit successfully${createdId != null ? ' (#$createdId)' : ''}.",
-          ),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } on DioException catch (e) {
-      if (!mounted) return;
-      final serverMessage = e.response?.data is Map
-          ? (e.response?.data['message']?.toString() ?? e.message)
-          : e.message;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Lưu outfit thất bại: ${serverMessage ?? 'Lỗi không xác định'}'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Lưu outfit thất bại: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    } finally {
-      if (mounted) {
-        setState(() => _isSavingOutfit = false);
-      }
-    }
   }
 
   void _paintImageFit(Canvas canvas, ui.Image img, Rect rect) {
@@ -676,24 +582,59 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
               color: AppColors.primary,
             ),
           ),
-          bottom: const TabBar(
-            labelColor: AppColors.primary,
-            unselectedLabelColor: Colors.grey,
-            indicatorColor: AppColors.primary,
-            indicatorSize: TabBarIndicatorSize.label,
-            labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            tabs: [
-              Tab(text: 'Phòng thử đồ ảo'),
-              Tab(text: 'Gợi ý phối đồ'),
-            ],
-          ),
         ),
         body: SafeArea(
-          child: TabBarView(
-            physics: const BouncingScrollPhysics(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildVirtualTryOnRoom(),
-              _buildStaticAiOutfits(),
+              // ── Tab Bar ──────────────────────────────────────────────
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: TabBar(
+                    indicator: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [AppColors.primary, AppColors.primaryLight],
+                      ),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    indicatorSize: TabBarIndicatorSize.tab,
+                    dividerColor: Colors.transparent,
+                    labelColor: Colors.white,
+                    unselectedLabelColor: AppColors.primary,
+                    labelStyle: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                    ),
+                    tabs: const [
+                      Tab(
+                        icon: Icon(Icons.face_rounded, size: 18),
+                        text: 'Phòng thử đồ ảo',
+                        height: 52,
+                      ),
+                      Tab(
+                        icon: Icon(Icons.lightbulb_outline_rounded, size: 18),
+                        text: 'Gợi ý phối đồ',
+                        height: 52,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Expanded(
+                child: TabBarView(
+                  physics: const BouncingScrollPhysics(),
+                  children: [
+                    _buildVirtualTryOnRoom(),
+                    _buildStaticAiOutfits(),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
@@ -800,33 +741,6 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                 ),
               ),
             ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: OutlinedButton.icon(
-                style: OutlinedButton.styleFrom(
-                  side: BorderSide(
-                    color: _selectedGarments.isEmpty ? Colors.grey.shade400 : AppColors.primary,
-                  ),
-                  foregroundColor: _selectedGarments.isEmpty ? Colors.grey.shade500 : AppColors.primary,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                ),
-                onPressed: _selectedGarments.isEmpty || _isSavingOutfit ? null : _saveOutfitToCloset,
-                icon: _isSavingOutfit
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.bookmark_add_outlined),
-                label: Text(
-                  _isSavingOutfit ? 'Đang lưu outfit...' : 'Lưu outfit collage vào tủ đồ',
-                  style: const TextStyle(fontWeight: FontWeight.w700),
-                ),
-              ),
-            ),
-  
             if (_errorMessage != null) ...[
               const SizedBox(height: 16),
               Center(
@@ -837,287 +751,8 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                 ),
               )
             ],
-            const SizedBox(height: 24),
-            _buildSavedOutfitsSection(),
           ],
         ),
-      ),
-    );
-  }
-
-  String _formatOutfitDate(dynamic rawCreatedAt) {
-    final value = rawCreatedAt?.toString() ?? '';
-    if (value.length >= 10) {
-      return value.substring(0, 10);
-    }
-    return value;
-  }
-
-  void _showSavedOutfitPreview(Map<String, dynamic> outfit) {
-    final snapshotUrl = (outfit['canvasSnapshotUrl'] ?? '').toString();
-    final title = (outfit['title'] ?? 'Untitled').toString();
-    final createdAt = _formatOutfitDate(outfit['createdAt']);
-    final id = (outfit['id'] ?? '').toString();
-    final isPublic = outfit['isPublic'] == true;
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => Container(
-        margin: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: double.infinity,
-                height: 300,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(14),
-                  color: Colors.grey.shade100,
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(14),
-                  child: snapshotUrl.isEmpty
-                      ? const Center(
-                          child: Icon(Icons.image_not_supported_outlined, color: Colors.grey),
-                        )
-                      : Image.network(
-                          snapshotUrl,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => const Center(
-                            child: Icon(Icons.broken_image_outlined, color: Colors.grey),
-                          ),
-                        ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.primary,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                'Date: $createdAt',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: AppColors.primary.withValues(alpha: 0.7),
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Status: ${isPublic ? 'Public' : 'Private'}',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: AppColors.primary.withValues(alpha: 0.7),
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'ID: $id',
-                style: TextStyle(
-                  fontSize: 11,
-                  color: AppColors.primary.withValues(alpha: 0.55),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSavedOutfitsSection() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Expanded(
-                child: Text(
-                  'Outfit da luu',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.primary,
-                  ),
-                ),
-              ),
-              IconButton(
-                onPressed: _isLoadingSavedOutfits ? null : _fetchSavedOutfits,
-                tooltip: 'Refresh saved outfits',
-                icon: _isLoadingSavedOutfits
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.refresh_rounded, color: AppColors.primary),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          if (_isLoadingSavedOutfits && _savedOutfits.isEmpty)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 24),
-              child: Center(
-                child: CircularProgressIndicator(color: AppColors.primary),
-              ),
-            )
-          else if (_savedOutfits.isEmpty)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 12),
-              decoration: BoxDecoration(
-                color: AppColors.background,
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: const Column(
-                children: [
-                  Icon(Icons.photo_library_outlined, color: AppColors.primary),
-                  SizedBox(height: 8),
-                  Text(
-                    'Ban chua luu outfit nao.',
-                    style: TextStyle(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            )
-          else
-            GridView.builder(
-              itemCount: _savedOutfits.length,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-                childAspectRatio: 0.72,
-              ),
-              itemBuilder: (context, index) {
-                final outfit = _savedOutfits[index];
-                final snapshotUrl = (outfit['canvasSnapshotUrl'] ?? '').toString();
-                final title = (outfit['title'] ?? 'Untitled').toString();
-                final createdAt = _formatOutfitDate(outfit['createdAt']);
-                final isPublic = outfit['isPublic'] == true;
-
-                return GestureDetector(
-                  onTap: () => _showSavedOutfitPreview(outfit),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: Colors.grey.shade200),
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(14),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: snapshotUrl.isEmpty
-                                ? Container(
-                                    color: Colors.grey.shade100,
-                                    child: const Center(
-                                      child: Icon(
-                                        Icons.image_not_supported_outlined,
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                  )
-                                : Image.network(
-                                    snapshotUrl,
-                                    fit: BoxFit.cover,
-                                    width: double.infinity,
-                                    errorBuilder: (context, error, stackTrace) => Container(
-                                      color: Colors.grey.shade100,
-                                      child: const Center(
-                                        child: Icon(
-                                          Icons.broken_image_outlined,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  title,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                    color: AppColors.primary,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        createdAt,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          fontSize: 11,
-                                          color: AppColors.primary.withValues(alpha: 0.65),
-                                        ),
-                                      ),
-                                    ),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                      decoration: BoxDecoration(
-                                        color: isPublic ? const Color(0xFFE7F7ED) : const Color(0xFFF3F0EA),
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      child: Text(
-                                        isPublic ? 'Public' : 'Private',
-                                        style: TextStyle(
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w700,
-                                          color: isPublic ? const Color(0xFF247A3A) : AppColors.primary,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-        ],
       ),
     );
   }
@@ -1138,7 +773,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
 
   Widget _buildModelSelector() {
     return SizedBox(
-      height: 100,
+      height: 130,
       child: ListView(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
@@ -1177,7 +812,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
               );
             },
             child: Container(
-              width: 80,
+              width: 88,
               margin: const EdgeInsets.only(right: 12),
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -1195,9 +830,9 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                   : const Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.add_a_photo_outlined, color: AppColors.primary, size: 24),
-                        SizedBox(height: 4),
-                        Text('Tải ảnh', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.primary)),
+                        Icon(Icons.add_a_photo_outlined, color: AppColors.primary, size: 28),
+                        SizedBox(height: 6),
+                        Text('Tải ảnh\ncủa bạn', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.primary, height: 1.3), textAlign: TextAlign.center),
                       ],
                     ),
             ),
@@ -1206,6 +841,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
           // PRE-DEFINED SAMPLE MODELS
           ..._sampleModels.map((model) {
             final isSelected = _selectedModelUrl == model['url'] && _selectedModelFile == null;
+            final isFemale = model['gender'] == 'female';
             return GestureDetector(
               onTap: () {
                 setState(() {
@@ -1213,44 +849,86 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                   _selectedModelFile = null;
                 });
               },
-              child: Container(
-                width: 80,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: 88,
                 margin: const EdgeInsets.only(right: 12),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: isSelected ? AppColors.primaryLight : Colors.transparent,
-                    width: 2.5,
+                    color: isSelected ? AppColors.primaryLight : Colors.grey.shade200,
+                    width: isSelected ? 2.5 : 1.5,
                   ),
+                  boxShadow: isSelected ? [
+                    BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.18),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    )
+                  ] : [],
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(14),
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      Image.network(model['url']!, fit: BoxFit.cover),
+                      Image.network(
+                        model['url']!,
+                        fit: BoxFit.cover,
+                        alignment: Alignment.topCenter,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Container(
+                            color: Colors.grey.shade100,
+                            child: const Center(
+                              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+                            ),
+                          );
+                        },
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          color: Colors.grey.shade100,
+                          child: const Center(child: Icon(Icons.person, color: Colors.grey, size: 36)),
+                        ),
+                      ),
                       Positioned(
                         bottom: 0,
                         left: 0,
                         right: 0,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 2),
-                          color: Colors.black54,
-                          child: Text(
-                            model['name']!,
-                            style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
-                            textAlign: TextAlign.center,
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.bottomCenter,
+                              end: Alignment.topCenter,
+                              colors: [Colors.black.withValues(alpha: 0.75), Colors.transparent],
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                isFemale ? Icons.female_rounded : Icons.male_rounded,
+                                color: isFemale ? Colors.pinkAccent : Colors.lightBlueAccent,
+                                size: 12,
+                              ),
+                              const SizedBox(width: 2),
+                              Text(
+                                model['name']!,
+                                style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
                           ),
                         ),
                       ),
                       if (isSelected)
                         const Positioned(
-                          top: 4,
-                          right: 4,
+                          top: 6,
+                          right: 6,
                           child: CircleAvatar(
-                            radius: 8,
+                            radius: 10,
                             backgroundColor: AppColors.primaryLight,
-                            child: Icon(Icons.check, size: 10, color: Colors.white),
+                            child: Icon(Icons.check_rounded, size: 12, color: Colors.white),
                           ),
                         )
                     ],
@@ -1326,76 +1004,128 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
         ),
         const SizedBox(height: 12),
 
-        // Garments Row
-        SizedBox(
-          height: 140,
-          child: _filteredGarments.isEmpty
-              ? const Center(child: Text('Không tìm thấy quần áo phù hợp ở danh mục này.', style: TextStyle(color: Colors.grey, fontSize: 12)))
-              : ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  physics: const BouncingScrollPhysics(),
-                  itemCount: _filteredGarments.length,
-                  itemBuilder: (context, index) {
-                    final item = _filteredGarments[index];
-                    final isSelected = _selectedGarments.any((g) => g.id == item.id);
+        // Garments Grid – wrap vào GridView để hiển thị đầy đủ
+        if (_filteredGarments.isEmpty)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 24),
+            child: Center(
+              child: Text(
+                'Không tìm thấy quần áo phù hợp ở danh mục này.',
+                style: TextStyle(color: Colors.grey, fontSize: 12),
+              ),
+            ),
+          )
+        else
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+              childAspectRatio: 0.78,
+            ),
+            itemCount: _filteredGarments.length,
+            itemBuilder: (context, index) {
+              final item = _filteredGarments[index];
+              final isSelected = _selectedGarments.any((g) => g.id == item.id);
 
-                    return GestureDetector(
-                      onTap: () => _toggleGarmentSelection(item),
-                      child: Container(
-                        width: 100,
-                        margin: const EdgeInsets.only(right: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: isSelected ? AppColors.primaryLight : Colors.grey.shade200,
-                            width: isSelected ? 2.5 : 1,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.03),
-                              blurRadius: 8,
-                              offset: const Offset(0, 4),
-                            )
-                          ]
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: ClipRRect(
-                                borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
-                                child: Image.network(
-                                  item.imageUrl,
-                                  width: double.infinity,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image, size: 30),
+              return GestureDetector(
+                onTap: () => _toggleGarmentSelection(item),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: isSelected ? AppColors.primaryLight : Colors.grey.shade200,
+                      width: isSelected ? 2.5 : 1,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: isSelected
+                            ? AppColors.primary.withValues(alpha: 0.12)
+                            : Colors.black.withValues(alpha: 0.04),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      )
+                    ],
+                  ),
+                  child: Stack(
+                    children: [
+                      Column(
+                        children: [
+                          Expanded(
+                            child: ClipRRect(
+                              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                              child: Image.network(
+                                item.originalImageUrl ?? item.imageUrl,
+                                width: double.infinity,
+                                fit: BoxFit.contain,
+                                loadingBuilder: (context, child, loadingProgress) {
+                                  if (loadingProgress == null) return child;
+                                  return Container(
+                                    color: Colors.grey.shade50,
+                                    child: const Center(
+                                      child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+                                    ),
+                                  );
+                                },
+                                errorBuilder: (context, error, stackTrace) => Container(
+                                  color: Colors.grey.shade100,
+                                  child: const Icon(Icons.broken_image_outlined, color: Colors.grey, size: 30),
                                 ),
                               ),
                             ),
-                            Padding(
-                              padding: const EdgeInsets.all(6.0),
-                              child: Text(
-                                item.name.isEmpty ? 'Không tên' : item.name,
-                                style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            )
-                          ],
-                        ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 5),
+                            child: Text(
+                              item.name.isEmpty ? 'Không tên' : item.name,
+                              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ],
                       ),
-                    );
-                  },
+                      if (isSelected)
+                        Positioned(
+                          top: 4,
+                          right: 4,
+                          child: CircleAvatar(
+                            radius: 10,
+                            backgroundColor: AppColors.primaryLight,
+                            child: const Icon(Icons.check_rounded, size: 12, color: Colors.white),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
-        )
+              );
+            },
+          )
       ],
     );
   }
 
+  // Helper: chuyển category tiếng Anh sang tiếng Việt
+  String _categoryLabel(String cat) {
+    switch (cat.toLowerCase()) {
+      case 'top': return 'Áo';
+      case 'bottom': return 'Quần/Váy';
+      case 'dress': return 'Đầm';
+      case 'outerwear': return 'Áo khoác';
+      case 'bag': return 'Túi';
+      case 'shoes': return 'Giày';
+      default: return 'Khác';
+    }
+  }
+
   Widget _buildSelectedGarmentsPreview() {
     if (_selectedGarments.isEmpty) return const SizedBox.shrink();
-    
+
     return Container(
       margin: const EdgeInsets.only(top: 16),
       padding: const EdgeInsets.all(16),
@@ -1410,14 +1140,14 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Bảng phối đồ hiện tại (Flat Lay)',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.primary),
+              Text(
+                'Đã chọn (${_selectedGarments.length} món)',
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.primary),
               ),
               GestureDetector(
                 onTap: () => setState(() => _selectedGarments.clear()),
                 child: const Text(
-                  'Xóa phối đồ',
+                  'Xóa tất cả',
                   style: TextStyle(color: Colors.red, fontSize: 12, fontWeight: FontWeight.bold),
                 ),
               )
@@ -1425,51 +1155,72 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
           ),
           const SizedBox(height: 12),
           SizedBox(
-            height: 80,
+            height: 96,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               itemCount: _selectedGarments.length,
               itemBuilder: (context, idx) {
                 final item = _selectedGarments[idx];
                 return Container(
-                  width: 70,
-                  margin: const EdgeInsets.only(right: 12),
+                  width: 78,
+                  margin: const EdgeInsets.only(right: 10),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.primaryLight.withOpacity(0.5)),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: AppColors.primaryLight.withValues(alpha: 0.6), width: 1.5),
                   ),
                   child: Stack(
+                    clipBehavior: Clip.none,
                     children: [
+                      // Ảnh sản phẩm
                       ClipRRect(
-                        borderRadius: BorderRadius.circular(11),
-                        child: Image.network(item.imageUrl, fit: BoxFit.cover, width: double.infinity, height: double.infinity),
-                      ),
-                      Positioned(
-                        top: 2,
-                        right: 2,
-                        child: GestureDetector(
-                          onTap: () => setState(() => _selectedGarments.removeAt(idx)),
-                          child: const CircleAvatar(
-                            radius: 8,
-                            backgroundColor: Colors.red,
-                            child: Icon(Icons.close, size: 10, color: Colors.white),
-                          ),
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.network(
+                          item.originalImageUrl ?? item.imageUrl,
+                          fit: BoxFit.contain,
+                          width: double.infinity,
+                          height: double.infinity,
+                          errorBuilder: (context, e, s) =>
+                              const Icon(Icons.broken_image_outlined, color: Colors.grey),
                         ),
                       ),
+                      // Nhãn loại (tiếng Việt) ở dưới
                       Positioned(
                         bottom: 0,
                         left: 0,
                         right: 0,
                         child: Container(
-                          color: Colors.black54,
-                          padding: const EdgeInsets.symmetric(vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.55),
+                            borderRadius: const BorderRadius.vertical(bottom: Radius.circular(12)),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 3),
                           child: Text(
-                            item.category.toUpperCase(),
-                            style: const TextStyle(fontSize: 8, color: Colors.white, fontWeight: FontWeight.bold),
+                            _categoryLabel(item.category),
+                            style: const TextStyle(fontSize: 9, color: Colors.white, fontWeight: FontWeight.bold),
                             textAlign: TextAlign.center,
                           ),
                         ),
-                      )
+                      ),
+                      // Nút X – to hơn, dễ nhấn
+                      Positioned(
+                        top: -6,
+                        right: -6,
+                        child: GestureDetector(
+                          onTap: () => setState(() => _selectedGarments.removeAt(idx)),
+                          child: Container(
+                            width: 26,
+                            height: 26,
+                            decoration: const BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2)),
+                              ],
+                            ),
+                            child: const Icon(Icons.close_rounded, size: 16, color: Colors.white),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 );
@@ -1481,7 +1232,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: AppColors.accent.withOpacity(0.2),
+                color: AppColors.accent.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Row(
@@ -1490,7 +1241,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                   SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Hệ thống sẽ tự động ghép các món đồ trên thành 1 ảnh Flat Lay trước khi mặc thử lên người mẫu.',
+                      'Hệ thống sẽ tự động ghép các món đồ thành 1 ảnh Flat Lay trước khi mặc thử lên người mẫu.',
                       style: TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w500),
                     ),
                   ),
@@ -1561,161 +1312,174 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
   // ================= STATE: SCANNING ANIMATION =================
 
   Widget _buildScanningState() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Magic scanning image container
-          Stack(
-            alignment: Alignment.center,
+    return Center(
+      child: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Combined avatar preview
-              Container(
-                width: 260,
-                height: 320,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(28),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.12),
-                      blurRadius: 30,
-                      offset: const Offset(0, 10),
-                    )
-                  ],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(28),
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      // Model image
-                      if (_selectedModelFile != null)
-                        Image.file(_selectedModelFile!, fit: BoxFit.cover)
-                      else if (_selectedModelUrl != null)
-                        Image.network(_selectedModelUrl!, fit: BoxFit.cover),
-                      
-                      // Semi-transparent overlay
-                      Container(color: Colors.black26),
-                    ],
-                  ),
-                ),
-              ),
-
-              // Animated Laser scanning line
-              AnimatedBuilder(
-                animation: _scanAnimation,
-                builder: (context, child) {
-                  return Positioned(
-                    top: _scanAnimation.value * 300 + 10, // Moves up and down the container
-                    left: 20,
-                    right: 20,
-                    child: Container(
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: Colors.greenAccent,
-                        borderRadius: BorderRadius.circular(10),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.greenAccent.withValues(alpha: 0.8),
-                            blurRadius: 16,
-                            spreadRadius: 3,
-                          )
+              // Magic scanning image container
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Combined avatar preview
+                  Container(
+                    width: 260,
+                    height: 320,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(28),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withValues(alpha: 0.12),
+                          blurRadius: 30,
+                          offset: const Offset(0, 10),
+                        )
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(28),
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          // Model image
+                          if (_selectedModelFile != null)
+                            Image.file(_selectedModelFile!, fit: BoxFit.cover)
+                          else if (_selectedModelUrl != null)
+                            Image.network(_selectedModelUrl!, fit: BoxFit.cover),
+                          
+                          // Semi-transparent overlay
+                          Container(color: Colors.black26),
                         ],
                       ),
                     ),
-                  );
-                },
-              ),
-
-              // Garment badge overlap (overlapping stack for multiple garments)
-              if (_selectedGarments.isNotEmpty)
-                Positioned(
-                  bottom: 12,
-                  right: 12,
-                  child: SizedBox(
-                    width: 70.0 + (_selectedGarments.length - 1) * 15.0,
-                    height: 70.0,
-                    child: Stack(
-                      children: List.generate(_selectedGarments.length, (index) {
-                        final item = _selectedGarments[index];
-                        return Positioned(
-                          left: index * 15.0,
-                          child: Container(
-                            width: 70,
-                            height: 70,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              border: Border.all(color: AppColors.primaryLight, width: 2),
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: Colors.black26,
-                                  blurRadius: 6,
-                                  offset: Offset(2, 2),
-                                )
-                              ],
-                            ),
-                            child: ClipOval(
-                              child: Image.network(item.imageUrl, fit: BoxFit.cover),
-                            ),
-                          ),
-                        );
-                      }),
-                    ),
                   ),
-                )
+
+                  // Animated Laser scanning line
+                  AnimatedBuilder(
+                    animation: _scanAnimation,
+                    builder: (context, child) {
+                      return Positioned(
+                        top: _scanAnimation.value * 300 + 10, // Moves up and down the container
+                        left: 20,
+                        right: 20,
+                        child: Container(
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: Colors.greenAccent,
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.greenAccent.withValues(alpha: 0.8),
+                                blurRadius: 16,
+                                spreadRadius: 3,
+                              )
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+
+                  // Garment badge overlap (overlapping stack for multiple garments)
+                  if (_selectedGarments.isNotEmpty)
+                    Positioned(
+                      bottom: 12,
+                      right: 12,
+                      child: SizedBox(
+                        width: 70.0 + (_selectedGarments.length - 1) * 15.0,
+                        height: 70.0,
+                        child: Stack(
+                          children: List.generate(_selectedGarments.length, (index) {
+                            final item = _selectedGarments[index];
+                            return Positioned(
+                              left: index * 15.0,
+                              child: Container(
+                                width: 70,
+                                height: 70,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: AppColors.primaryLight, width: 2),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Colors.black26,
+                                      blurRadius: 6,
+                                      offset: Offset(2, 2),
+                                    )
+                                  ],
+                                ),
+                                child: ClipOval(
+                                  child: Image.network(item.imageUrl, fit: BoxFit.cover),
+                                ),
+                              ),
+                            );
+                          }),
+                        ),
+                      ),
+                    )
+                ],
+              ),
+              const SizedBox(height: 24),
+
+              // Elapsed and loading text
+              Text(
+                '${_elapsedSeconds}s',
+                style: const TextStyle(
+                  fontSize: 38,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.primary,
+                  letterSpacing: 2
+                ),
+              ),
+              const SizedBox(height: 8),
+              
+              Text(
+                _loadingMessage,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primary,
+                  height: 1.25,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 6),
+              const Text(
+                'Tiến trình AI thường mất khoảng 10-15 giây để hoàn tất.',
+                style: TextStyle(color: Colors.grey, fontSize: 11, height: 1.25),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              
+              // Cancel processing button
+              OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Colors.red),
+                  foregroundColor: Colors.red,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                ),
+                onPressed: () {
+                  setState(() {
+                    _isGenerating = false;
+                    _predictionId = null;
+                  });
+                  _stopTimer();
+                  _scanController.stop();
+                },
+                icon: const Icon(Icons.cancel_outlined, size: 18),
+                label: const Text(
+                  'Hủy bỏ yêu cầu',
+                  style: TextStyle(fontWeight: FontWeight.bold, height: 1.25),
+                ),
+              )
             ],
           ),
-          const SizedBox(height: 36),
-
-          // Elapsed and loading text
-          Text(
-            '${_elapsedSeconds}s',
-            style: const TextStyle(
-              fontSize: 38,
-              fontWeight: FontWeight.w900,
-              color: AppColors.primary,
-              letterSpacing: 2
-            ),
-          ),
-          const SizedBox(height: 10),
-          
-          Text(
-            _loadingMessage,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.primary),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 6),
-          const Text(
-            'Tiến trình AI thường mất khoảng 10-15 giây để hoàn tất.',
-            style: TextStyle(color: Colors.grey, fontSize: 11),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 32),
-          
-          // Cancel processing button
-          OutlinedButton.icon(
-            style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: Colors.red),
-              foregroundColor: Colors.red,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            ),
-            onPressed: () {
-              setState(() {
-                _isGenerating = false;
-                _predictionId = null;
-              });
-              _stopTimer();
-              _scanController.stop();
-            },
-            icon: const Icon(Icons.cancel_outlined, size: 18),
-            label: const Text('Hủy bỏ yêu cầu', style: TextStyle(fontWeight: FontWeight.bold)),
-          )
-        ],
+        ),
       ),
     );
   }

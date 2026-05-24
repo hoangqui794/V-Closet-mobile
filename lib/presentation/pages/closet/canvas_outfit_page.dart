@@ -1,7 +1,9 @@
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:get_it/get_it.dart';
+import 'package:image_gallery_saver_plus/image_gallery_saver_plus.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/datasources/outfit_api_service.dart';
 import '../../../../data/datasources/wardrobe_api_service.dart';
@@ -175,6 +177,23 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
     setState(() => _selectedUid = null);
     await Future.delayed(const Duration(milliseconds: 120));
 
+    // Capture canvas snapshot immediately BEFORE showing the save dialog.
+    // This avoids recording the keyboard resize, page transitions, or modal bottom sheet overlay.
+    Uint8List? preCapturedBytes;
+    Size? canvasSize;
+    try {
+      final boundary = _canvasRepaintKey.currentContext?.findRenderObject()
+          as RenderRepaintBoundary?;
+      if (boundary != null) {
+        canvasSize = _canvasRepaintKey.currentContext!.size;
+        final uiImage = await boundary.toImage(pixelRatio: 2.5);
+        final byteData = await uiImage.toByteData(format: ui.ImageByteFormat.png);
+        preCapturedBytes = byteData!.buffer.asUint8List();
+      }
+    } catch (e) {
+      debugPrint('Lỗi chụp canvas trước khi lưu: $e');
+    }
+
     // Get title & isPublic from user
     final result = await _showSaveDialog();
     if (result == null || !mounted) return;
@@ -182,23 +201,27 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
     setState(() => _isSaving = true);
 
     try {
-      // Capture canvas as PNG bytes
-      final boundary =
-          _canvasRepaintKey.currentContext?.findRenderObject()
-              as RenderRepaintBoundary?;
-      if (boundary == null) throw Exception('Không thể chụp canvas');
+      Uint8List? bytes = preCapturedBytes;
+      if (bytes == null) {
+        // Fallback: try capturing now if pre-capture failed
+        final boundary = _canvasRepaintKey.currentContext?.findRenderObject()
+            as RenderRepaintBoundary?;
+        if (boundary == null) throw Exception('Không thể chụp canvas');
 
-      final uiImage = await boundary.toImage(pixelRatio: 2.5);
-      final byteData = await uiImage.toByteData(format: ui.ImageByteFormat.png);
-      final bytes = byteData!.buffer.asUint8List();
+        final uiImage = await boundary.toImage(pixelRatio: 2.5);
+        final byteData = await uiImage.toByteData(format: ui.ImageByteFormat.png);
+        bytes = byteData!.buffer.asUint8List();
+      }
+
+      final activeSize = canvasSize ?? _canvasRepaintKey.currentContext?.size;
+      if (activeSize == null) throw Exception('Không thể xác định kích thước canvas');
 
       // Build items list for API
-      final canvasSize = _canvasRepaintKey.currentContext!.size!;
       final apiItems = _canvasItems.map((c) {
         return <String, dynamic>{
           'WardrobeItemId': c.clothingItem.id,
-          'PosX': (c.position.dx / canvasSize.width).clamp(0.0, 1.0),
-          'PosY': (c.position.dy / canvasSize.height).clamp(0.0, 1.0),
+          'PosX': (c.position.dx / activeSize.width).clamp(0.0, 1.0),
+          'PosY': (c.position.dy / activeSize.height).clamp(0.0, 1.0),
           'Scale': c.scale,
           'ZIndex': c.zIndex,
           'Rotation': 0,
@@ -234,6 +257,62 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
+    }
+  }
+
+  Future<void> _downloadCanvasImage() async {
+    if (_canvasItems.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Hãy thêm ít nhất 1 món đồ lên canvas trước!'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    // Deselect to remove selection border before capture
+    setState(() => _selectedUid = null);
+    await Future.delayed(const Duration(milliseconds: 120));
+
+    try {
+      final boundary = _canvasRepaintKey.currentContext?.findRenderObject()
+          as RenderRepaintBoundary?;
+      if (boundary == null) throw Exception('Không thể chụp canvas');
+
+      final uiImage = await boundary.toImage(pixelRatio: 3.0); // High quality
+      final byteData = await uiImage.toByteData(format: ui.ImageByteFormat.png);
+      final bytes = byteData!.buffer.asUint8List();
+
+      final result = await ImageGallerySaverPlus.saveImage(
+        bytes,
+        quality: 100,
+        name: 'vcloset_canvas_${DateTime.now().millisecondsSinceEpoch}',
+      );
+
+      if (mounted) {
+        if (result != null && result['isSuccess'] == true) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Đã lưu ảnh canvas vào Thư viện! 📲'),
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: Colors.green,
+            ),
+          );
+        } else {
+          throw Exception(result?['errorMessage'] ?? 'Không thể lưu ảnh');
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi tải ảnh về máy: $e'),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
     }
   }
 
@@ -400,7 +479,15 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
           ),
         ),
         actions: [
-          if (_canvasItems.isNotEmpty)
+          if (_canvasItems.isNotEmpty) ...[
+            IconButton(
+              icon: const Icon(
+                Icons.download_rounded,
+                color: AppColors.primary,
+              ),
+              tooltip: 'Tải ảnh về máy',
+              onPressed: _downloadCanvasImage,
+            ),
             IconButton(
               icon: const Icon(
                 Icons.delete_sweep_rounded,
@@ -409,6 +496,7 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
               tooltip: 'Xóa tất cả',
               onPressed: _clearCanvas,
             ),
+          ],
           const SizedBox(width: 4),
           _isSaving
               ? const Padding(
@@ -449,7 +537,14 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
       body: Column(
         children: [
           // ── Canvas area ───────────────────────────────────────────────────
-          Expanded(flex: 3, child: _buildCanvas()),
+          Expanded(
+            child: Center(
+              child: AspectRatio(
+                aspectRatio: 0.75, // 3:4 aspect ratio
+                child: _buildCanvas(),
+              ),
+            ),
+          ),
 
           // ── Divider with hint ─────────────────────────────────────────────
           Container(
@@ -463,12 +558,16 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
                   color: AppColors.primary,
                 ),
                 const SizedBox(width: 6),
-                Text(
-                  'Chọn đồ bên dưới để thêm vào canvas · Kéo để di chuyển',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: AppColors.primary.withValues(alpha: 0.65),
-                    fontWeight: FontWeight.w500,
+                Expanded(
+                  child: Text(
+                    'Chọn đồ bên dưới để thêm vào canvas · Kéo để di chuyển',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.primary.withValues(alpha: 0.65),
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
               ],
@@ -508,12 +607,10 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
           ),
 
           // ── Wardrobe picker ───────────────────────────────────────────────
-          Expanded(
-            flex: 2,
-            child: Container(
-              color: Colors.white,
-              child: _buildWardrobePicker(),
-            ),
+          Container(
+            height: 140,
+            color: Colors.white,
+            child: _buildWardrobePicker(),
           ),
         ],
       ),
@@ -596,10 +693,11 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
   Widget _buildCanvasItem(_CanvasItem canvasItem) {
     final isSelected = _selectedUid == canvasItem.uid;
     const double baseSize = 140.0;
+    final double currentSize = baseSize * canvasItem.scale;
 
     return Positioned(
-      left: canvasItem.position.dx,
-      top: canvasItem.position.dy,
+      left: canvasItem.position.dx - 12,
+      top: canvasItem.position.dy - 12,
       child: GestureDetector(
         // Tap to select / bring to front
         onTap: () => _selectItem(canvasItem.uid),
@@ -627,93 +725,103 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
           });
         },
 
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            // Item image
-            Transform.scale(
-              scale: canvasItem.scale,
-              alignment: Alignment.topLeft,
-              child: Container(
-                width: baseSize,
-                height: baseSize,
-                decoration: isSelected
-                    ? BoxDecoration(
-                        border: Border.all(color: AppColors.primary, width: 2),
-                        borderRadius: BorderRadius.circular(12),
-                      )
-                    : null,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: canvasItem.clothingItem.imageUrl.isEmpty
-                      ? Container(
-                          color: AppColors.secondary,
-                          child: const Icon(
-                            Icons.checkroom_rounded,
-                            size: 48,
+        child: Container(
+          width: currentSize + 24,
+          height: currentSize + 24,
+          color: Colors.transparent,
+          child: Stack(
+            children: [
+              // Item image
+              Positioned(
+                left: 12,
+                top: 12,
+                width: currentSize,
+                height: currentSize,
+                child: Container(
+                  decoration: isSelected
+                      ? BoxDecoration(
+                          border: Border.all(
                             color: AppColors.primary,
+                            width: 2,
                           ),
+                          borderRadius: BorderRadius.circular(12),
                         )
-                      : Image.network(
-                          canvasItem.clothingItem.imageUrl,
-                          fit: BoxFit.contain,
-                          errorBuilder: (context, error, stackTrace) =>
-                              Container(
-                                color: AppColors.secondary,
-                                child: const Icon(
-                                  Icons.broken_image_outlined,
-                                  size: 48,
+                      : null,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: canvasItem.clothingItem.imageUrl.isEmpty
+                        ? Container(
+                            color: AppColors.secondary,
+                            child: const Icon(
+                              Icons.checkroom_rounded,
+                              size: 48,
+                              color: AppColors.primary,
+                            ),
+                          )
+                        : Image.network(
+                            canvasItem.clothingItem.imageUrl,
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) =>
+                                Container(
+                                  color: AppColors.secondary,
+                                  child: const Icon(
+                                    Icons.broken_image_outlined,
+                                    size: 48,
+                                  ),
                                 ),
-                              ),
-                        ),
+                          ),
+                  ),
                 ),
               ),
-            ),
 
-            // Delete button (only when selected)
-            if (isSelected)
-              Positioned(
-                top: -12,
-                right: -12,
-                child: GestureDetector(
-                  onTap: _deleteSelected,
+              // Delete button (only when selected)
+              if (isSelected)
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () {
+                      _deleteSelected();
+                    },
+                    child: Container(
+                      width: 26,
+                      height: 26,
+                      decoration: const BoxDecoration(
+                        color: Colors.redAccent,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.close_rounded,
+                        color: Colors.white,
+                        size: 16,
+                      ),
+                    ),
+                  ),
+                ),
+
+              // Scale handle hint (only when selected)
+              if (isSelected)
+                Positioned(
+                  bottom: 0,
+                  right: 0,
                   child: Container(
-                    width: 26,
-                    height: 26,
-                    decoration: const BoxDecoration(
-                      color: Colors.redAccent,
+                    width: 24,
+                    height: 24,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
                       shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 2),
                     ),
                     child: const Icon(
-                      Icons.close_rounded,
+                      Icons.open_with_rounded,
                       color: Colors.white,
-                      size: 16,
+                      size: 13,
                     ),
                   ),
                 ),
-              ),
-
-            // Scale handle hint (only when selected)
-            if (isSelected)
-              Positioned(
-                bottom: -12,
-                right: -12,
-                child: Container(
-                  width: 24,
-                  height: 24,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 2),
-                  ),
-                  child: const Icon(
-                    Icons.open_with_rounded,
-                    color: Colors.white,
-                    size: 13,
-                  ),
-                ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -768,14 +876,14 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
     return Container(
       width: 90,
       decoration: BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.10)),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.08)),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
+            color: AppColors.primary.withValues(alpha: 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -784,41 +892,45 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
           Expanded(
             child: ClipRRect(
               borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(14),
+                top: Radius.circular(16),
               ),
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  item.imageUrl.isEmpty
-                      ? Container(
-                          color: AppColors.secondary,
-                          child: const Icon(
-                            Icons.checkroom_rounded,
-                            color: AppColors.primary,
-                            size: 30,
-                          ),
-                        )
-                      : Image.network(
-                          item.imageUrl,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) =>
-                              Container(
-                                color: AppColors.secondary,
-                                child: const Icon(
-                                  Icons.broken_image_outlined,
-                                  size: 28,
-                                  color: AppColors.primary,
-                                ),
+                  if (item.imageUrl.isEmpty)
+                    Container(
+                      color: AppColors.secondary,
+                      child: const Icon(
+                        Icons.checkroom_rounded,
+                        color: AppColors.primary,
+                        size: 30,
+                      ),
+                    )
+                  else
+                    Container(
+                      color: const Color(0xFFF8F9FA),
+                      padding: const EdgeInsets.all(4),
+                      child: Image.network(
+                        item.imageUrl,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) =>
+                            Container(
+                              color: AppColors.secondary,
+                              child: const Icon(
+                                Icons.broken_image_outlined,
+                                size: 28,
+                                color: AppColors.primary,
                               ),
-                        ),
+                            ),
+                      ),
+                    ),
                   // Add overlay
                   Positioned(
-                    bottom: 0,
-                    right: 0,
+                    bottom: 4,
+                    right: 4,
                     child: Container(
                       width: 22,
                       height: 22,
-                      margin: const EdgeInsets.all(4),
                       decoration: const BoxDecoration(
                         color: AppColors.primary,
                         shape: BoxShape.circle,
@@ -835,7 +947,7 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(6),
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
             child: Text(
               item.name.isEmpty ? 'Món đồ' : item.name,
               maxLines: 1,
@@ -843,7 +955,7 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontSize: 10,
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w800,
                 color: AppColors.primary,
               ),
             ),

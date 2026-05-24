@@ -4,6 +4,8 @@ import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:dio/dio.dart';
+import 'package:image_gallery_saver_plus/image_gallery_saver_plus.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/datasources/bg_removal_service.dart';
 import '../../../../data/datasources/wardrobe_api_service.dart';
@@ -148,7 +150,7 @@ class _ClosetPageState extends State<ClosetPage>
           children: [
             // ── Header ──────────────────────────────────────────────
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
               child: Row(
                 children: [
                   const Expanded(
@@ -230,18 +232,18 @@ class _ClosetPageState extends State<ClosetPage>
 
             // ── Stats banner ─────────────────────────────────────────
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
               child: FadeInDown(
                 child: Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(18),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
                       colors: [AppColors.primary, AppColors.primaryLight],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
-                    borderRadius: BorderRadius.circular(22),
+                    borderRadius: BorderRadius.circular(16),
                   ),
                   child: Row(
                     children: [
@@ -250,20 +252,19 @@ class _ClosetPageState extends State<ClosetPage>
                           listenable: _tabController,
                           builder: (context, _) {
                             final isOutfitTab = _tabController.index == 1;
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                            return Row(
                               children: [
                                 Text(
-                                  isOutfitTab ? 'Tổng bộ phối đồ' : 'Tổng số món đồ',
-                                  style: const TextStyle(color: Colors.white70),
+                                  isOutfitTab ? 'Tổng bộ phối đồ:' : 'Tổng số món đồ:',
+                                  style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w600),
                                 ),
-                                const SizedBox(height: 6),
+                                const SizedBox(width: 8),
                                 Text(
                                   isOutfitTab
                                       ? (_isLoadingOutfits ? '--' : '${_outfits.length}')
                                       : (_isLoading ? '--' : '${_items.length}'),
                                   style: const TextStyle(
-                                    fontSize: 34,
+                                    fontSize: 22,
                                     fontWeight: FontWeight.w900,
                                     color: Colors.white,
                                   ),
@@ -274,11 +275,11 @@ class _ClosetPageState extends State<ClosetPage>
                         ),
                       ),
                       Container(
-                        width: 56,
-                        height: 56,
+                        width: 38,
+                        height: 38,
                         decoration: BoxDecoration(
                           color: Colors.white.withValues(alpha: 0.18),
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(10),
                         ),
                         child: ListenableBuilder(
                           listenable: _tabController,
@@ -287,7 +288,7 @@ class _ClosetPageState extends State<ClosetPage>
                                 ? Icons.style_rounded
                                 : Icons.checkroom_rounded,
                             color: Colors.white,
-                            size: 28,
+                            size: 20,
                           ),
                         ),
                       ),
@@ -506,26 +507,29 @@ class _ClosetPageState extends State<ClosetPage>
                       ),
                     )
                   else
-                    Image.network(
-                      snapshotUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Container(
-                        color: AppColors.secondary,
-                        child: const Icon(
-                          Icons.broken_image_outlined,
-                          color: AppColors.primary,
-                          size: 48,
-                        ),
-                      ),
-                      loadingBuilder: (context, child, progress) {
-                        if (progress == null) return child;
-                        return Container(
-                          color: AppColors.secondary.withValues(alpha: 0.5),
-                          child: const Center(
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                    Container(
+                      color: const Color(0xFFF8F9FA),
+                      child: Image.network(
+                        snapshotUrl,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          color: AppColors.secondary,
+                          child: const Icon(
+                            Icons.broken_image_outlined,
+                            color: AppColors.primary,
+                            size: 48,
                           ),
-                        );
-                      },
+                        ),
+                        loadingBuilder: (context, child, progress) {
+                          if (progress == null) return child;
+                          return Container(
+                            color: AppColors.secondary.withValues(alpha: 0.5),
+                            child: const Center(
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   // Public / Private badge
                   Positioned(
@@ -716,18 +720,63 @@ class _ClosetPageState extends State<ClosetPage>
 
                     // Snapshot / Flat-lay image
                     if (snapshotUrl != null && snapshotUrl.isNotEmpty)
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(20),
-                        child: Image.network(
-                          snapshotUrl,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => Container(
-                            height: 180,
-                            color: AppColors.secondary,
-                            child: const Icon(Icons.broken_image_outlined, size: 64),
+                      Stack(
+                        children: [
+                          Container(
+                            height: 320,
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF8F9FA),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: Colors.grey.shade200),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(20),
+                              child: Image.network(
+                                snapshotUrl,
+                                fit: BoxFit.contain,
+                                errorBuilder: (context, error, stackTrace) => const Center(
+                                  child: Icon(Icons.broken_image_outlined, size: 64, color: AppColors.primary),
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
+                          Positioned(
+                            bottom: 12,
+                            right: 12,
+                            child: Material(
+                              color: Colors.white.withValues(alpha: 0.9),
+                              borderRadius: BorderRadius.circular(30),
+                              elevation: 2,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(30),
+                                onTap: () => _downloadOutfitImage(snapshotUrl),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                                  child: const Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.download_rounded,
+                                        size: 18,
+                                        color: AppColors.primary,
+                                      ),
+                                      SizedBox(width: 6),
+                                      Text(
+                                        'Tải ảnh',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w700,
+                                          color: AppColors.primary,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
 
                     // Items in outfit
@@ -800,6 +849,44 @@ class _ClosetPageState extends State<ClosetPage>
                       ),
                     ],
                     const SizedBox(height: 24),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: AppColors.primary),
+                              foregroundColor: AppColors.primary,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                            icon: const Icon(Icons.edit_rounded),
+                            label: const Text('Đổi tên', style: TextStyle(height: 1.25)),
+                            onPressed: () {
+                              Navigator.pop(context);
+                              _renameOutfit(outfit);
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.redAccent,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                            icon: const Icon(Icons.delete_forever_rounded),
+                            label: const Text('Xóa', style: TextStyle(height: 1.25)),
+                            onPressed: () {
+                              Navigator.pop(context);
+                              _confirmDeleteOutfit(outfit);
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
                   ],
                 ),
               ),
@@ -808,6 +895,161 @@ class _ClosetPageState extends State<ClosetPage>
         );
       },
     );
+  }
+
+  Future<void> _renameOutfit(Map<String, dynamic> outfit) async {
+    final String title = outfit['Title']?.toString() ?? outfit['title']?.toString() ?? '';
+    final String outfitId = outfit['Id']?.toString() ?? outfit['id']?.toString() ?? '';
+    if (outfitId.isEmpty) return;
+
+    final TextEditingController textController = TextEditingController(text: title);
+
+    final newTitle = await showDialog<String>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Đổi tên bộ phối đồ'),
+          content: TextField(
+            controller: textController,
+            decoration: const InputDecoration(
+              labelText: 'Tên bộ phối đồ',
+              hintText: 'Nhập tên mới...',
+            ),
+            autofocus: true,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Hủy'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final text = textController.text.trim();
+                if (text.isNotEmpty) {
+                  Navigator.pop(context, text);
+                }
+              },
+              child: const Text('Lưu'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (newTitle != null && newTitle.isNotEmpty) {
+      _showLoadingDialog('Đang đổi tên...');
+      try {
+        await _outfitApiService.updateOutfitTitle(outfitId, newTitle);
+        Navigator.pop(context); // Close loading dialog
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Đổi tên bộ phối đồ thành công!')),
+        );
+        _fetchOutfits();
+      } catch (e) {
+        Navigator.pop(context); // Close loading dialog
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Lỗi: Đổi tên thất bại. $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _confirmDeleteOutfit(Map<String, dynamic> outfit) async {
+    final String title = outfit['Title']?.toString() ?? outfit['title']?.toString() ?? 'Bộ phối đồ';
+    final String outfitId = outfit['Id']?.toString() ?? outfit['id']?.toString() ?? '';
+    if (outfitId.isEmpty) return;
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Xác nhận xóa'),
+          content: Text('Bạn có chắc chắn muốn xóa bộ phối đồ "$title" không?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Hủy'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Xóa', style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirm == true) {
+      _showLoadingDialog('Đang xóa...');
+      try {
+        await _outfitApiService.deleteOutfit(outfitId);
+        Navigator.pop(context); // Close loading dialog
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Đã xóa bộ phối đồ thành công!')),
+        );
+        _fetchOutfits();
+      } catch (e) {
+        Navigator.pop(context); // Close loading dialog
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Lỗi: Xóa thất bại. $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _downloadOutfitImage(String? url) async {
+    if (url == null || url.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Không tìm thấy link ảnh để tải!'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    _showLoadingDialog('Đang tải ảnh về máy...');
+
+    try {
+      final dio = Dio();
+      final response = await dio.get(
+        url,
+        options: Options(responseType: ResponseType.bytes),
+      );
+
+      final result = await ImageGallerySaverPlus.saveImage(
+        Uint8List.fromList(response.data as List<int>),
+        quality: 100,
+        name: "vcloset_outfit_${DateTime.now().millisecondsSinceEpoch}",
+      );
+
+      if (mounted) {
+        Navigator.pop(context); // Close loading dialog
+        if (result != null && result['isSuccess'] == true) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Lưu thành công! Đã lưu ảnh bộ phối vào Thư viện. 📲'),
+              backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        } else {
+          throw Exception(result?['errorMessage'] ?? 'Không thể lưu ảnh vào thư viện.');
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context); // Close loading dialog
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi khi tải ảnh về máy: $e'),
+            backgroundColor: Colors.redAccent,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
   }
 
   Widget _emptyOutfitState() {
@@ -939,7 +1181,7 @@ class _ClosetPageState extends State<ClosetPage>
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       icon: const Icon(Icons.edit_rounded),
-                      label: const Text('Chỉnh sửa'),
+                      label: const Text('Chỉnh sửa', style: TextStyle(height: 1.25)),
                       onPressed: () {
                         Navigator.pop(context);
                         _showEditDialog(item);
@@ -956,7 +1198,7 @@ class _ClosetPageState extends State<ClosetPage>
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       icon: const Icon(Icons.delete_forever_rounded),
-                      label: const Text('Xóa'),
+                      label: const Text('Xóa', style: TextStyle(height: 1.25)),
                       onPressed: () {
                         Navigator.pop(context);
                         _confirmDelete(item);
@@ -1411,14 +1653,19 @@ class _ClosetPageState extends State<ClosetPage>
                       ),
                     )
                   else
-                    Image.network(
-                      imageUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Container(
-                        color: AppColors.secondary,
-                        child: const Icon(
-                          Icons.broken_image_outlined,
-                          color: AppColors.primary,
+                    Container(
+                      color: const Color(0xFFF8F9FA),
+                      width: double.infinity,
+                      height: double.infinity,
+                      child: Image.network(
+                        imageUrl,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          color: AppColors.secondary,
+                          child: const Icon(
+                            Icons.broken_image_outlined,
+                            color: AppColors.primary,
+                          ),
                         ),
                       ),
                     ),
