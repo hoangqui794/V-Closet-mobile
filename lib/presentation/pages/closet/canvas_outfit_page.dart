@@ -119,13 +119,15 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
     setState(() {
       _nextZIndex++;
       final uid = '${item.id}_${DateTime.now().millisecondsSinceEpoch}';
-      _canvasItems.add(_CanvasItem(
-        uid: uid,
-        clothingItem: item,
-        position: offset,
-        scale: 1.0,
-        zIndex: _nextZIndex,
-      ));
+      _canvasItems.add(
+        _CanvasItem(
+          uid: uid,
+          clothingItem: item,
+          position: offset,
+          scale: 1.0,
+          zIndex: _nextZIndex,
+        ),
+      );
       _selectedUid = uid;
     });
   }
@@ -181,8 +183,9 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
 
     try {
       // Capture canvas as PNG bytes
-      final boundary = _canvasRepaintKey.currentContext
-          ?.findRenderObject() as RenderRepaintBoundary?;
+      final boundary =
+          _canvasRepaintKey.currentContext?.findRenderObject()
+              as RenderRepaintBoundary?;
       if (boundary == null) throw Exception('Không thể chụp canvas');
 
       final uiImage = await boundary.toImage(pixelRatio: 2.5);
@@ -283,8 +286,11 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
                           ),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Icon(Icons.style_rounded,
-                            color: Colors.white, size: 22),
+                        child: const Icon(
+                          Icons.style_rounded,
+                          color: Colors.white,
+                          size: 22,
+                        ),
                       ),
                       const SizedBox(width: 12),
                       const Text(
@@ -303,7 +309,8 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
                     decoration: InputDecoration(
                       labelText: 'Tên bộ phối đồ',
                       border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12)),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       prefixIcon: const Icon(Icons.edit_rounded),
                     ),
                     onChanged: (val) => title = val,
@@ -313,12 +320,14 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
                   Container(
                     decoration: BoxDecoration(
                       border: Border.all(
-                          color: AppColors.primary.withValues(alpha: 0.2)),
+                        color: AppColors.primary.withValues(alpha: 0.2),
+                      ),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: SwitchListTile(
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       title: const Text(
                         'Chia sẻ công khai',
                         style: TextStyle(fontWeight: FontWeight.w700),
@@ -338,13 +347,16 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
                         backgroundColor: AppColors.primary,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14)),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
                       ),
                       icon: const Icon(Icons.save_rounded),
                       label: const Text(
                         'Lưu bộ phối đồ',
                         style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w700),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                       onPressed: () => Navigator.pop(context, {
                         'title': title,
@@ -373,8 +385,10 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded,
-              color: AppColors.primary),
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: AppColors.primary,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
@@ -388,8 +402,10 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
         actions: [
           if (_canvasItems.isNotEmpty)
             IconButton(
-              icon: const Icon(Icons.delete_sweep_rounded,
-                  color: Colors.redAccent),
+              icon: const Icon(
+                Icons.delete_sweep_rounded,
+                color: Colors.redAccent,
+              ),
               tooltip: 'Xóa tất cả',
               onPressed: _clearCanvas,
             ),
@@ -401,7 +417,9 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
                     width: 22,
                     height: 22,
                     child: CircularProgressIndicator(
-                        strokeWidth: 2.5, color: AppColors.primary),
+                      strokeWidth: 2.5,
+                      color: AppColors.primary,
+                    ),
                   ),
                 )
               : Padding(
@@ -412,13 +430,18 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
                       backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10)),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 8),
+                        horizontal: 14,
+                        vertical: 8,
+                      ),
                     ),
                     icon: const Icon(Icons.save_rounded, size: 18),
-                    label: const Text('Lưu',
-                        style: TextStyle(fontWeight: FontWeight.w700)),
+                    label: const Text(
+                      'Lưu',
+                      style: TextStyle(fontWeight: FontWeight.w700),
+                    ),
                   ),
                 ),
         ],
@@ -426,20 +449,19 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
       body: Column(
         children: [
           // ── Canvas area ───────────────────────────────────────────────────
-          Expanded(
-            flex: 3,
-            child: _buildCanvas(),
-          ),
+          Expanded(flex: 3, child: _buildCanvas()),
 
           // ── Divider with hint ─────────────────────────────────────────────
           Container(
             color: Colors.white,
-            padding:
-                const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             child: Row(
               children: [
-                const Icon(Icons.touch_app_rounded,
-                    size: 16, color: AppColors.primary),
+                const Icon(
+                  Icons.touch_app_rounded,
+                  size: 16,
+                  color: AppColors.primary,
+                ),
                 const SizedBox(width: 6),
                 Text(
                   'Chọn đồ bên dưới để thêm vào canvas · Kéo để di chuyển',
@@ -461,16 +483,14 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               scrollDirection: Axis.horizontal,
               itemCount: _categories.length,
-              separatorBuilder: (context, index) =>
-                  const SizedBox(width: 8),
+              separatorBuilder: (context, index) => const SizedBox(width: 8),
               itemBuilder: (context, index) {
                 final label = _categories[index];
                 final active = _wardrobeFilter == label;
                 return Center(
                   child: ChoiceChip(
                     selected: active,
-                    label: Text(label,
-                        style: TextStyle(fontSize: 12)),
+                    label: Text(label, style: TextStyle(fontSize: 12)),
                     labelStyle: TextStyle(
                       color: active ? Colors.white : AppColors.primary,
                       fontWeight: FontWeight.w600,
@@ -545,8 +565,7 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w700,
-                              color:
-                                  AppColors.primary.withValues(alpha: 0.25),
+                              color: AppColors.primary.withValues(alpha: 0.25),
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -554,8 +573,7 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
                             'Chọn đồ từ tủ bên dưới để thêm vào',
                             style: TextStyle(
                               fontSize: 13,
-                              color:
-                                  AppColors.primary.withValues(alpha: 0.20),
+                              color: AppColors.primary.withValues(alpha: 0.20),
                             ),
                           ),
                         ],
@@ -564,7 +582,7 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
 
                   // Canvas items sorted by zIndex
                   ...(_canvasItems.toList()
-                      ..sort((a, b) => a.zIndex.compareTo(b.zIndex)))
+                        ..sort((a, b) => a.zIndex.compareTo(b.zIndex)))
                       .map((canvasItem) => _buildCanvasItem(canvasItem)),
                 ],
               ),
@@ -601,8 +619,10 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
 
             // Pinch scale.
             if (details.pointerCount >= 2) {
-              canvasItem.scale =
-                  (_gestureBaseScale * details.scale).clamp(0.3, 4.0);
+              canvasItem.scale = (_gestureBaseScale * details.scale).clamp(
+                0.3,
+                4.0,
+              );
             }
           });
         },
@@ -619,10 +639,7 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
                 height: baseSize,
                 decoration: isSelected
                     ? BoxDecoration(
-                        border: Border.all(
-                          color: AppColors.primary,
-                          width: 2,
-                        ),
+                        border: Border.all(color: AppColors.primary, width: 2),
                         borderRadius: BorderRadius.circular(12),
                       )
                     : null,
@@ -631,18 +648,23 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
                   child: canvasItem.clothingItem.imageUrl.isEmpty
                       ? Container(
                           color: AppColors.secondary,
-                          child: const Icon(Icons.checkroom_rounded,
-                              size: 48, color: AppColors.primary),
+                          child: const Icon(
+                            Icons.checkroom_rounded,
+                            size: 48,
+                            color: AppColors.primary,
+                          ),
                         )
                       : Image.network(
                           canvasItem.clothingItem.imageUrl,
                           fit: BoxFit.contain,
                           errorBuilder: (context, error, stackTrace) =>
                               Container(
-                            color: AppColors.secondary,
-                            child: const Icon(Icons.broken_image_outlined,
-                                size: 48),
-                          ),
+                                color: AppColors.secondary,
+                                child: const Icon(
+                                  Icons.broken_image_outlined,
+                                  size: 48,
+                                ),
+                              ),
                         ),
                 ),
               ),
@@ -662,8 +684,11 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
                       color: Colors.redAccent,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.close_rounded,
-                        color: Colors.white, size: 16),
+                    child: const Icon(
+                      Icons.close_rounded,
+                      color: Colors.white,
+                      size: 16,
+                    ),
                   ),
                 ),
               ),
@@ -681,8 +706,11 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
                     shape: BoxShape.circle,
                     border: Border.all(color: Colors.white, width: 2),
                   ),
-                  child: const Icon(Icons.open_with_rounded,
-                      color: Colors.white, size: 13),
+                  child: const Icon(
+                    Icons.open_with_rounded,
+                    color: Colors.white,
+                    size: 13,
+                  ),
                 ),
               ),
           ],
@@ -703,9 +731,11 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.checkroom_rounded,
-                size: 48,
-                color: AppColors.primary.withValues(alpha: 0.2)),
+            Icon(
+              Icons.checkroom_rounded,
+              size: 48,
+              color: AppColors.primary.withValues(alpha: 0.2),
+            ),
             const SizedBox(height: 8),
             Text(
               'Không có đồ nào',
@@ -740,9 +770,7 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
       decoration: BoxDecoration(
         color: AppColors.background,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: AppColors.primary.withValues(alpha: 0.10),
-        ),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.10)),
         boxShadow: [
           BoxShadow(
             color: AppColors.primary.withValues(alpha: 0.05),
@@ -755,26 +783,33 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
         children: [
           Expanded(
             child: ClipRRect(
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(14)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(14),
+              ),
               child: Stack(
                 fit: StackFit.expand,
                 children: [
                   item.imageUrl.isEmpty
                       ? Container(
                           color: AppColors.secondary,
-                          child: const Icon(Icons.checkroom_rounded,
-                              color: AppColors.primary, size: 30),
+                          child: const Icon(
+                            Icons.checkroom_rounded,
+                            color: AppColors.primary,
+                            size: 30,
+                          ),
                         )
                       : Image.network(
                           item.imageUrl,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) =>
                               Container(
-                            color: AppColors.secondary,
-                            child: const Icon(Icons.broken_image_outlined,
-                                size: 28, color: AppColors.primary),
-                          ),
+                                color: AppColors.secondary,
+                                child: const Icon(
+                                  Icons.broken_image_outlined,
+                                  size: 28,
+                                  color: AppColors.primary,
+                                ),
+                              ),
                         ),
                   // Add overlay
                   Positioned(
@@ -788,8 +823,11 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
                         color: AppColors.primary,
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.add_rounded,
-                          color: Colors.white, size: 14),
+                      child: const Icon(
+                        Icons.add_rounded,
+                        color: Colors.white,
+                        size: 14,
+                      ),
                     ),
                   ),
                 ],
@@ -815,4 +853,3 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
     );
   }
 }
-
