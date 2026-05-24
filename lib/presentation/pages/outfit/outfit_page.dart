@@ -1,11 +1,15 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:dio/dio.dart';
+import 'package:image_gallery_saver_plus/image_gallery_saver_plus.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../data/datasources/outfit_api_service.dart';
 import '../../../data/datasources/tryon_api_service.dart';
 import '../../../data/datasources/wardrobe_api_service.dart';
 import '../../../domain/entities/clothing_item.dart';
@@ -19,13 +23,14 @@ class OutfitPage extends StatefulWidget {
 
 class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
   final TryOnApiService _tryOnApiService = GetIt.I<TryOnApiService>();
+  final OutfitApiService _outfitApiService = GetIt.I<OutfitApiService>();
   final WardrobeApiService _wardrobeApiService = GetIt.I<WardrobeApiService>();
   final ImagePicker _picker = ImagePicker();
 
   // Selected state
   String? _selectedModelUrl;
   File? _selectedModelFile;
-  ClothingItem? _selectedGarment;
+  final List<ClothingItem> _selectedGarments = [];
   String _selectedCategory = 'auto'; // auto, tops, bottoms, one-pieces
   bool _restoreBackground = true;
 
@@ -42,6 +47,10 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
   String? _resultUrl;
   String _loadingMessage = 'Đang khởi tạo AI...';
   String? _errorMessage;
+  bool _isSavingImage = false;
+  bool _isSavingOutfit = false;
+  bool _isLoadingSavedOutfits = false;
+  List<Map<String, dynamic>> _savedOutfits = [];
 
   // Scanning Animation
   late AnimationController _scanController;
@@ -75,6 +84,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _fetchWardrobe();
+    _fetchSavedOutfits();
 
     // Setup scanning animation
     _scanController = AnimationController(
@@ -114,6 +124,27 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
       setState(() => _isLoadingWardrobe = false);
       debugPrint('Lỗi tải tủ đồ: $e');
     }
+  }
+
+  Future<void> _fetchSavedOutfits() async {
+    setState(() => _isLoadingSavedOutfits = true);
+    try {
+      final outfits = await _outfitApiService.getUserOutfits();
+      setState(() {
+        _savedOutfits = outfits;
+        _isLoadingSavedOutfits = false;
+      });
+    } catch (e) {
+      setState(() => _isLoadingSavedOutfits = false);
+      debugPrint('Load saved outfits failed: $e');
+    }
+  }
+
+  Future<void> _refreshAllData() async {
+    await Future.wait([
+      _fetchWardrobe(),
+      _fetchSavedOutfits(),
+    ]);
   }
 
   // Pick custom model photo
@@ -159,9 +190,211 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
     _timer?.cancel();
   }
 
+  void _toggleGarmentSelection(ClothingItem item) {
+    setState(() {
+      final isSelected = _selectedGarments.any((g) => g.id == item.id);
+      
+      if (isSelected) {
+        _selectedGarments.removeWhere((g) => g.id == item.id);
+      } else {
+        final cat = item.category.toLowerCase();
+        
+        // Remove conflicting categories
+        if (cat == 'top') {
+          _selectedGarments.removeWhere((g) => g.category.toLowerCase() == 'top' || g.category.toLowerCase() == 'dress');
+        } else if (cat == 'bottom') {
+          _selectedGarments.removeWhere((g) => g.category.toLowerCase() == 'bottom' || g.category.toLowerCase() == 'dress');
+        } else if (cat == 'dress') {
+          _selectedGarments.removeWhere((g) => g.category.toLowerCase() == 'top' || g.category.toLowerCase() == 'bottom' || g.category.toLowerCase() == 'dress');
+        } else {
+          // Remove same category items
+          _selectedGarments.removeWhere((g) => g.category.toLowerCase() == cat);
+        }
+        
+        _selectedGarments.add(item);
+      }
+      
+      // Auto-set the best Fashn AI tryon category
+      final selectedCats = _selectedGarments.map((g) => g.category.toLowerCase()).toList();
+      if (selectedCats.contains('dress')) {
+        _selectedCategory = 'one-pieces';
+      } else if (selectedCats.contains('top') && selectedCats.contains('bottom')) {
+        _selectedCategory = 'auto';
+      } else if (selectedCats.contains('top')) {
+        _selectedCategory = 'tops';
+      } else if (selectedCats.contains('bottom')) {
+        _selectedCategory = 'bottoms';
+      } else {
+        _selectedCategory = 'auto';
+      }
+    });
+  }
+
+  Future<Uint8List> _generateCollageBytes() async {
+    final dio = Dio();
+    final Map<String, ui.Image> decodedImages = {};
+    
+    for (final item in _selectedGarments) {
+      try {
+        final url = item.originalImageUrl ?? item.imageUrl;
+        final response = await dio.get(
+          url,
+          options: Options(responseType: ResponseType.bytes),
+        );
+        final bytes = response.data as List<int>;
+        
+        final codec = await ui.instantiateImageCodec(Uint8List.fromList(bytes));
+        final frame = await codec.getNextFrame();
+        decodedImages[item.id] = frame.image;
+      } catch (e) {
+        debugPrint('Lỗi tải/giải mã ảnh ${item.name}: $e');
+      }
+    }
+    
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+    const canvasWidth = 600.0;
+    const canvasHeight = 800.0;
+    
+    // Fill background
+    final paintBg = Paint()..color = const Color(0xFFF3F3F3);
+    canvas.drawRect(const Rect.fromLTWH(0, 0, canvasWidth, canvasHeight), paintBg);
+    
+    // Draw each item based on its category
+    for (final item in _selectedGarments) {
+      final img = decodedImages[item.id];
+      if (img == null) continue;
+      
+      final targetRect = _targetRectForCategory(item.category.toLowerCase());
+      
+      _paintImageFit(canvas, img, targetRect);
+    }
+    
+    final picture = recorder.endRecording();
+    final img = await picture.toImage(canvasWidth.toInt(), canvasHeight.toInt());
+    final byteData = await img.toByteData(format: ui.ImageByteFormat.png);
+    return byteData!.buffer.asUint8List();
+  }
+
+  Rect _targetRectForCategory(String category) {
+    if (category == 'top') {
+      return const Rect.fromLTWH(50, 50, 220, 280);
+    }
+    if (category == 'outerwear') {
+      return const Rect.fromLTWH(330, 50, 220, 280);
+    }
+    if (category == 'bottom') {
+      return const Rect.fromLTWH(50, 380, 220, 380);
+    }
+    if (category == 'dress') {
+      return const Rect.fromLTWH(50, 80, 220, 550);
+    }
+    if (category == 'bag') {
+      return const Rect.fromLTWH(330, 380, 220, 200);
+    }
+    if (category == 'shoes') {
+      return const Rect.fromLTWH(330, 600, 220, 160);
+    }
+    return const Rect.fromLTWH(330, 200, 220, 220);
+  }
+
+  List<Map<String, dynamic>> _buildCanvasItemsPayload() {
+    final payload = <Map<String, dynamic>>[];
+    for (int i = 0; i < _selectedGarments.length; i++) {
+      final garment = _selectedGarments[i];
+      final rect = _targetRectForCategory(garment.category.toLowerCase());
+      payload.add({
+        'wardrobeItemId': garment.id,
+        'posX': rect.left,
+        'posY': rect.top,
+        'scale': 1.0,
+        'rotation': 0.0,
+        'zIndex': i,
+      });
+    }
+    return payload;
+  }
+
+  Future<void> _saveOutfitToCloset() async {
+    if (_selectedGarments.isEmpty || _isSavingOutfit) {
+      return;
+    }
+
+    setState(() => _isSavingOutfit = true);
+    try {
+      final collageBytes = await _generateCollageBytes();
+      final created = await _outfitApiService.createOutfit(
+        title: 'Outfit ${DateTime.now().toIso8601String()}',
+        isPublic: false,
+        snapshotBytes: collageBytes,
+        items: _buildCanvasItemsPayload(),
+      );
+      final createdId = created['id']?.toString();
+      await _fetchSavedOutfits();
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "Saved outfit successfully${createdId != null ? ' (#$createdId)' : ''}.",
+          ),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } on DioException catch (e) {
+      if (!mounted) return;
+      final serverMessage = e.response?.data is Map
+          ? (e.response?.data['message']?.toString() ?? e.message)
+          : e.message;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Lưu outfit thất bại: ${serverMessage ?? 'Lỗi không xác định'}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Lưu outfit thất bại: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isSavingOutfit = false);
+      }
+    }
+  }
+
+  void _paintImageFit(Canvas canvas, ui.Image img, Rect rect) {
+    final double srcWidth = img.width.toDouble();
+    final double srcHeight = img.height.toDouble();
+    
+    final double destWidth = rect.width;
+    final double destHeight = rect.height;
+    
+    final double scale = (destWidth / srcWidth < destHeight / srcHeight)
+        ? destWidth / srcWidth
+        : destHeight / srcHeight;
+        
+    final double w = srcWidth * scale;
+    final double h = srcHeight * scale;
+    
+    final double x = rect.left + (destWidth - w) / 2;
+    final double y = rect.top + (destHeight - h) / 2;
+    
+    canvas.drawImageRect(
+      img,
+      Rect.fromLTWH(0, 0, srcWidth, srcHeight),
+      Rect.fromLTWH(x, y, w, h),
+      Paint()..isAntiAlias = true,
+    );
+  }
+
   // Start Virtual Tryon Process
   Future<void> _startTryOn() async {
-    if (_selectedGarment == null) {
+    if (_selectedGarments.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Vui lòng chọn trang phục để thử.')),
       );
@@ -172,39 +405,64 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
       _isGenerating = true;
       _errorMessage = null;
       _resultUrl = null;
-      _loadingMessage = 'Đang kết nối dịch vụ AI...';
+      _loadingMessage = 'Đang khởi tạo AI...';
     });
 
     _scanController.forward();
     _startTimer();
 
     try {
+      final dio = Dio();
+      dio.options.baseUrl = GetIt.I<Dio>().options.baseUrl;
       String? modelUrlToUse = _selectedModelUrl;
 
-      // 1. If user uploaded a custom model photo, we need to upload it first.
-      // We can use a Form Data upload to S3 via the backend run-files endpoint, 
-      // or run tryon with files directly.
-      if (_selectedModelFile != null) {
-        setState(() => _loadingMessage = 'Đang tải ảnh người mẫu của bạn lên Cloud...');
+      // Check if we need to run via the files upload API
+      final bool isMultiGarment = _selectedGarments.length > 1;
+      final bool isCustomModel = _selectedModelFile != null;
+
+      if (isMultiGarment || isCustomModel) {
+        // We will call the /api/TryOn/run-files endpoint using FormData
         
-        // For custom files, we call the backend via DIO directly.
-        // The API route is /api/TryOn/run-files.
-        final dio = Dio();
-        dio.options.baseUrl = GetIt.I<Dio>().options.baseUrl;
+        // 1. Prepare model file bytes
+        List<int> modelBytes;
+        String modelFilename;
         
-        setState(() => _loadingMessage = 'Đang chuẩn bị dữ liệu hình ảnh...');
-        
-        final garmentResponse = await dio.get(
-          _selectedGarment!.originalImageUrl ?? _selectedGarment!.imageUrl,
-          options: Options(responseType: ResponseType.bytes),
-        );
-        
-        final garmentBytes = garmentResponse.data as List<int>;
+        if (isCustomModel) {
+          setState(() => _loadingMessage = 'Đang chuẩn bị ảnh người mẫu của bạn...');
+          modelBytes = await _selectedModelFile!.readAsBytes();
+          modelFilename = _selectedModelFile!.path.split(Platform.pathSeparator).last;
+        } else {
+          setState(() => _loadingMessage = 'Đang tải thông tin người mẫu...');
+          final modelResponse = await dio.get(
+            modelUrlToUse!,
+            options: Options(responseType: ResponseType.bytes),
+          );
+          modelBytes = modelResponse.data as List<int>;
+          modelFilename = 'model.png';
+        }
+
+        // 2. Prepare garment file bytes
+        List<int> garmentBytes;
+        if (isMultiGarment) {
+          setState(() => _loadingMessage = 'Đang ghép ảnh phối đồ (Flat Lay)...');
+          garmentBytes = await _generateCollageBytes();
+        } else {
+          setState(() => _loadingMessage = 'Đang tải thông tin trang phục...');
+          final garment = _selectedGarments.first;
+          final garmentResponse = await dio.get(
+            garment.originalImageUrl ?? garment.imageUrl,
+            options: Options(responseType: ResponseType.bytes),
+          );
+          garmentBytes = garmentResponse.data as List<int>;
+        }
+
+        // 3. Upload and trigger prediction
+        setState(() => _loadingMessage = 'Đang gửi dữ liệu phối đồ lên Cloud...');
         
         final uploadFormData = FormData.fromMap({
-          "modelFile": await MultipartFile.fromFile(
-            _selectedModelFile!.path,
-            filename: _selectedModelFile!.path.split(Platform.pathSeparator).last,
+          "modelFile": MultipartFile.fromBytes(
+            modelBytes,
+            filename: modelFilename,
           ),
           "garmentFile": MultipartFile.fromBytes(
             garmentBytes,
@@ -220,12 +478,14 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
         if (response.statusCode == 200 && response.data != null) {
           _predictionId = response.data['predictionId'] as String?;
         } else {
-          throw Exception('Lỗi khởi tạo tiến trình thử đồ file.');
+          throw Exception('Lỗi khởi tạo tiến trình thử đồ phối.');
         }
       } else {
-        // Use direct wardrobe item ID and sample model URL
+        // Single garment, sample model: use fast run-wardrobe API
+        setState(() => _loadingMessage = 'Đang gửi yêu cầu phối đồ...');
+        final garment = _selectedGarments.first;
         _predictionId = await _tryOnApiService.runTryOnWithWardrobe(
-          wardrobeItemId: _selectedGarment!.id,
+          wardrobeItemId: garment.id,
           modelUrl: modelUrlToUse,
           category: _selectedCategory,
           restoreBackground: _restoreBackground,
@@ -241,9 +501,25 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
     } catch (e) {
       _stopTimer();
       _scanController.stop();
+      String msg = e.toString();
+      if (e is DioException) {
+        final errorData = e.response?.data;
+        if (errorData is Map) {
+          if (errorData.containsKey('error')) {
+            msg = errorData['error'].toString();
+          } else if (errorData.containsKey('message')) {
+            msg = errorData['message'].toString();
+          }
+        } else if (errorData != null) {
+          msg = errorData.toString();
+          if (msg.length > 250) {
+            msg = '${msg.substring(0, 250)}...';
+          }
+        }
+      }
       setState(() {
         _isGenerating = false;
-        _errorMessage = 'Lỗi: ${e.toString()}';
+        _errorMessage = 'Lỗi: $msg';
       });
     }
   }
@@ -304,13 +580,70 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
     });
   }
 
+  // Save AI Try-On image to mobile gallery
+  Future<void> _saveImageToGallery(String imageUrl) async {
+    setState(() => _isSavingImage = true);
+    
+    // Show download starting SnackBar
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Đang lưu hình ảnh vào Thư viện của bạn...'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+
+    try {
+      final dio = Dio();
+      final response = await dio.get(
+        imageUrl,
+        options: Options(responseType: ResponseType.bytes),
+      );
+
+      final result = await ImageGallerySaverPlus.saveImage(
+        Uint8List.fromList(response.data as List<int>),
+        quality: 100,
+        name: "vcloset_tryon_${DateTime.now().millisecondsSinceEpoch}",
+      );
+
+      if (result != null && result['isSuccess'] == true) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Lưu thành công! Đã lưu ảnh thử đồ ảo vào Thư viện.'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } else {
+        throw Exception(result?['errorMessage'] ?? 'Không thể lưu ảnh vào thư viện.');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lưu thất bại: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSavingImage = false);
+      }
+    }
+  }
+
   // Filtered wardrobe list
   List<ClothingItem> get _filteredGarments {
     if (_wardrobeFilter == 'Tất cả') {
       // Filter out non-wearables like bags and shoes for standard tryon
       return _wardrobeItems.where((item) {
         final cat = item.category.toLowerCase();
-        return cat == 'top' || cat == 'bottom' || cat == 'dress' || cat == 'outerwear';
+        return cat == 'top' || cat == 'bottom' || cat == 'dress' || cat == 'outerwear' || cat == 'other';
       }).toList();
     }
     
@@ -319,6 +652,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
       'Quần/Váy': 'bottom',
       'Đầm/Váy liền': 'dress',
       'Áo khoác': 'outerwear',
+      'Khác': 'other',
     };
     
     final targetCat = filterMap[_wardrobeFilter];
@@ -378,101 +712,411 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
       return _buildResultState();
     }
 
-    return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 110),
+    return RefreshIndicator(
+      onRefresh: _refreshAllData,
+      color: AppColors.primary,
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 110),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            FadeInDown(
+              duration: const Duration(milliseconds: 400),
+              child: const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Phòng thử đồ thông minh',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    'Mặc thử bất kỳ trang phục nào lên người mẫu ảo chỉ trong vài giây.',
+                    style: TextStyle(color: AppColors.textMuted, fontSize: 13),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+  
+            // 1. SELECT MODEL IMAGE
+            _sectionHeader('1. Chọn người mẫu thử đồ'),
+            const SizedBox(height: 12),
+            _buildModelSelector(),
+            const SizedBox(height: 24),
+  
+            // 2. SELECT WARDROBE ITEM
+            _sectionHeader('2. Chọn quần áo từ tủ đồ'),
+            const SizedBox(height: 12),
+            _buildGarmentSelector(),
+            _buildSelectedGarmentsPreview(),
+            const SizedBox(height: 24),
+  
+            // 3. OPTIONS
+            _sectionHeader('3. Cấu hình AI'),
+            const SizedBox(height: 12),
+            _buildTryOnConfig(),
+            const SizedBox(height: 32),
+  
+            // ACTION BUTTON
+            FadeInUp(
+              child: Container(
+                width: double.infinity,
+                height: 56,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  gradient: LinearGradient(
+                    colors: _selectedGarments.isEmpty 
+                        ? [Colors.grey.shade400, Colors.grey.shade400] 
+                        : [AppColors.primary, AppColors.primaryLight],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  boxShadow: _selectedGarments.isEmpty ? [] : [
+                    BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.25),
+                      blurRadius: 16,
+                      offset: const Offset(0, 8),
+                    )
+                  ],
+                ),
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  ),
+                  onPressed: _selectedGarments.isEmpty ? null : _startTryOn,
+                  icon: const Icon(Icons.auto_awesome_rounded, color: Colors.white),
+                  label: const Text(
+                    'Bắt đầu thử đồ ảo AI',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(
+                    color: _selectedGarments.isEmpty ? Colors.grey.shade400 : AppColors.primary,
+                  ),
+                  foregroundColor: _selectedGarments.isEmpty ? Colors.grey.shade500 : AppColors.primary,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+                onPressed: _selectedGarments.isEmpty || _isSavingOutfit ? null : _saveOutfitToCloset,
+                icon: _isSavingOutfit
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.bookmark_add_outlined),
+                label: Text(
+                  _isSavingOutfit ? 'Đang lưu outfit...' : 'Lưu outfit collage vào tủ đồ',
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+              ),
+            ),
+  
+            if (_errorMessage != null) ...[
+              const SizedBox(height: 16),
+              Center(
+                child: Text(
+                  _errorMessage!,
+                  style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w600),
+                  textAlign: TextAlign.center,
+                ),
+              )
+            ],
+            const SizedBox(height: 24),
+            _buildSavedOutfitsSection(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _formatOutfitDate(dynamic rawCreatedAt) {
+    final value = rawCreatedAt?.toString() ?? '';
+    if (value.length >= 10) {
+      return value.substring(0, 10);
+    }
+    return value;
+  }
+
+  void _showSavedOutfitPreview(Map<String, dynamic> outfit) {
+    final snapshotUrl = (outfit['canvasSnapshotUrl'] ?? '').toString();
+    final title = (outfit['title'] ?? 'Untitled').toString();
+    final createdAt = _formatOutfitDate(outfit['createdAt']);
+    final id = (outfit['id'] ?? '').toString();
+    final isPublic = outfit['isPublic'] == true;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => Container(
+        margin: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: double.infinity,
+                height: 300,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(14),
+                  color: Colors.grey.shade100,
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(14),
+                  child: snapshotUrl.isEmpty
+                      ? const Center(
+                          child: Icon(Icons.image_not_supported_outlined, color: Colors.grey),
+                        )
+                      : Image.network(
+                          snapshotUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => const Center(
+                            child: Icon(Icons.broken_image_outlined, color: Colors.grey),
+                          ),
+                        ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.primary,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Date: $createdAt',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: AppColors.primary.withValues(alpha: 0.7),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Status: ${isPublic ? 'Public' : 'Private'}',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: AppColors.primary.withValues(alpha: 0.7),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'ID: $id',
+                style: TextStyle(
+                  fontSize: 11,
+                  color: AppColors.primary.withValues(alpha: 0.55),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSavedOutfitsSection() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          FadeInDown(
-            duration: const Duration(milliseconds: 400),
-            child: const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Phòng thử đồ thông minh',
+          Row(
+            children: [
+              const Expanded(
+                child: Text(
+                  'Outfit da luu',
                   style: TextStyle(
-                    fontSize: 22,
+                    fontSize: 16,
                     fontWeight: FontWeight.w800,
                     color: AppColors.primary,
                   ),
                 ),
-                SizedBox(height: 4),
-                Text(
-                  'Mặc thử bất kỳ trang phục nào lên người mẫu ảo chỉ trong vài giây.',
-                  style: TextStyle(color: AppColors.textMuted, fontSize: 13),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 24),
-
-          // 1. SELECT MODEL IMAGE
-          _sectionHeader('1. Chọn người mẫu thử đồ'),
-          const SizedBox(height: 12),
-          _buildModelSelector(),
-          const SizedBox(height: 24),
-
-          // 2. SELECT WARDROBE ITEM
-          _sectionHeader('2. Chọn quần áo từ tủ đồ'),
-          const SizedBox(height: 12),
-          _buildGarmentSelector(),
-          const SizedBox(height: 24),
-
-          // 3. OPTIONS
-          _sectionHeader('3. Cấu hình AI'),
-          const SizedBox(height: 12),
-          _buildTryOnConfig(),
-          const SizedBox(height: 32),
-
-          // ACTION BUTTON
-          FadeInUp(
-            child: Container(
-              width: double.infinity,
-              height: 56,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                gradient: LinearGradient(
-                  colors: _selectedGarment == null 
-                      ? [Colors.grey.shade400, Colors.grey.shade400] 
-                      : [AppColors.primary, AppColors.primaryLight],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                boxShadow: _selectedGarment == null ? [] : [
-                  BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.25),
-                    blurRadius: 16,
-                    offset: const Offset(0, 8),
-                  )
-                ],
               ),
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.transparent,
-                  shadowColor: Colors.transparent,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                ),
-                onPressed: _selectedGarment == null ? null : _startTryOn,
-                icon: const Icon(Icons.auto_awesome_rounded, color: Colors.white),
-                label: const Text(
-                  'Bắt đầu thử đồ ảo AI',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-                ),
+              IconButton(
+                onPressed: _isLoadingSavedOutfits ? null : _fetchSavedOutfits,
+                tooltip: 'Refresh saved outfits',
+                icon: _isLoadingSavedOutfits
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.refresh_rounded, color: AppColors.primary),
               ),
-            ),
+            ],
           ),
-
-          if (_errorMessage != null) ...[
-            const SizedBox(height: 16),
-            Center(
-              child: Text(
-                _errorMessage!,
-                style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w600),
-                textAlign: TextAlign.center,
+          const SizedBox(height: 8),
+          if (_isLoadingSavedOutfits && _savedOutfits.isEmpty)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 24),
+              child: Center(
+                child: CircularProgressIndicator(color: AppColors.primary),
               ),
             )
-          ]
+          else if (_savedOutfits.isEmpty)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 12),
+              decoration: BoxDecoration(
+                color: AppColors.background,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: const Column(
+                children: [
+                  Icon(Icons.photo_library_outlined, color: AppColors.primary),
+                  SizedBox(height: 8),
+                  Text(
+                    'Ban chua luu outfit nao.',
+                    style: TextStyle(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            )
+          else
+            GridView.builder(
+              itemCount: _savedOutfits.length,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+                childAspectRatio: 0.72,
+              ),
+              itemBuilder: (context, index) {
+                final outfit = _savedOutfits[index];
+                final snapshotUrl = (outfit['canvasSnapshotUrl'] ?? '').toString();
+                final title = (outfit['title'] ?? 'Untitled').toString();
+                final createdAt = _formatOutfitDate(outfit['createdAt']);
+                final isPublic = outfit['isPublic'] == true;
+
+                return GestureDetector(
+                  onTap: () => _showSavedOutfitPreview(outfit),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: Colors.grey.shade200),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(14),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: snapshotUrl.isEmpty
+                                ? Container(
+                                    color: Colors.grey.shade100,
+                                    child: const Center(
+                                      child: Icon(
+                                        Icons.image_not_supported_outlined,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  )
+                                : Image.network(
+                                    snapshotUrl,
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                    errorBuilder: (context, error, stackTrace) => Container(
+                                      color: Colors.grey.shade100,
+                                      child: const Center(
+                                        child: Icon(
+                                          Icons.broken_image_outlined,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  title,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        createdAt,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: AppColors.primary.withValues(alpha: 0.65),
+                                        ),
+                                      ),
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: isPublic ? const Color(0xFFE7F7ED) : const Color(0xFFF3F0EA),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Text(
+                                        isPublic ? 'Public' : 'Private',
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w700,
+                                          color: isPublic ? const Color(0xFF247A3A) : AppColors.primary,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
         ],
       ),
     );
@@ -663,7 +1307,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
           height: 38,
           child: ListView(
             scrollDirection: Axis.horizontal,
-            children: ['Tất cả', 'Áo', 'Quần/Váy', 'Đầm/Váy liền', 'Áo khoác'].map((filter) {
+            children: ['Tất cả', 'Áo', 'Quần/Váy', 'Đầm/Váy liền', 'Áo khoác', 'Khác'].map((filter) {
               final active = _wardrobeFilter == filter;
               return Padding(
                 padding: const EdgeInsets.only(right: 8),
@@ -693,28 +1337,10 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                   itemCount: _filteredGarments.length,
                   itemBuilder: (context, index) {
                     final item = _filteredGarments[index];
-                    final isSelected = _selectedGarment?.id == item.id;
+                    final isSelected = _selectedGarments.any((g) => g.id == item.id);
 
                     return GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _selectedGarment = isSelected ? null : item;
-                          
-                          // Smart auto-update category config based on selected clothing category
-                          if (!isSelected) {
-                            final cat = item.category.toLowerCase();
-                            if (cat == 'top') {
-                              _selectedCategory = 'tops';
-                            } else if (cat == 'bottom') {
-                              _selectedCategory = 'bottoms';
-                            } else if (cat == 'dress') {
-                              _selectedCategory = 'one-pieces';
-                            } else if (cat == 'outerwear') {
-                              _selectedCategory = 'tops';
-                            }
-                          }
-                        });
-                      },
+                      onTap: () => _toggleGarmentSelection(item),
                       child: Container(
                         width: 100,
                         margin: const EdgeInsets.only(right: 12),
@@ -764,6 +1390,116 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                 ),
         )
       ],
+    );
+  }
+
+  Widget _buildSelectedGarmentsPreview() {
+    if (_selectedGarments.isEmpty) return const SizedBox.shrink();
+    
+    return Container(
+      margin: const EdgeInsets.only(top: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Bảng phối đồ hiện tại (Flat Lay)',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.primary),
+              ),
+              GestureDetector(
+                onTap: () => setState(() => _selectedGarments.clear()),
+                child: const Text(
+                  'Xóa phối đồ',
+                  style: TextStyle(color: Colors.red, fontSize: 12, fontWeight: FontWeight.bold),
+                ),
+              )
+            ],
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 80,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: _selectedGarments.length,
+              itemBuilder: (context, idx) {
+                final item = _selectedGarments[idx];
+                return Container(
+                  width: 70,
+                  margin: const EdgeInsets.only(right: 12),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.primaryLight.withOpacity(0.5)),
+                  ),
+                  child: Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(11),
+                        child: Image.network(item.imageUrl, fit: BoxFit.cover, width: double.infinity, height: double.infinity),
+                      ),
+                      Positioned(
+                        top: 2,
+                        right: 2,
+                        child: GestureDetector(
+                          onTap: () => setState(() => _selectedGarments.removeAt(idx)),
+                          child: const CircleAvatar(
+                            radius: 8,
+                            backgroundColor: Colors.red,
+                            child: Icon(Icons.close, size: 10, color: Colors.white),
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        child: Container(
+                          color: Colors.black54,
+                          padding: const EdgeInsets.symmetric(vertical: 2),
+                          child: Text(
+                            item.category.toUpperCase(),
+                            style: const TextStyle(fontSize: 8, color: Colors.white, fontWeight: FontWeight.bold),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+          if (_selectedGarments.length > 1) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: AppColors.accent.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.info_outline, size: 16, color: AppColors.primary),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Hệ thống sẽ tự động ghép các món đồ trên thành 1 ảnh Flat Lay trước khi mặc thử lên người mẫu.',
+                      style: TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          ]
+        ],
+      ),
     );
   }
 
@@ -894,22 +1630,40 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                 },
               ),
 
-              // Garment badge overlap
-              if (_selectedGarment != null)
+              // Garment badge overlap (overlapping stack for multiple garments)
+              if (_selectedGarments.isNotEmpty)
                 Positioned(
                   bottom: 12,
                   right: 12,
-                  child: Container(
-                    width: 70,
-                    height: 70,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: AppColors.primaryLight, width: 2),
-                      boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 10)]
-                    ),
-                    child: ClipOval(
-                      child: Image.network(_selectedGarment!.imageUrl, fit: BoxFit.cover),
+                  child: SizedBox(
+                    width: 70.0 + (_selectedGarments.length - 1) * 15.0,
+                    height: 70.0,
+                    child: Stack(
+                      children: List.generate(_selectedGarments.length, (index) {
+                        final item = _selectedGarments[index];
+                        return Positioned(
+                          left: index * 15.0,
+                          child: Container(
+                            width: 70,
+                            height: 70,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: AppColors.primaryLight, width: 2),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Colors.black26,
+                                  blurRadius: 6,
+                                  offset: Offset(2, 2),
+                                )
+                              ],
+                            ),
+                            child: ClipOval(
+                              child: Image.network(item.imageUrl, fit: BoxFit.cover),
+                            ),
+                          ),
+                        );
+                      }),
                     ),
                   ),
                 )
@@ -1020,27 +1774,23 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   ),
-                  onPressed: () {
-                    // Simulating image saving to gallery
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Đang lưu hình ảnh vào Thư viện của bạn...'),
-                        duration: Duration(seconds: 1),
-                      ),
-                    );
-                    Future.delayed(const Duration(milliseconds: 1500), () {
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Lưu thành công! Đã lưu ảnh thử đồ ảo vào Thư viện.'),
-                            backgroundColor: Colors.green,
+                  onPressed: _isSavingImage
+                      ? null
+                      : () => _saveImageToGallery(_resultUrl!),
+                  icon: _isSavingImage
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            color: AppColors.primary,
+                            strokeWidth: 2,
                           ),
-                        );
-                      }
-                    });
-                  },
-                  icon: const Icon(Icons.download_rounded),
-                  label: const Text('Tải xuống', style: TextStyle(fontWeight: FontWeight.bold)),
+                        )
+                      : const Icon(Icons.download_rounded),
+                  label: Text(
+                    _isSavingImage ? 'Đang tải...' : 'Tải xuống',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
               ),
               const SizedBox(width: 12),

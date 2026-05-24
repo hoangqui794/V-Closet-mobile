@@ -45,5 +45,7 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Chúng tôi cần quyền truy cập thư viện ảnh để tải xuống ảnh thử đồ ảo của bạn.</string>
 </dict>
 </plist>
