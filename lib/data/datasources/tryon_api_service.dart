@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'api_service.dart';
 
 class TryOnApiService {
@@ -30,10 +31,10 @@ class TryOnApiService {
       }
       return null;
     } on DioException catch (e) {
-      print('Lỗi gọi API RunTryOn: ${e.response?.data}');
+      debugPrint('Lỗi gọi API RunTryOn: ${e.response?.data}');
       rethrow;
     } catch (e) {
-      print('Lỗi gọi API RunTryOn: $e');
+      debugPrint('Lỗi gọi API RunTryOn: $e');
       return null;
     }
   }
@@ -51,7 +52,7 @@ class TryOnApiService {
         '/TryOn/run-wardrobe',
         data: {
           'wardrobeItemId': wardrobeItemId,
-          if (modelUrl != null) 'modelImageUrl': modelUrl,
+          'modelImageUrl': ?modelUrl,
           'category': category,
           'restoreBackground': restoreBackground,
         },
@@ -62,10 +63,10 @@ class TryOnApiService {
       }
       return null;
     } on DioException catch (e) {
-      print('Lỗi gọi API RunTryOn với tủ đồ: ${e.response?.data}');
+      debugPrint('Lỗi gọi API RunTryOn với tủ đồ: ${e.response?.data}');
       rethrow;
     } catch (e) {
-      print('Lỗi gọi API RunTryOn với tủ đồ: $e');
+      debugPrint('Lỗi gọi API RunTryOn với tủ đồ: $e');
       return null;
     }
   }
@@ -84,7 +85,7 @@ class TryOnApiService {
       }
       return null;
     } catch (e) {
-      print('Lỗi kiểm tra trạng thái thử đồ: $e');
+      debugPrint('Lỗi kiểm tra trạng thái thử đồ: $e');
       return null;
     }
   }

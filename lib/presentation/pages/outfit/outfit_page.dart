@@ -112,7 +112,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
       });
     } catch (e) {
       setState(() => _isLoadingWardrobe = false);
-      print('Lỗi tải tủ đồ: $e');
+      debugPrint('Lỗi tải tủ đồ: $e');
     }
   }
 
@@ -127,6 +127,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
         _selectedModelUrl = null; // Clear sample selection
       });
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Không thể chọn ảnh: $e')),
       );
@@ -298,7 +299,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
           });
         }
       } catch (e) {
-        print('Lỗi kiểm tra trạng thái: $e');
+        debugPrint('Lỗi kiểm tra trạng thái: $e');
       }
     });
   }
@@ -702,10 +703,15 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                           // Smart auto-update category config based on selected clothing category
                           if (!isSelected) {
                             final cat = item.category.toLowerCase();
-                            if (cat == 'top') _selectedCategory = 'tops';
-                            else if (cat == 'bottom') _selectedCategory = 'bottoms';
-                            else if (cat == 'dress') _selectedCategory = 'one-pieces';
-                            else if (cat == 'outerwear') _selectedCategory = 'tops';
+                            if (cat == 'top') {
+                              _selectedCategory = 'tops';
+                            } else if (cat == 'bottom') {
+                              _selectedCategory = 'bottoms';
+                            } else if (cat == 'dress') {
+                              _selectedCategory = 'one-pieces';
+                            } else if (cat == 'outerwear') {
+                              _selectedCategory = 'tops';
+                            }
                           }
                         });
                       },
@@ -806,7 +812,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
               ),
               Switch(
                 value: _restoreBackground,
-                activeColor: AppColors.primary,
+                activeThumbColor: AppColors.primary,
                 onChanged: (val) => setState(() => _restoreBackground = val),
               )
             ],
