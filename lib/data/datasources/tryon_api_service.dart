@@ -52,7 +52,7 @@ class TryOnApiService {
         '/TryOn/run-wardrobe',
         data: {
           'wardrobeItemId': wardrobeItemId,
-          'modelImageUrl': ?modelUrl,
+          'modelImageUrl': modelUrl,
           'category': category,
           'restoreBackground': restoreBackground,
         },

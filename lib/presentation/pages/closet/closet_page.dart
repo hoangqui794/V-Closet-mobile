@@ -7,7 +7,9 @@ import 'package:image_picker/image_picker.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/datasources/bg_removal_service.dart';
 import '../../../../data/datasources/wardrobe_api_service.dart';
+import '../../../../data/datasources/outfit_api_service.dart';
 import '../../../../domain/entities/clothing_item.dart';
+import 'canvas_outfit_page.dart';
 
 class ClosetPage extends StatefulWidget {
   const ClosetPage({super.key});
@@ -16,12 +18,23 @@ class ClosetPage extends StatefulWidget {
   State<ClosetPage> createState() => _ClosetPageState();
 }
 
-class _ClosetPageState extends State<ClosetPage> {
+class _ClosetPageState extends State<ClosetPage>
+    with SingleTickerProviderStateMixin {
   final WardrobeApiService _apiService = GetIt.I<WardrobeApiService>();
+  final OutfitApiService _outfitApiService = GetIt.I<OutfitApiService>();
   final ImagePicker _picker = ImagePicker();
+
+  // Tab controller
+  late TabController _tabController;
+
+  // Wardrobe tab state
   List<ClothingItem> _items = [];
   bool _isLoading = true;
   String _selectedCategory = 'Tất cả';
+
+  // Outfit collage tab state
+  List<Map<String, dynamic>> _outfits = [];
+  bool _isLoadingOutfits = true;
 
   final Map<String, String> _categoryMap = {
     'Tất cả': '',
@@ -49,7 +62,22 @@ class _ClosetPageState extends State<ClosetPage> {
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(() {
+      if (!_tabController.indexIsChanging) {
+        if (_tabController.index == 1 && _outfits.isEmpty && !_isLoadingOutfits) {
+          _fetchOutfits();
+        }
+      }
+    });
     _fetchItems();
+    _fetchOutfits();
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   Future<void> _fetchItems() async {
@@ -76,6 +104,40 @@ class _ClosetPageState extends State<ClosetPage> {
     }
   }
 
+  Future<void> _fetchOutfits() async {
+    setState(() => _isLoadingOutfits = true);
+    try {
+      final result = await _outfitApiService.getUserOutfits();
+      if (mounted) {
+        setState(() {
+          _outfits = result;
+          _isLoadingOutfits = false;
+        });
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isLoadingOutfits = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Không thể tải bộ phối đồ: $e')),
+      );
+    }
+  }
+
+  Future<void> _openCanvasBuilder() async {
+    if (_tabController.index != 1) {
+      _tabController.animateTo(1);
+    }
+    final saved = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (context) => const CanvasOutfitPage(),
+        fullscreenDialog: true,
+      ),
+    );
+    if (saved == true && mounted) {
+      _fetchOutfits();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -84,6 +146,7 @@ class _ClosetPageState extends State<ClosetPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // ── Header ──────────────────────────────────────────────
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
               child: Row(
@@ -108,27 +171,64 @@ class _ClosetPageState extends State<ClosetPage> {
                       ],
                     ),
                   ),
-                  IconButton(
-                    onPressed: _pickAndAddClothes,
-                    icon: const Icon(
-                      Icons.add_circle_outline_rounded,
-                      color: AppColors.primary,
-                      size: 28,
-                    ),
-                    tooltip: 'Thêm đồ',
-                  ),
-                  IconButton(
-                    onPressed: _fetchItems,
-                    icon: const Icon(
-                      Icons.refresh_rounded,
-                      color: AppColors.primary,
-                      size: 28,
-                    ),
-                    tooltip: 'Làm mới',
+                  // Add button only shows on wardrobe tab
+                  ListenableBuilder(
+                    listenable: _tabController,
+                    builder: (context, _) {
+                      if (_tabController.index == 0) {
+                        return Row(
+                          children: [
+                            IconButton(
+                              onPressed: _pickAndAddClothes,
+                              icon: const Icon(
+                                Icons.add_circle_outline_rounded,
+                                color: AppColors.primary,
+                                size: 28,
+                              ),
+                              tooltip: 'Thêm đồ',
+                            ),
+                            IconButton(
+                              onPressed: _fetchItems,
+                              icon: const Icon(
+                                Icons.refresh_rounded,
+                                color: AppColors.primary,
+                                size: 28,
+                              ),
+                              tooltip: 'Làm mới',
+                            ),
+                          ],
+                        );
+                      }
+                      // Outfit tab: + button to create new + refresh
+                      return Row(
+                        children: [
+                          IconButton(
+                            onPressed: _openCanvasBuilder,
+                            icon: const Icon(
+                              Icons.add_circle_outline_rounded,
+                              color: AppColors.primary,
+                              size: 28,
+                            ),
+                            tooltip: 'Tạo bộ phối mới',
+                          ),
+                          IconButton(
+                            onPressed: _fetchOutfits,
+                            icon: const Icon(
+                              Icons.refresh_rounded,
+                              color: AppColors.primary,
+                              size: 28,
+                            ),
+                            tooltip: 'Làm mới',
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ],
               ),
             ),
+
+            // ── Stats banner ─────────────────────────────────────────
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
               child: FadeInDown(
@@ -146,23 +246,31 @@ class _ClosetPageState extends State<ClosetPage> {
                   child: Row(
                     children: [
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Tổng số món đồ',
-                              style: TextStyle(color: Colors.white70),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              _isLoading ? '--' : '${_items.length}',
-                              style: const TextStyle(
-                                fontSize: 34,
-                                fontWeight: FontWeight.w900,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
+                        child: ListenableBuilder(
+                          listenable: _tabController,
+                          builder: (context, _) {
+                            final isOutfitTab = _tabController.index == 1;
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  isOutfitTab ? 'Tổng bộ phối đồ' : 'Tổng số món đồ',
+                                  style: const TextStyle(color: Colors.white70),
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  isOutfitTab
+                                      ? (_isLoadingOutfits ? '--' : '${_outfits.length}')
+                                      : (_isLoading ? '--' : '${_items.length}'),
+                                  style: const TextStyle(
+                                    fontSize: 34,
+                                    fontWeight: FontWeight.w900,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
                         ),
                       ),
                       Container(
@@ -172,10 +280,15 @@ class _ClosetPageState extends State<ClosetPage> {
                           color: Colors.white.withValues(alpha: 0.18),
                           borderRadius: BorderRadius.circular(16),
                         ),
-                        child: const Icon(
-                          Icons.checkroom_rounded,
-                          color: Colors.white,
-                          size: 28,
+                        child: ListenableBuilder(
+                          listenable: _tabController,
+                          builder: (context, _) => Icon(
+                            _tabController.index == 1
+                                ? Icons.style_rounded
+                                : Icons.checkroom_rounded,
+                            color: Colors.white,
+                            size: 28,
+                          ),
                         ),
                       ),
                     ],
@@ -183,37 +296,104 @@ class _ClosetPageState extends State<ClosetPage> {
                 ),
               ),
             ),
-            SizedBox(
-              height: 54,
-              child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                scrollDirection: Axis.horizontal,
-                children: _categoryMap.keys.map((label) {
-                  final active = _selectedCategory == label;
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: ChoiceChip(
-                      selected: active,
-                      onSelected: (_) {
-                        if (_selectedCategory == label) return;
-                        setState(() => _selectedCategory = label);
-                        _fetchItems();
-                      },
-                      label: Text(label),
-                      labelStyle: TextStyle(
-                        color: active ? Colors.white : AppColors.primary,
-                        fontWeight: active ? FontWeight.w700 : FontWeight.w600,
-                      ),
+
+            // ── Tab Bar ──────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: TabBar(
+                  controller: _tabController,
+                  indicator: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [AppColors.primary, AppColors.primaryLight],
                     ),
-                  );
-                }).toList(),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  indicatorSize: TabBarIndicatorSize.tab,
+                  dividerColor: Colors.transparent,
+                  labelColor: Colors.white,
+                  unselectedLabelColor: AppColors.primary,
+                  labelStyle: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                  ),
+                  tabs: const [
+                    Tab(
+                      icon: Icon(Icons.checkroom_rounded, size: 18),
+                      text: 'Quần áo',
+                      height: 52,
+                    ),
+                    Tab(
+                      icon: Icon(Icons.style_rounded, size: 18),
+                      text: 'Bộ phối đồ',
+                      height: 52,
+                    ),
+                  ],
+                ),
               ),
             ),
+
             const SizedBox(height: 8),
+
+            // ── Tab Content ──────────────────────────────────────────
             Expanded(
-              child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : _items.isEmpty
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildWardrobeTab(),
+                  _buildOutfitCollageTab(),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────────
+  // TAB 1 — Wardrobe (Quần áo)
+  // ─────────────────────────────────────────────────────────────────
+
+  Widget _buildWardrobeTab() {
+    return Column(
+      children: [
+        // Category filter chips
+        SizedBox(
+          height: 54,
+          child: ListView(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            scrollDirection: Axis.horizontal,
+            children: _categoryMap.keys.map((label) {
+              final active = _selectedCategory == label;
+              return Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: ChoiceChip(
+                  selected: active,
+                  onSelected: (_) {
+                    if (_selectedCategory == label) return;
+                    setState(() => _selectedCategory = label);
+                    _fetchItems();
+                  },
+                  label: Text(label),
+                  labelStyle: TextStyle(
+                    color: active ? Colors.white : AppColors.primary,
+                    fontWeight: active ? FontWeight.w700 : FontWeight.w600,
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Expanded(
+          child: _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _items.isEmpty
                   ? _emptyState()
                   : GridView.builder(
                       physics: const BouncingScrollPhysics(),
@@ -237,12 +417,431 @@ class _ClosetPageState extends State<ClosetPage> {
                         );
                       },
                     ),
-            ),
-          ],
         ),
+      ],
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────────
+  // TAB 2 — Outfit Collage (Bộ phối đồ)
+  // ─────────────────────────────────────────────────────────────────
+
+  Widget _buildOutfitCollageTab() {
+    if (_isLoadingOutfits) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_outfits.isEmpty) {
+      return _emptyOutfitState();
+    }
+
+    return GridView.builder(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 110),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 14,
+        mainAxisSpacing: 14,
+        childAspectRatio: 0.75,
+      ),
+      itemCount: _outfits.length,
+      itemBuilder: (context, index) {
+        final outfit = _outfits[index];
+        return FadeInUp(
+          delay: Duration(milliseconds: 45 * (index % 8)),
+          child: GestureDetector(
+            onTap: () => _showOutfitDetails(outfit),
+            child: _outfitCollageCard(outfit),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _outfitCollageCard(Map<String, dynamic> outfit) {
+    final String title = outfit['Title']?.toString() ?? outfit['title']?.toString() ?? 'Bộ phối đồ';
+    final String? snapshotUrl = outfit['CanvasSnapshotUrl']?.toString() ??
+        outfit['canvasSnapshotUrl']?.toString() ??
+        outfit['snapshotUrl']?.toString();
+    final bool isPublic = outfit['IsPublic'] == true || outfit['isPublic'] == true;
+    final String createdAt = outfit['CreatedAt']?.toString() ??
+        outfit['createdAt']?.toString() ?? '';
+    String dateLabel = '';
+    if (createdAt.isNotEmpty) {
+      try {
+        final dt = DateTime.parse(createdAt).toLocal();
+        dateLabel = '${dt.day}/${dt.month}/${dt.year}';
+      } catch (_) {}
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.07),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: ClipRRect(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  // Collage image
+                  if (snapshotUrl == null || snapshotUrl.isEmpty)
+                    Container(
+                      color: AppColors.secondary,
+                      child: const Icon(
+                        Icons.style_rounded,
+                        color: AppColors.primary,
+                        size: 48,
+                      ),
+                    )
+                  else
+                    Image.network(
+                      snapshotUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        color: AppColors.secondary,
+                        child: const Icon(
+                          Icons.broken_image_outlined,
+                          color: AppColors.primary,
+                          size: 48,
+                        ),
+                      ),
+                      loadingBuilder: (context, child, progress) {
+                        if (progress == null) return child;
+                        return Container(
+                          color: AppColors.secondary.withValues(alpha: 0.5),
+                          child: const Center(
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        );
+                      },
+                    ),
+                  // Public / Private badge
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: isPublic
+                            ? Colors.green.withValues(alpha: 0.85)
+                            : Colors.white.withValues(alpha: 0.90),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            isPublic ? Icons.public_rounded : Icons.lock_rounded,
+                            size: 10,
+                            color: isPublic ? Colors.white : AppColors.primary,
+                          ),
+                          const SizedBox(width: 3),
+                          Text(
+                            isPublic ? 'Công khai' : 'Riêng tư',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              color: isPublic ? Colors.white : AppColors.primary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.primary,
+                    fontSize: 13,
+                  ),
+                ),
+                if (dateLabel.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    dateLabel,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: AppColors.primary.withValues(alpha: 0.5),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
+
+  void _showOutfitDetails(Map<String, dynamic> outfit) {
+    final String title = outfit['Title']?.toString() ?? outfit['title']?.toString() ?? 'Bộ phối đồ';
+    final String? snapshotUrl = outfit['CanvasSnapshotUrl']?.toString() ??
+        outfit['canvasSnapshotUrl']?.toString() ??
+        outfit['snapshotUrl']?.toString();
+    final bool isPublic = outfit['IsPublic'] == true || outfit['isPublic'] == true;
+    final String createdAt = outfit['CreatedAt']?.toString() ??
+        outfit['createdAt']?.toString() ?? '';
+    String dateLabel = '';
+    if (createdAt.isNotEmpty) {
+      try {
+        final dt = DateTime.parse(createdAt).toLocal();
+        dateLabel = '${dt.day}/${dt.month}/${dt.year} lúc ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+      } catch (_) {}
+    }
+
+    // Extract items from outfit (support both PascalCase and camelCase from .NET API)
+    final dynamic rawItems = outfit['Items'] ?? outfit['items'];
+    List<Map<String, dynamic>> items = [];
+    if (rawItems is List) {
+      items = rawItems.whereType<Map>().map((e) => Map<String, dynamic>.from(e)).toList();
+    }
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.85,
+          minChildSize: 0.5,
+          maxChildSize: 0.95,
+          expand: false,
+          builder: (context, scrollController) {
+            return SingleChildScrollView(
+              controller: scrollController,
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Handle bar
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(99),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Title row
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            title,
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                          decoration: BoxDecoration(
+                            color: isPublic
+                                ? Colors.green.withValues(alpha: 0.12)
+                                : AppColors.primary.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                isPublic ? Icons.public_rounded : Icons.lock_rounded,
+                                size: 12,
+                                color: isPublic ? Colors.green : AppColors.primary,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                isPublic ? 'Công khai' : 'Riêng tư',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: isPublic ? Colors.green : AppColors.primary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ],
+                    ),
+                    if (dateLabel.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: Text(
+                          'Tạo lúc: $dateLabel',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.primary.withValues(alpha: 0.5),
+                          ),
+                        ),
+                      ),
+
+                    // Snapshot / Flat-lay image
+                    if (snapshotUrl != null && snapshotUrl.isNotEmpty)
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: Image.network(
+                          snapshotUrl,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => Container(
+                            height: 180,
+                            color: AppColors.secondary,
+                            child: const Icon(Icons.broken_image_outlined, size: 64),
+                          ),
+                        ),
+                      ),
+
+                    // Items in outfit
+                    if (items.isNotEmpty) ...[
+                      const SizedBox(height: 20),
+                      const Text(
+                        'Các món trong bộ phối',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        height: 100,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: items.length,
+                          separatorBuilder: (context, index) => const SizedBox(width: 10),
+                          itemBuilder: (context, idx) {
+                            final item = items[idx];
+                            final String? imgUrl = item['imageUrl']?.toString() ??
+                                item['image_url']?.toString();
+                            final String itemName = item['name']?.toString() ?? 'Món đồ';
+                            return Column(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: imgUrl != null && imgUrl.isNotEmpty
+                                      ? Image.network(
+                                          imgUrl,
+                                          width: 72,
+                                          height: 72,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (context, error, stackTrace) =>
+                                              Container(
+                                            width: 72,
+                                            height: 72,
+                                            color: AppColors.secondary,
+                                            child: const Icon(Icons.checkroom_rounded, size: 30),
+                                          ),
+                                        )
+                                      : Container(
+                                          width: 72,
+                                          height: 72,
+                                          color: AppColors.secondary,
+                                          child: const Icon(Icons.checkroom_rounded, size: 30),
+                                        ),
+                                ),
+                                const SizedBox(height: 4),
+                                SizedBox(
+                                  width: 72,
+                                  child: Text(
+                                    itemName,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.primary,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 24),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _emptyOutfitState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.style_rounded,
+            size: 76,
+            color: AppColors.primary.withValues(alpha: 0.25),
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            'Chưa có bộ phối đồ nào',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              color: AppColors.primary,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Hãy phối đồ từ tab "Phòng thử đồ".',
+            style: TextStyle(color: AppColors.primary.withValues(alpha: 0.6)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────────
+  // Shared helpers
+  // ─────────────────────────────────────────────────────────────────
 
   void _showLoadingDialog(String message) {
     showDialog(
@@ -342,7 +941,7 @@ class _ClosetPageState extends State<ClosetPage> {
                       icon: const Icon(Icons.edit_rounded),
                       label: const Text('Chỉnh sửa'),
                       onPressed: () {
-                        Navigator.pop(context); // Close details sheet
+                        Navigator.pop(context);
                         _showEditDialog(item);
                       },
                     ),
@@ -359,7 +958,7 @@ class _ClosetPageState extends State<ClosetPage> {
                       icon: const Icon(Icons.delete_forever_rounded),
                       label: const Text('Xóa'),
                       onPressed: () {
-                        Navigator.pop(context); // Close details sheet
+                        Navigator.pop(context);
                         _confirmDelete(item);
                       },
                     ),
@@ -429,13 +1028,13 @@ class _ClosetPageState extends State<ClosetPage> {
     if (confirm == true) {
       _showLoadingDialog('Đang xóa...');
       final deleted = await _apiService.deleteItem(item.id);
-      Navigator.pop(context); // Close loading dialog
+      Navigator.pop(context);
 
       if (deleted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Đã xóa món đồ khỏi tủ đồ thành công!')),
         );
-        _fetchItems(); // Reload
+        _fetchItems();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Lỗi: Xóa thất bại.')),
@@ -460,7 +1059,6 @@ class _ClosetPageState extends State<ClosetPage> {
       'Khác': 'Other'
     };
 
-    // Tìm key tương ứng của category
     String currentCatName = 'Khác';
     for (var entry in categoryOptions.entries) {
       if (entry.value.toLowerCase() == item.category.toLowerCase()) {
@@ -539,13 +1137,13 @@ class _ClosetPageState extends State<ClosetPage> {
     if (result != null) {
       _showLoadingDialog('Đang cập nhật...');
       final updated = await _apiService.updateItem(item.id, result);
-      Navigator.pop(context); // Close loading dialog
+      Navigator.pop(context);
 
       if (updated != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Cập nhật thành công!')),
         );
-        _fetchItems(); // Reload
+        _fetchItems();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Lỗi: Cập nhật thất bại.')),
@@ -556,7 +1154,7 @@ class _ClosetPageState extends State<ClosetPage> {
 
   Future<Map<String, String>?> _showDetailsDialog(File imageFile) async {
     String name = 'Đồ mới thêm ${DateTime.now().second}';
-    String category = 'Top'; 
+    String category = 'Top';
     String currentCatName = 'Áo';
 
     final Map<String, String> categoryOptions = {
@@ -660,11 +1258,9 @@ class _ClosetPageState extends State<ClosetPage> {
       final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
       if (image == null) return;
 
-      // Hiển thị dialog để nhập thông tin
       final details = await _showDetailsDialog(File(image.path));
       if (details == null) return;
 
-      // Hiển thị loading overlay
       if (!mounted) return;
       bool isDialogOpen = true;
       showDialog(
@@ -687,7 +1283,6 @@ class _ClosetPageState extends State<ClosetPage> {
         ),
       ).then((_) => isDialogOpen = false);
 
-      // 1. Tách nền ảnh
       final bgRemovalService = GetIt.I<BgRemovalService>();
       final Uint8List? resultBytes = await bgRemovalService.removeBackground(File(image.path));
 
@@ -698,22 +1293,19 @@ class _ClosetPageState extends State<ClosetPage> {
         fileToUpload = tempFile;
       }
 
-      // 2. Upload và tạo món đồ mới
       final newItem = await _apiService.uploadAndCreateItem(
         imageFile: fileToUpload,
         category: details['category']!,
         name: details['name']!,
       );
 
-      // Đóng loading dialog
       if (mounted && isDialogOpen) {
         Navigator.pop(context);
       }
 
       if (newItem != null) {
-        _fetchItems(); // Tải lại danh sách
-        
-        // Show success alert
+        _fetchItems();
+
         if (mounted) {
           showDialog(
             context: context,
@@ -746,7 +1338,6 @@ class _ClosetPageState extends State<ClosetPage> {
         }
       }
     } catch (e) {
-      // Đóng loading dialog nếu xảy ra lỗi
       if (mounted) {
         Navigator.of(context, rootNavigator: true).pop();
         ScaffoldMessenger.of(context).showSnackBar(
