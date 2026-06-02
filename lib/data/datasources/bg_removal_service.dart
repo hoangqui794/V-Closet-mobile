@@ -1,28 +1,8 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:image/image.dart' as img;
 import 'api_service.dart';
-
-// Top-level worker function to compress image in isolate background
-Uint8List _compressImageInIsolate(Map<String, dynamic> params) {
-  final Uint8List bytes = params['bytes'];
-  final int targetSize = params['targetSize'];
-  
-  img.Image? decoded = img.decodeImage(bytes);
-  if (decoded == null) return bytes;
-  
-  img.Image resized = decoded;
-  if (decoded.width > targetSize || decoded.height > targetSize) {
-    if (decoded.width > decoded.height) {
-      resized = img.copyResize(decoded, width: targetSize);
-    } else {
-      resized = img.copyResize(decoded, height: targetSize);
-    }
-  }
-  
-  return Uint8List.fromList(img.encodeJpg(resized, quality: 80));
-}
+import 'image_compression_helper.dart';
 
 class BgRemovalService {
   final ApiService _apiService;
@@ -33,23 +13,8 @@ class BgRemovalService {
   /// Returns the image bytes (PNG) if successful, or null if it fails.
   Future<Uint8List?> removeBackground(File imageFile) async {
     try {
-      File fileToUse = imageFile;
-      
-      // Auto-compress large files (> 1MB) to prevent HTTP 413 (Payload Too Large)
-      final int fileSize = await imageFile.length();
-      if (fileSize > 1 * 1024 * 1024) {
-        debugPrint('Tệp ảnh lớn (${(fileSize / (1024 * 1024)).toStringAsFixed(2)} MB), đang nén tự động...');
-        final bytes = await imageFile.readAsBytes();
-        final compressedBytes = await compute(_compressImageInIsolate, {
-          'bytes': bytes,
-          'targetSize': 1024,
-        });
-        
-        final tempFile = File('${Directory.systemTemp.path}/compressed_${DateTime.now().millisecondsSinceEpoch}.jpg');
-        await tempFile.writeAsBytes(compressedBytes);
-        fileToUse = tempFile;
-        debugPrint('Đã nén xong: ${(compressedBytes.length / 1024).toStringAsFixed(2)} KB');
-      }
+      // Auto-compress image if larger than 500 KB to avoid HTTP 413 Payload Too Large
+      File fileToUse = await ImageCompressionHelper.compressIfNeeded(imageFile);
 
       String fileName = fileToUse.path.split(Platform.pathSeparator).last;
       

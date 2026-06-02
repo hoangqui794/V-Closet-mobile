@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import '../../domain/entities/clothing_item.dart';
 import 'api_service.dart';
+import 'image_compression_helper.dart';
 
 class WardrobeApiService {
   final ApiService _apiService;
@@ -50,11 +51,14 @@ class WardrobeApiService {
     String? brand,
   }) async {
     try {
-      String fileName = imageFile.path.split(Platform.pathSeparator).last;
+      // Auto-compress the image if it exceeds 500 KB to avoid HTTP 413 Payload Too Large
+      File fileToUpload = await ImageCompressionHelper.compressIfNeeded(imageFile);
+      
+      String fileName = fileToUpload.path.split(Platform.pathSeparator).last;
       
       FormData formData = FormData.fromMap({
         "file": await MultipartFile.fromFile(
-          imageFile.path,
+          fileToUpload.path,
           filename: fileName,
         ),
         "category": category,
@@ -63,6 +67,15 @@ class WardrobeApiService {
       });
 
       final response = await _apiService.post('/api/Wardrobe/upload-and-create', data: formData);
+      
+      // Clean up temp file if created
+      if (fileToUpload.path != imageFile.path) {
+        try {
+          await fileToUpload.delete();
+        } catch (e) {
+          // Ignore temp file deletion errors
+        }
+      }
       
       if (response.statusCode == 200 || response.statusCode == 201) {
         return ClothingItem.fromJson(response.data);
