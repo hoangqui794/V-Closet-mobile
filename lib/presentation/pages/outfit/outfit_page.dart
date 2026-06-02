@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:dio/dio.dart';
@@ -601,8 +601,9 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
       // Check if we need to run via the files upload API
       final bool isCustomModel = _selectedModelFile != null;
       final bool isOutfitSnapshot = _selectedOutfitSnapshotUrl != null;
+      final bool isLocalModel = modelUrlToUse != null && modelUrlToUse.startsWith('assets/');
 
-      if (isMultiGarment || isCustomModel || isOutfitSnapshot) {
+      if (isMultiGarment || isCustomModel || isOutfitSnapshot || isLocalModel) {
         // We will call the /api/TryOn/run-files endpoint using FormData
         
         // 1. Prepare model file bytes
@@ -615,6 +616,11 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
           final pathLower = _selectedModelFile!.path.toLowerCase();
           final ext = pathLower.endsWith('.png') ? '.png' : '.jpg';
           modelFilename = 'model$ext';
+        } else if (isLocalModel) {
+          setState(() => _loadingMessage = 'Đang tải người mẫu từ ứng dụng...');
+          final ByteData data = await rootBundle.load(modelUrlToUse);
+          modelBytes = data.buffer.asUint8List();
+          modelFilename = modelUrlToUse.split('/').last;
         } else {
           setState(() => _loadingMessage = 'Đang tải thông tin người mẫu...');
           final modelResponse = await dio.get(

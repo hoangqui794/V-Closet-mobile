@@ -1010,8 +1010,10 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
       final category = _mapCategoryForApi(widget.product);
       final bool isCustomModel = _customModelFile != null && _selectedModelUrl == null;
       final bool isMultiGarment = _selectedWardrobeItem != null;
+      final String? selectedModelUrlLocal = _selectedModelUrl;
+      final bool isLocalModel = selectedModelUrlLocal != null && selectedModelUrlLocal.startsWith('assets/');
 
-      if (isCustomModel || isMultiGarment) {
+      if (isCustomModel || isMultiGarment || isLocalModel) {
         setState(() => _loadingMessage = 'Đang chuẩn bị ảnh người mẫu...');
         List<int> modelBytes;
         String modelFilename;
@@ -1021,6 +1023,11 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
           final pathLower = _customModelFile!.path.toLowerCase();
           final ext = pathLower.endsWith('.png') ? '.png' : '.jpg';
           modelFilename = 'model$ext';
+        } else if (isLocalModel) {
+          setState(() => _loadingMessage = 'Đang tải người mẫu từ ứng dụng...');
+          final ByteData data = await rootBundle.load(selectedModelUrlLocal);
+          modelBytes = data.buffer.asUint8List();
+          modelFilename = selectedModelUrlLocal.split('/').last;
         } else {
           final dioClient = dio_pkg.Dio();
           final modelResponse = await dioClient.get(
