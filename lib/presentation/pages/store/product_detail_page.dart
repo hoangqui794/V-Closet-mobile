@@ -815,9 +815,11 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
 
         if (isCustomModel) {
           modelBytes = await _customModelFile!.readAsBytes();
-          modelFilename = _customModelFile!.path.split(Platform.pathSeparator).last;
+          final pathLower = _customModelFile!.path.toLowerCase();
+          final ext = pathLower.endsWith('.png') ? '.png' : '.jpg';
+          modelFilename = 'model$ext';
         } else {
-          final dioClient = GetIt.I<dio_pkg.Dio>();
+          final dioClient = dio_pkg.Dio();
           final modelResponse = await dioClient.get(
             _selectedModelUrl!,
             options: dio_pkg.Options(responseType: dio_pkg.ResponseType.bytes),
@@ -836,7 +838,7 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
           );
         } else {
           setState(() => _loadingMessage = 'Đang tải thông tin trang phục...');
-          final dioClient = GetIt.I<dio_pkg.Dio>();
+          final dioClient = dio_pkg.Dio();
           final garmentResponse = await dioClient.get(
             garmentUrl,
             options: dio_pkg.Options(responseType: dio_pkg.ResponseType.bytes),

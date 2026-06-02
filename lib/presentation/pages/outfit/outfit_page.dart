@@ -386,7 +386,9 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
         if (isCustomModel) {
           setState(() => _loadingMessage = 'Đang chuẩn bị ảnh người mẫu của bạn...');
           modelBytes = await _selectedModelFile!.readAsBytes();
-          modelFilename = _selectedModelFile!.path.split(Platform.pathSeparator).last;
+          final pathLower = _selectedModelFile!.path.toLowerCase();
+          final ext = pathLower.endsWith('.png') ? '.png' : '.jpg';
+          modelFilename = 'model$ext';
         } else {
           setState(() => _loadingMessage = 'Đang tải thông tin người mẫu...');
           final modelResponse = await dio.get(
