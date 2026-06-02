@@ -70,32 +70,27 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
   final List<Map<String, String>> _sampleModels = [
     {
       'name': 'Mẫu Nữ 1',
-      'url': 'https://images.unsplash.com/photo-1617922001439-4a2e6562f328?q=80&w=600&auto=format&fit=crop',
+      'url': 'assets/images/mau_nu_1.jpg',
       'gender': 'female'
     },
     {
       'name': 'Mẫu Nữ 2',
-      'url': 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?q=80&w=600&auto=format&fit=crop',
+      'url': 'assets/images/mau_nu_2.jpg',
+      'gender': 'female'
+    },
+    {
+      'name': 'Mẫu Nữ 3',
+      'url': 'assets/images/mau_nu_3.jpg',
       'gender': 'female'
     },
     {
       'name': 'Mẫu Nam 1',
-      'url': 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=600&auto=format&fit=crop',
+      'url': 'assets/images/mau_nam_1.jpg',
       'gender': 'male'
     },
     {
       'name': 'Mẫu Nam 2',
-      'url': 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=600&auto=format&fit=crop',
-      'gender': 'male'
-    },
-    {
-      'name': 'Mẫu Nữ 3',
-      'url': 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?q=80&w=600&auto=format&fit=crop',
-      'gender': 'female'
-    },
-    {
-      'name': 'Mẫu Nam 3',
-      'url': 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=600&auto=format&fit=crop',
+      'url': 'assets/images/mau_nam_2.jpg',
       'gender': 'male'
     },
   ];
@@ -180,6 +175,246 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
         SnackBar(content: Text('Không thể chọn ảnh: $e')),
       );
     }
+  }
+
+  void _showModelUploadGuidelines() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: AppColors.background,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Handle bar
+            Center(
+              child: Container(
+                width: 42,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            
+            // Header
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Row(
+                  children: [
+                    Icon(Icons.info_outline_rounded, color: AppColors.primary, size: 22),
+                    SizedBox(width: 8),
+                    Text(
+                      'Lưu ý chọn ảnh người mẫu',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ],
+                ),
+                IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.close_rounded, color: AppColors.primary),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // Illustration comparison row (Nên vs Không nên)
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    height: 110,
+                    decoration: BoxDecoration(
+                      color: Colors.green.shade50.withValues(alpha: 0.6),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.green.shade200, width: 1),
+                    ),
+                    child: Stack(
+                      children: [
+                        Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.accessibility_new_rounded, size: 36, color: Colors.green.shade700),
+                              const SizedBox(height: 6),
+                              const Text(
+                                'Chuẩn chính diện',
+                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.green),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                'Đứng thẳng, rõ thân',
+                                style: TextStyle(fontSize: 9, color: Colors.green.shade800),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Positioned(
+                          top: 8,
+                          right: 8,
+                          child: Icon(Icons.check_circle_rounded, color: Colors.green, size: 18),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Container(
+                    height: 110,
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade50.withValues(alpha: 0.6),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.red.shade200, width: 1),
+                    ),
+                    child: Stack(
+                      children: [
+                        Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.person_off_rounded, size: 36, color: Colors.red.shade700),
+                              const SizedBox(height: 6),
+                              Text(
+                                'Không nên chọn',
+                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.red.shade700),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                'Nghiêng, bị che khuất',
+                                style: TextStyle(fontSize: 9, color: Colors.red.shade800),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Positioned(
+                          top: 8,
+                          right: 8,
+                          child: Icon(Icons.cancel_rounded, color: Colors.red, size: 18),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // Detailed text guidelines
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppColors.accent.withValues(alpha: 0.3)),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(Icons.check_circle_rounded, color: Colors.green, size: 16),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: RichText(
+                          text: const TextSpan(
+                            style: TextStyle(fontSize: 12, color: AppColors.primary, height: 1.4),
+                            children: [
+                              TextSpan(text: 'Nên: ', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
+                              TextSpan(text: 'Chọn ảnh chụp chính diện, đứng thẳng, rõ thân người. Mặc quần áo ôm sát sườn hoặc thon gọn (áo phông mỏng, quần/váy ôm).'),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 10),
+                    child: Divider(),
+                  ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(Icons.cancel_rounded, color: Colors.red, size: 16),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: RichText(
+                          text: const TextSpan(
+                            style: TextStyle(fontSize: 12, color: AppColors.primary, height: 1.4),
+                            children: [
+                              TextSpan(text: 'Tránh: ', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
+                              TextSpan(text: 'Ảnh đứng nghiêng/chụp xéo góc, tay khoanh trước ngực, tay che người hoặc tay đút túi. Không mặc quần áo quá phồng, quá rộng hoặc áo khoác phao dày.'),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Camera / Gallery Buttons
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      side: const BorderSide(color: AppColors.primaryLight, width: 1.5),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    ),
+                    onPressed: () {
+                      Navigator.pop(context);
+                      _pickModelImage(ImageSource.camera);
+                    },
+                    icon: const Icon(Icons.camera_alt_rounded, color: AppColors.primaryLight, size: 18),
+                    label: const Text(
+                      'Chụp ảnh mới',
+                      style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primaryLight, fontSize: 13),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      backgroundColor: AppColors.primary,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      elevation: 0,
+                    ),
+                    onPressed: () {
+                      Navigator.pop(context);
+                      _pickModelImage(ImageSource.gallery);
+                    },
+                    icon: const Icon(Icons.photo_library_rounded, color: Colors.white, size: 18),
+                    label: const Text(
+                      'Chọn từ thư viện',
+                      style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 13),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   // Timer helper
@@ -339,20 +574,11 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
     }
 
     final bool isMultiGarment = _selectedGarments.length > 1;
-    final int requiredCredits = isMultiGarment ? 2 : 1;
 
-    // Kiểm tra Credits trước khi thực hiện
+    // Kiểm tra Credits trước khi thực hiện (mỗi lần thử đồ AI chỉ tốn 1 lượt)
     final localStorage = GetIt.I<AuthLocalStorage>();
     final tryonCredits = localStorage.getTryOnCredits();
-    if (tryonCredits < requiredCredits) {
-      if (tryonCredits > 0 && isMultiGarment) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Bạn cần ít nhất 2 lượt thử đồ AI để phối bộ. Hãy nạp thêm hoặc xem quảng cáo nhé!'),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
+    if (tryonCredits < 1) {
       SubscriptionPage.showOutOfCreditsSheet(context, isBgRemoval: false);
       return;
     }
@@ -444,9 +670,8 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
         
         if (response.statusCode == 200 && response.data != null) {
           _predictionId = response.data['predictionId'] as String?;
-          // Trừ credits thử đồ AI dựa theo loại phối đồ (phối bộ trừ 2 lượt)
-          final creditsToSubtract = isMultiGarment ? 2 : 1;
-          await localStorage.updateCredits(tryonCredits: tryonCredits - creditsToSubtract);
+          // Trừ 1 credit thử đồ AI
+          await localStorage.updateCredits(tryonCredits: tryonCredits - 1);
         } else {
           throw Exception('Lỗi khởi tạo tiến trình thử đồ phối.');
         }
@@ -727,7 +952,9 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
             _sectionHeader('3. Cấu hình AI'),
             const SizedBox(height: 12),
             _buildTryOnConfig(),
-            const SizedBox(height: 32),
+            const SizedBox(height: 20),
+            _buildTryOnNotes(),
+            const SizedBox(height: 24),
   
             // ACTION BUTTON
             FadeInUp(
@@ -805,37 +1032,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
         children: [
           // ADD CUSTOM BUTTON
           GestureDetector(
-            onTap: () {
-              showModalBottomSheet(
-                context: context,
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                ),
-                builder: (context) => SafeArea(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      ListTile(
-                        leading: const Icon(Icons.camera_alt_rounded, color: AppColors.primary),
-                        title: const Text('Chụp ảnh mới'),
-                        onTap: () {
-                          Navigator.pop(context);
-                          _pickModelImage(ImageSource.camera);
-                        },
-                      ),
-                      ListTile(
-                        leading: const Icon(Icons.photo_library_rounded, color: AppColors.primary),
-                        title: const Text('Chọn từ thư viện'),
-                        onTap: () {
-                          Navigator.pop(context);
-                          _pickModelImage(ImageSource.gallery);
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
+            onTap: _showModelUploadGuidelines,
             child: Container(
               width: 88,
               margin: const EdgeInsets.only(right: 12),
@@ -897,24 +1094,30 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      Image.network(
-                        model['url']!,
-                        fit: BoxFit.cover,
-                        alignment: Alignment.topCenter,
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return Container(
-                            color: Colors.grey.shade100,
-                            child: const Center(
-                              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+                      model['url']!.startsWith('assets/')
+                          ? Image.asset(
+                              model['url']!,
+                              fit: BoxFit.cover,
+                              alignment: Alignment.topCenter,
+                            )
+                          : Image.network(
+                              model['url']!,
+                              fit: BoxFit.cover,
+                              alignment: Alignment.topCenter,
+                              loadingBuilder: (context, child, loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return Container(
+                                  color: Colors.grey.shade100,
+                                  child: const Center(
+                                    child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+                                  ),
+                                );
+                              },
+                              errorBuilder: (context, error, stackTrace) => Container(
+                                color: Colors.grey.shade100,
+                                child: const Center(child: Icon(Icons.person, color: Colors.grey, size: 36)),
+                              ),
                             ),
-                          );
-                        },
-                        errorBuilder: (context, error, stackTrace) => Container(
-                          color: Colors.grey.shade100,
-                          child: const Center(child: Icon(Icons.person, color: Colors.grey, size: 36)),
-                        ),
-                      ),
                       Positioned(
                         bottom: 0,
                         left: 0,
@@ -1550,6 +1753,75 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
     );
   }
 
+  Widget _buildTryOnNotes() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.secondary.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.accent.withValues(alpha: 0.5)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.tips_and_updates_rounded,
+                color: AppColors.primaryLight,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              const Text(
+                'Lưu ý để phối đồ AI đẹp nhất:',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.primary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          _buildNoteItem(
+            Icons.person_pin_rounded,
+            'Ảnh người mẫu: Chụp thẳng, rõ nét, đủ sáng, tư thế đứng thẳng tự nhiên (tay buông thõng hai bên, không che thân). Tránh mặc đồ quá rộng/phồng.',
+          ),
+          const SizedBox(height: 8),
+          _buildNoteItem(
+            Icons.checkroom_rounded,
+            'Ảnh trang phục: Chọn ảnh rõ nét, chụp phẳng (Flat Lay) hoặc ảnh sản phẩm chụp trên nền trơn/trắng.',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNoteItem(IconData icon, String text) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(
+          icon,
+          size: 16,
+          color: AppColors.primaryLight.withValues(alpha: 0.8),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            style: const TextStyle(
+              fontSize: 12,
+              color: AppColors.primary,
+              height: 1.4,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   // ================= STATE: SCANNING ANIMATION =================
 
   Widget _buildScanningState() {
@@ -1590,7 +1862,9 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                           if (_selectedModelFile != null)
                             Image.file(_selectedModelFile!, fit: BoxFit.cover)
                           else if (_selectedModelUrl != null)
-                            Image.network(_selectedModelUrl!, fit: BoxFit.cover),
+                            _selectedModelUrl!.startsWith('assets/')
+                                ? Image.asset(_selectedModelUrl!, fit: BoxFit.cover)
+                                : Image.network(_selectedModelUrl!, fit: BoxFit.cover),
                           
                           // Semi-transparent overlay
                           Container(color: Colors.black26),

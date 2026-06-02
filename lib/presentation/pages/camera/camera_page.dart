@@ -97,6 +97,220 @@ class _CameraPageState extends State<CameraPage> {
     return Icons.flash_off;
   }
 
+  void _showBgRemovalGuidelines() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: AppColors.background,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Handle bar
+            Center(
+              child: Container(
+                width: 42,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            
+            // Header
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Row(
+                  children: [
+                    Icon(Icons.info_outline_rounded, color: AppColors.primary, size: 22),
+                    SizedBox(width: 8),
+                    Text(
+                      'Lưu ý chụp ảnh tách nền',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ],
+                ),
+                IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.close_rounded, color: AppColors.primary),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // Illustration comparison row (Nên vs Không nên)
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    height: 110,
+                    decoration: BoxDecoration(
+                      color: Colors.green.shade50.withValues(alpha: 0.6),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.green.shade200, width: 1),
+                    ),
+                    child: Stack(
+                      children: [
+                        Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.checkroom_rounded, size: 36, color: Colors.green.shade700),
+                              const SizedBox(height: 6),
+                              const Text(
+                                'Ảnh phẳng / Treo',
+                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.green),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                'Nền trơn, rõ nét',
+                                style: TextStyle(fontSize: 9, color: Colors.green.shade800),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Positioned(
+                          top: 8,
+                          right: 8,
+                          child: Icon(Icons.check_circle_rounded, color: Colors.green, size: 18),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Container(
+                    height: 110,
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade50.withValues(alpha: 0.6),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.red.shade200, width: 1),
+                    ),
+                    child: Stack(
+                      children: [
+                        Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.photo_filter_rounded, size: 36, color: Colors.red.shade700),
+                              const SizedBox(height: 6),
+                              Text(
+                                'Không nên chọn',
+                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.red.shade700),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                'Nền rối, nhiều đồ vật',
+                                style: TextStyle(fontSize: 9, color: Colors.red.shade800),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Positioned(
+                          top: 8,
+                          right: 8,
+                          child: Icon(Icons.cancel_rounded, color: Colors.red, size: 18),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // Detailed text guidelines
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppColors.accent.withValues(alpha: 0.3)),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(Icons.check_circle_rounded, color: Colors.green, size: 16),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: RichText(
+                          text: const TextSpan(
+                            style: TextStyle(fontSize: 12, color: AppColors.primary, height: 1.4),
+                            children: [
+                              TextSpan(text: 'Nên: ', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
+                              TextSpan(text: 'Trải phẳng quần áo trên sàn đơn sắc hoặc treo trên móc trước tường trơn. Chụp thẳng từ trên xuống hoặc chính diện, đủ ánh sáng.'),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 10),
+                    child: Divider(),
+                  ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(Icons.cancel_rounded, color: Colors.red, size: 16),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: RichText(
+                          text: const TextSpan(
+                            style: TextStyle(fontSize: 12, color: AppColors.primary, height: 1.4),
+                            children: [
+                              TextSpan(text: 'Tránh: ', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
+                              TextSpan(text: 'Chụp quần áo bị nhăn nheo, gấp nếp. Tránh hậu cảnh có quá nhiều đồ đạc xung quanh hoặc có màu nền trùng với màu quần áo.'),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Got it button
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  elevation: 0,
+                ),
+                onPressed: () => Navigator.pop(context),
+                child: const Text(
+                  'Đã hiểu',
+                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 15),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _cameraController?.dispose();
@@ -149,6 +363,28 @@ class _CameraPageState extends State<CameraPage> {
                     ),
                   ),
                   const SizedBox(height: 20),
+                  // Lưu ý nhỏ ở dưới ảnh preview
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: AppColors.secondary.withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppColors.accent.withValues(alpha: 0.3)),
+                    ),
+                    child: const Row(
+                      children: [
+                        Icon(Icons.lightbulb_outline_rounded, color: AppColors.primaryLight, size: 18),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Mẹo: Ảnh quần áo phẳng phiu, nền đơn sắc sẽ tách nền sạch đẹp nhất.',
+                            style: TextStyle(fontSize: 11, color: AppColors.primary, height: 1.3),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                   TextFormField(
                     initialValue: name,
                     decoration: const InputDecoration(
@@ -348,9 +584,18 @@ class _CameraPageState extends State<CameraPage> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      IconButton(
-                        icon: Icon(_getFlashIcon(), color: Colors.white),
-                        onPressed: _toggleFlash, // Chuyển đổi Flash
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.help_outline_rounded, color: Colors.white),
+                            onPressed: _showBgRemovalGuidelines,
+                          ),
+                          IconButton(
+                            icon: Icon(_getFlashIcon(), color: Colors.white),
+                            onPressed: _toggleFlash, // Chuyển đổi Flash
+                          ),
+                        ],
                       ),
                     ],
                   ),
