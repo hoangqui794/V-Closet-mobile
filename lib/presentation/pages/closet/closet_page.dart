@@ -10,11 +10,14 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../data/datasources/bg_removal_service.dart';
 import '../../../../data/datasources/wardrobe_api_service.dart';
 import '../../../../data/datasources/outfit_api_service.dart';
+import '../../../../data/datasources/auth_local_storage.dart';
+import '../profile/subscription_page.dart';
 import '../../../../domain/entities/clothing_item.dart';
 import 'canvas_outfit_page.dart';
 
 class ClosetPage extends StatefulWidget {
-  const ClosetPage({super.key});
+  final VoidCallback? onMenuPressed;
+  const ClosetPage({super.key, this.onMenuPressed});
 
   @override
   State<ClosetPage> createState() => _ClosetPageState();
@@ -153,26 +156,43 @@ class _ClosetPageState extends State<ClosetPage>
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
               child: Row(
                 children: [
-                  const Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Tủ đồ của tôi',
-                          style: TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.primary,
-                          ),
-                        ),
-                        SizedBox(height: 2),
-                        Text(
-                          'Kho lưu trữ thời trang hằng ngày',
-                          style: TextStyle(color: Color(0x994A3728)),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(14),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withValues(alpha: 0.06),
+                          blurRadius: 14,
+                          offset: const Offset(0, 6),
                         ),
                       ],
                     ),
+                    child: IconButton(
+                      onPressed: () {
+                        final scaffold = Scaffold.maybeOf(context);
+                        if (scaffold != null && scaffold.hasDrawer) {
+                          scaffold.openDrawer();
+                        } else {
+                          widget.onMenuPressed?.call();
+                        }
+                      },
+                      icon: const Icon(
+                        Icons.menu_rounded,
+                        color: AppColors.primary,
+                      ),
+                    ),
                   ),
+                  const SizedBox(width: 14),
+                  const Text(
+                    'Tủ đồ của tôi',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                  const Spacer(),
                   // Add button only shows on wardrobe tab
                   ListenableBuilder(
                     listenable: _tabController,
@@ -227,74 +247,6 @@ class _ClosetPageState extends State<ClosetPage>
                     },
                   ),
                 ],
-              ),
-            ),
-
-            // ── Stats banner ─────────────────────────────────────────
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-              child: FadeInDown(
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [AppColors.primary, AppColors.primaryLight],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: ListenableBuilder(
-                          listenable: _tabController,
-                          builder: (context, _) {
-                            final isOutfitTab = _tabController.index == 1;
-                            return Row(
-                              children: [
-                                Text(
-                                  isOutfitTab ? 'Tổng bộ phối đồ:' : 'Tổng số món đồ:',
-                                  style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w600),
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  isOutfitTab
-                                      ? (_isLoadingOutfits ? '--' : '${_outfits.length}')
-                                      : (_isLoading ? '--' : '${_items.length}'),
-                                  style: const TextStyle(
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.w900,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ],
-                            );
-                          },
-                        ),
-                      ),
-                      Container(
-                        width: 38,
-                        height: 38,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.18),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: ListenableBuilder(
-                          listenable: _tabController,
-                          builder: (context, _) => Icon(
-                            _tabController.index == 1
-                                ? Icons.style_rounded
-                                : Icons.checkroom_rounded,
-                            color: Colors.white,
-                            size: 20,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
               ),
             ),
 
@@ -465,15 +417,7 @@ class _ClosetPageState extends State<ClosetPage>
         outfit['canvasSnapshotUrl']?.toString() ??
         outfit['snapshotUrl']?.toString();
     final bool isPublic = outfit['IsPublic'] == true || outfit['isPublic'] == true;
-    final String createdAt = outfit['CreatedAt']?.toString() ??
-        outfit['createdAt']?.toString() ?? '';
-    String dateLabel = '';
-    if (createdAt.isNotEmpty) {
-      try {
-        final dt = DateTime.parse(createdAt).toLocal();
-        dateLabel = '${dt.day}/${dt.month}/${dt.year}';
-      } catch (_) {}
-    }
+
 
     return Container(
       decoration: BoxDecoration(
@@ -583,16 +527,7 @@ class _ClosetPageState extends State<ClosetPage>
                     fontSize: 13,
                   ),
                 ),
-                if (dateLabel.isNotEmpty) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    dateLabel,
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: AppColors.primary.withValues(alpha: 0.5),
-                    ),
-                  ),
-                ],
+
               ],
             ),
           ),
@@ -1503,6 +1438,16 @@ class _ClosetPageState extends State<ClosetPage>
       final details = await _showDetailsDialog(File(image.path));
       if (details == null) return;
 
+      // Kiểm tra Credits trước khi thực hiện
+      final localStorage = GetIt.I<AuthLocalStorage>();
+      final bgCredits = localStorage.getBgRemovalCredits();
+      if (bgCredits <= 0) {
+        if (mounted) {
+          SubscriptionPage.showOutOfCreditsSheet(context, isBgRemoval: true);
+        }
+        return;
+      }
+
       if (!mounted) return;
       bool isDialogOpen = true;
       showDialog(
@@ -1527,6 +1472,9 @@ class _ClosetPageState extends State<ClosetPage>
 
       final bgRemovalService = GetIt.I<BgRemovalService>();
       final Uint8List? resultBytes = await bgRemovalService.removeBackground(File(image.path));
+
+      // Trừ 1 credit xóa nền
+      await localStorage.updateCredits(bgCredits: bgCredits - 1);
 
       File fileToUpload = File(image.path);
       if (resultBytes != null) {
@@ -1709,18 +1657,7 @@ class _ClosetPageState extends State<ClosetPage>
                     color: AppColors.primary,
                   ),
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  item.brand?.isNotEmpty == true
-                      ? item.brand!
-                      : 'Chưa có thương hiệu',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: AppColors.primary.withValues(alpha: 0.55),
-                  ),
-                ),
+
               ],
             ),
           ),

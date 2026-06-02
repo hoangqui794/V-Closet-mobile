@@ -6,7 +6,9 @@ import 'package:get_it/get_it.dart';
 import 'package:camera/camera.dart';
 import '../../../data/datasources/bg_removal_service.dart';
 import '../../../data/datasources/wardrobe_api_service.dart';
+import '../../../data/datasources/auth_local_storage.dart';
 import '../../../core/theme/app_colors.dart';
+import '../profile/subscription_page.dart';
 
 class CameraPage extends StatefulWidget {
   final VoidCallback? onClose;
@@ -219,11 +221,24 @@ class _CameraPageState extends State<CameraPage> {
       final details = await _showDetailsDialog(File(image.path));
       if (details == null) return; // Người dùng bấm hủy
 
+      // Kiểm tra Credits trước khi thực hiện
+      final localStorage = GetIt.I<AuthLocalStorage>();
+      final bgCredits = localStorage.getBgRemovalCredits();
+      if (bgCredits <= 0) {
+        if (mounted) {
+          SubscriptionPage.showOutOfCreditsSheet(context, isBgRemoval: true);
+        }
+        return;
+      }
+
       setState(() => _isLoading = true);
 
       // 1. GỌI API TÁCH NỀN TRƯỚC
       final bgRemovalService = GetIt.I<BgRemovalService>();
       final Uint8List? resultBytes = await bgRemovalService.removeBackground(File(image.path));
+      
+      // Trừ 1 credit xóa nền
+      await localStorage.updateCredits(bgCredits: bgCredits - 1);
       
       File fileToUpload = File(image.path);
       

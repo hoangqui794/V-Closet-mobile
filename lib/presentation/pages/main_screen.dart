@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import '../../core/theme/app_colors.dart';
+import '../../data/datasources/auth_api_service.dart';
+import '../../data/datasources/auth_local_storage.dart';
+import 'auth/login_page.dart';
 import 'camera/camera_page.dart';
 import 'closet/closet_page.dart';
 import 'home/home_page.dart';
 import 'outfit/outfit_page.dart';
 import 'profile/profile_page.dart';
+import 'profile/subscription_page.dart';
+import 'store/store_page.dart';
+import '../../data/datasources/subscription_api_service.dart';
+import '../../data/datasources/signalr_service.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -14,7 +22,27 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final _localStorage = GetIt.I<AuthLocalStorage>();
   int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _syncSubscription();
+    SignalRService().initSignalR();
+  }
+
+  Future<void> _syncSubscription() async {
+    try {
+      await GetIt.I<SubscriptionApiService>().syncSubscriptionStatus();
+      if (mounted) {
+        setState(() {});
+      }
+    } catch (e) {
+      debugPrint('Lỗi đồng bộ gói dịch vụ tại MainScreen: $e');
+    }
+  }
 
   // Nav items: index 2 là nút camera đặc biệt ở giữa
   static const List<(IconData, String)> _navItems = [
@@ -22,15 +50,18 @@ class _MainScreenState extends State<MainScreen> {
     (Icons.checkroom_rounded, 'Tủ đồ'),
     (Icons.camera_alt_rounded, 'Camera'),
     (Icons.auto_awesome_rounded, 'Studio'),
-    (Icons.person_rounded, 'Hồ sơ'),
+    (Icons.shopping_bag_rounded, 'Cửa hàng'),
   ];
 
   late final List<Widget> _pages = [
-    const HomePage(),
-    const ClosetPage(),
+    HomePage(
+      onMenuPressed: _openDrawer,
+      onNavigateTo: (index) => setState(() => _currentIndex = index),
+    ),
+    ClosetPage(onMenuPressed: _openDrawer),
     CameraPage(onClose: () => _onTapNav(1)),
-    const OutfitPage(),
-    const ProfilePage(),
+    OutfitPage(onMenuPressed: _openDrawer),
+    StorePage(onMenuPressed: _openDrawer),
   ];
 
   void _onTapNav(int index) {
@@ -38,12 +69,172 @@ class _MainScreenState extends State<MainScreen> {
     setState(() => _currentIndex = index);
   }
 
+  void _openDrawer() {
+    debugPrint('DEBUG: _openDrawer triggered. scaffoldKey.currentState = ${_scaffoldKey.currentState}');
+    _scaffoldKey.currentState?.openDrawer();
+  }
+
   @override
   Widget build(BuildContext context) {
     final hideBottomNav = _currentIndex == 2;
 
     return Scaffold(
+      key: _scaffoldKey,
       extendBody: true,
+      drawer: Drawer(
+        backgroundColor: AppColors.background,
+        child: Column(
+          children: [
+            // Drawer Header
+            UserAccountsDrawerHeader(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [AppColors.primary, AppColors.primaryLight],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+              currentAccountPicture: CircleAvatar(
+                backgroundColor: AppColors.accent,
+                backgroundImage: _localStorage.getUserAvatar() != null && _localStorage.getUserAvatar()!.startsWith('http')
+                    ? NetworkImage(_localStorage.getUserAvatar()!) as ImageProvider
+                    : const AssetImage('assets/images/avatar1.png'),
+              ),
+              accountName: Row(
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  Expanded(
+                    child: Text(
+                      _localStorage.getUserName() ?? 'V-Closet User',
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w900,
+                        fontSize: 18,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  _buildSubscriptionBadge(),
+                  const SizedBox(width: 16),
+                ],
+              ),
+              accountEmail: Text(
+                _localStorage.getUserEmail() ?? 'Tủ đồ ảo thông minh AI',
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            // Menu Items
+            ListTile(
+              leading: const Icon(Icons.home_rounded, color: AppColors.primary),
+              title: const Text('Trang chủ', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
+              onTap: () {
+                Navigator.pop(context);
+                setState(() => _currentIndex = 0);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.checkroom_rounded, color: AppColors.primary),
+              title: const Text('Tủ đồ cá nhân', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
+              onTap: () {
+                Navigator.pop(context);
+                setState(() => _currentIndex = 1);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.auto_awesome_rounded, color: AppColors.primary),
+              title: const Text('Studio Phối Đồ AI', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
+              onTap: () {
+                Navigator.pop(context);
+                setState(() => _currentIndex = 3);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.shopping_bag_rounded, color: AppColors.primary),
+              title: const Text('Cửa hàng', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
+              onTap: () {
+                Navigator.pop(context);
+                setState(() => _currentIndex = 4);
+              },
+            ),
+            // Gói Premium — đặt nổi bật để dễ nhìn thấy
+            ListTile(
+              leading: const Icon(Icons.workspace_premium_rounded, color: Color(0xFFD4AF37)),
+              title: const Text('Gói Premium & Nạp Credits', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF996515))),
+              tileColor: const Color(0xFFFCF8F2),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SubscriptionPage()),
+                ).then((_) => setState(() {}));
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.person_rounded, color: AppColors.primary),
+              title: const Text('Hồ sơ cá nhân', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ProfilePage()),
+                );
+              },
+            ),
+            const Spacer(),
+            const Divider(color: AppColors.accent, thickness: 1),
+            ListTile(
+              leading: const Icon(Icons.info_outline_rounded, color: AppColors.primary),
+              title: const Text('Giới thiệu V-Closet', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
+              onTap: () {
+                Navigator.pop(context);
+                showAboutDialog(
+                  context: context,
+                  applicationName: 'V-Closet',
+                  applicationVersion: '1.0.0',
+                  applicationIcon: const Icon(Icons.checkroom_rounded, color: AppColors.primary, size: 40),
+                  children: [
+                    const Text('V-Closet là ứng dụng quản lý tủ đồ thông minh tích hợp công nghệ thử đồ ảo AI vượt trội.'),
+                  ],
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.logout_rounded, color: AppColors.error),
+              title: const Text('Đăng xuất', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.error)),
+              onTap: () async {
+                Navigator.pop(context); // Đóng drawer
+                
+                // Hiển thị loading dialog
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (context) => const Center(
+                    child: CircularProgressIndicator(color: AppColors.primary),
+                  ),
+                );
+                
+                await SignalRService().disconnect();
+                await GetIt.I<AuthApiService>().logout();
+                
+                if (context.mounted) {
+                  Navigator.of(context).pop(); // Đóng loading dialog
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (_) => const LoginPage()),
+                    (route) => false,
+                  );
+                }
+              },
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 300),
         switchInCurve: Curves.easeOutCubic,
@@ -218,6 +409,44 @@ class _MainScreenState extends State<MainScreen> {
             size: 26,
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSubscriptionBadge() {
+    final isPremium = _localStorage.getHasActivePremium();
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: isPremium
+            ? const Color(0xFFD4AF37)
+            : Colors.white.withOpacity(0.18),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isPremium ? const Color(0xFFFFD700) : Colors.white24,
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            isPremium ? Icons.stars_rounded : Icons.account_circle_outlined,
+            color: isPremium ? Colors.white : Colors.white70,
+            size: 12,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            isPremium ? 'PREMIUM' : 'FREE',
+            style: TextStyle(
+              color: isPremium ? Colors.white : Colors.white70,
+              fontSize: 10,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ],
       ),
     );
   }

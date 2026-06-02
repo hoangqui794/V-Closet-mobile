@@ -17,7 +17,7 @@ class TryOnApiService {
   }) async {
     try {
       final response = await _apiService.post(
-        '/TryOn/run',
+        '/api/tryon/run',
         data: {
           'modelImageUrl': modelUrl,
           'garmentImageUrl': garmentUrl,
@@ -49,7 +49,7 @@ class TryOnApiService {
   }) async {
     try {
       final response = await _apiService.post(
-        '/TryOn/run-wardrobe',
+        '/api/tryon/run-wardrobe',
         data: {
           'wardrobeItemId': wardrobeItemId,
           'modelImageUrl': modelUrl,
@@ -75,7 +75,7 @@ class TryOnApiService {
   /// Trả về map chứa: {status, outputUrl, error}
   Future<Map<String, dynamic>?> checkStatus(String predictionId) async {
     try {
-      final response = await _apiService.get('/TryOn/status/$predictionId');
+      final response = await _apiService.get('/api/tryon/status/$predictionId');
       if (response.statusCode == 200 && response.data != null) {
         return {
           'status': response.data['status'] as String,

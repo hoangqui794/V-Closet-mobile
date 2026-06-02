@@ -24,7 +24,7 @@ class BgRemovalService {
       // Backend route is /api/Wardrobe/remove-bg
       // ApiService baseUrl should already include /api
       Response response = await _apiService.post(
-        '/Wardrobe/remove-bg',
+        '/api/Wardrobe/remove-bg',
         data: formData,
         options: Options(
           responseType: ResponseType.bytes, // Get raw bytes for the image
