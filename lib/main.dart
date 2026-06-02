@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get_it/get_it.dart';
 import 'core/theme/app_theme.dart';
+import 'core/app_routes.dart';
 import 'injection_container.dart' as di;
+import 'data/datasources/auth_local_storage.dart';
+import 'data/datasources/ad_service.dart';
 import 'presentation/pages/auth/login_page.dart';
+import 'presentation/pages/auth/onboarding_survey_page.dart';
+import 'presentation/pages/main_screen.dart';
+import 'presentation/pages/profile/change_password_page.dart';
 
 import 'dart:io';
 
@@ -20,20 +27,70 @@ void main() async {
   HttpOverrides.global = MyHttpOverrides();
   await di.init();
 
-  runApp(const ProviderScope(child: VClosetApp()));
+  // Khởi tạo AdMob và tải trước rewarded ad
+  await AdService.initialize();
+  AdService().loadRewardedAd(); // load trước, không await để không block app
+
+  final hasSession = GetIt.I<AuthLocalStorage>().hasSession();
+  final isOnboardingCompleted = GetIt.I<AuthLocalStorage>().isOnboardingCompleted();
+  final userRole = GetIt.I<AuthLocalStorage>().getUserRole() ?? 'Customer';
+  final isPasswordSet = GetIt.I<AuthLocalStorage>().isPasswordSet();
+
+  debugPrint('=== DEBUG APP STATE AT START ===');
+  debugPrint('hasSession: $hasSession');
+  debugPrint('isOnboardingCompleted (local): $isOnboardingCompleted');
+  debugPrint('userRole: $userRole');
+  debugPrint('isPasswordSet: $isPasswordSet');
+  debugPrint('================================');
+
+  runApp(ProviderScope(
+    child: VClosetApp(
+      hasSession: hasSession,
+      isOnboardingCompleted: userRole.toLowerCase() != 'customer' || isOnboardingCompleted,
+      isPasswordSet: isPasswordSet,
+    ),
+  ));
 }
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 class VClosetApp extends StatelessWidget {
-  const VClosetApp({super.key});
+  final bool hasSession;
+  final bool isOnboardingCompleted;
+  final bool isPasswordSet;
+  const VClosetApp({
+    super.key,
+    required this.hasSession,
+    required this.isOnboardingCompleted,
+    required this.isPasswordSet,
+  });
 
   @override
   Widget build(BuildContext context) {
+    Widget initialScreen;
+    if (!hasSession) {
+      initialScreen = const LoginPage();
+    } else if (!isPasswordSet) {
+      initialScreen = const ChangePasswordPage();
+    } else if (isOnboardingCompleted) {
+      initialScreen = const MainScreen();
+    } else {
+      initialScreen = const OnboardingSurveyPage();
+    }
+
     return MaterialApp(
       title: 'V-Closet Mobile',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       themeMode: ThemeMode.light,
-      home: const LoginPage(),
+      navigatorKey: navigatorKey,
+      // Named routes — mọi trang navigate qua tên, không cần import nhau
+      routes: {
+        AppRoutes.login:      (_) => const LoginPage(),
+        AppRoutes.onboarding: (_) => const OnboardingSurveyPage(),
+        AppRoutes.main:       (_) => const MainScreen(),
+      },
+      home: initialScreen,
     );
   }
 }

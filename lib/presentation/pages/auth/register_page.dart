@@ -1,7 +1,9 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import '../../../core/theme/app_colors.dart';
-import '../main_screen.dart';
+import '../../../data/datasources/auth_api_service.dart';
+import 'verify_otp_page.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -15,6 +17,9 @@ class _RegisterPageState extends State<RegisterPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmController = TextEditingController();
+  final _authService = GetIt.I<AuthApiService>();
+
+  bool _isLoading = false;
   bool _showPassword = false;
   bool _showConfirm = false;
 
@@ -27,63 +32,134 @@ class _RegisterPageState extends State<RegisterPage> {
     super.dispose();
   }
 
+  Future<void> _register() async {
+    final name = _nameController.text.trim();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+    final confirm = _confirmController.text.trim();
+
+    if (name.isEmpty) {
+      _showSnackbar('Vui lòng nhập Họ và tên.');
+      return;
+    }
+    if (email.isEmpty || !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
+      _showSnackbar('Vui lòng nhập định dạng Email hợp lệ.');
+      return;
+    }
+    if (password.length < 6) {
+      _showSnackbar('Mật khẩu phải có tối thiểu 6 ký tự.');
+      return;
+    }
+    if (password != confirm) {
+      _showSnackbar('Mật khẩu và Xác nhận mật khẩu không khớp.');
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final msg = await _authService.register(
+        email: email,
+        password: password,
+        displayName: name,
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(msg.replaceAll('Exception: ', ''))),
+        );
+        // Đi tới trang xác thực OTP và truyền email đi cùng
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => VerifyOtpPage(email: email),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        _showSnackbar(e.toString().replaceAll('Exception: ', ''), isError: true);
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  void _showSnackbar(String message, {bool isError = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? AppColors.error : null,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final bool isSmallScreen = screenSize.height < 740 || screenSize.width < 360;
+
+    final double logoSize = isSmallScreen ? 70.0 : 90.0;
+    final double spacingTiny = isSmallScreen ? 4.0 : 8.0;
+    final double spacingSmall = isSmallScreen ? 8.0 : 12.0;
+    final double spacingMedium = isSmallScreen ? 12.0 : 16.0;
+    final double titleFontSize = isSmallScreen ? 20.0 : 24.0;
+    final double cardPadding = isSmallScreen ? 14.0 : 20.0;
+
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(title: const Text('Đăng ký')),
+      appBar: AppBar(
+        title: const Text('Đăng ký'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        foregroundColor: AppColors.primary,
+        toolbarHeight: isSmallScreen ? 48 : 56,
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+          padding: EdgeInsets.symmetric(
+            horizontal: isSmallScreen ? 16.0 : 24.0,
+            vertical: isSmallScreen ? 8.0 : 24.0,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               FadeInDown(
-                child: Container(
-                  height: 120,
-                  width: 120,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFFD4A373).withValues(alpha: 0.22),
-                        blurRadius: 24,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-                  ),
-                  child: Center(
-                    child: Image.asset(
-                      'assets/images/logo.png',
-                      height: 80,
-                      fit: BoxFit.contain,
-                    ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Image.asset(
+                    'assets/images/logo.png',
+                    height: logoSize,
+                    width: logoSize,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Icon(Icons.checkroom_rounded, size: logoSize, color: AppColors.primary);
+                    },
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
-              const Text(
+              SizedBox(height: spacingSmall),
+              Text(
                 'Tạo tài khoản mới',
                 style: TextStyle(
-                  fontSize: 26,
+                  fontSize: titleFontSize,
                   fontWeight: FontWeight.w800,
                   color: AppColors.primary,
                 ),
               ),
-              const SizedBox(height: 6),
+              SizedBox(height: spacingTiny / 2),
               Text(
                 'Tham gia V-Closet để quản lý tủ đồ thông minh hơn',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: AppColors.primary.withValues(alpha: 0.7),
-                  fontSize: 14,
+                  fontSize: isSmallScreen ? 13.0 : 14.0,
                 ),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: spacingMedium),
               FadeInUp(
                 child: Container(
-                  padding: const EdgeInsets.all(22),
+                  padding: EdgeInsets.all(cardPadding),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(24),
@@ -108,9 +184,12 @@ class _RegisterPageState extends State<RegisterPage> {
                             borderRadius: BorderRadius.circular(16),
                             borderSide: BorderSide.none,
                           ),
+                          contentPadding: isSmallScreen 
+                              ? const EdgeInsets.symmetric(horizontal: 16, vertical: 12)
+                              : const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: spacingTiny),
                       TextField(
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
@@ -123,9 +202,12 @@ class _RegisterPageState extends State<RegisterPage> {
                             borderRadius: BorderRadius.circular(16),
                             borderSide: BorderSide.none,
                           ),
+                          contentPadding: isSmallScreen 
+                              ? const EdgeInsets.symmetric(horizontal: 16, vertical: 12)
+                              : const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: spacingTiny),
                       TextField(
                         controller: _passwordController,
                         obscureText: !_showPassword,
@@ -148,9 +230,12 @@ class _RegisterPageState extends State<RegisterPage> {
                             borderRadius: BorderRadius.circular(16),
                             borderSide: BorderSide.none,
                           ),
+                          contentPadding: isSmallScreen 
+                              ? const EdgeInsets.symmetric(horizontal: 16, vertical: 12)
+                              : const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: spacingTiny),
                       TextField(
                         controller: _confirmController,
                         obscureText: !_showConfirm,
@@ -173,20 +258,26 @@ class _RegisterPageState extends State<RegisterPage> {
                             borderRadius: BorderRadius.circular(16),
                             borderSide: BorderSide.none,
                           ),
+                          contentPadding: isSmallScreen 
+                              ? const EdgeInsets.symmetric(horizontal: 16, vertical: 12)
+                              : const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                         ),
                       ),
-                      const SizedBox(height: 22),
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const MainScreen(),
-                            ),
-                          );
-                        },
-                        child: const Text('Tạo tài khoản'),
-                      ),
+                      SizedBox(height: spacingMedium),
+                      if (_isLoading)
+                        const Center(
+                          child: CircularProgressIndicator(color: AppColors.primary),
+                        )
+                      else
+                        ElevatedButton(
+                          onPressed: _register,
+                          style: ElevatedButton.styleFrom(
+                            padding: isSmallScreen 
+                                ? const EdgeInsets.symmetric(vertical: 12)
+                                : const EdgeInsets.symmetric(vertical: 16),
+                          ),
+                          child: Text('Tạo tài khoản', style: TextStyle(fontSize: isSmallScreen ? 15.0 : 16.0)),
+                        ),
                     ],
                   ),
                 ),

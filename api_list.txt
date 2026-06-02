@@ -1,0 +1,114 @@
+DANH SÁCH CÁC API ĐÃ ĐƯỢC TÍCH HỢP TRONG DỰ ÁN FRONTEND (FE)
+==========================================================
+Dự án FE Flutter sử dụng Dio Client (cấu hình trong lib/data/datasources/api_service.dart) với cơ chế tự động gửi Authorization Bearer Token và tự động làm mới Refresh Token (khi token hết hạn và nhận mã lỗi 401).
+
+Dưới đây là danh sách chi tiết các API được tích hợp chia theo từng nhóm Service:
+
+1. Dịch vụ Xác thực & Tài khoản (AuthApiService)
+   Đường dẫn file nguồn: lib/data/datasources/auth_api_service.dart
+   - POST /Auth/login
+     + Chức năng: Đăng nhập bằng tài khoản cục bộ (Email, Password)
+     + Tham số body: { 'email': email, 'password': password }
+   - POST /Auth/register
+     + Chức năng: Đăng ký tài khoản mới
+     + Tham số body: { 'email': email, 'password': password, 'displayName': displayName }
+   - POST /Auth/verify-otp
+     + Chức năng: Xác thực mã OTP sau đăng ký hoặc đăng nhập
+     + Tham số body: { 'email': email, 'otpCode': otpCode }
+   - POST /Auth/resend-otp
+     + Chức năng: Gửi lại mã OTP kích hoạt tài khoản
+     + Tham số body: { 'email': email }
+   - POST /Auth/forgot-password
+     + Chức năng: Yêu cầu mã OTP khôi phục mật khẩu khi quên
+     + Tham số body: { 'email': email }
+   - POST /Auth/reset-password
+     + Chức năng: Đặt lại mật khẩu mới bằng OTP xác minh
+     + Tham số body: { 'email': email, 'otpCode': otpCode, 'newPassword': newPassword }
+   - POST /Auth/google-login
+     + Chức năng: Đăng nhập thông qua tài khoản Google
+     + Tham số body: { 'idToken': idToken }
+   - POST /Auth/change-password
+     + Chức năng: Đổi mật khẩu (Yêu cầu Header Authorization)
+     + Tham số body: { 'oldPassword': oldPassword, 'newPassword': newPassword }
+   - POST /Auth/refresh-token
+     + Chức năng: Làm mới cặp Token (Access Token & Refresh Token)
+     + Tham số body: { 'accessToken': accessToken, 'refreshToken': refreshToken }
+   - POST /Auth/logout
+     + Chức năng: Đăng xuất hệ thống, thu hồi Refresh Token trên máy chủ
+     + Tham số body: { 'refreshToken': refreshToken }
+
+2. Dịch vụ Hồ sơ người dùng (UserApiService)
+   Đường dẫn file nguồn: lib/data/datasources/user_api_service.dart
+   - GET /users/me
+     + Chức năng: Lấy thông tin chi tiết hồ sơ cá nhân hiện tại
+     + Yêu cầu: Header Authorization
+   - PUT /users/me
+     + Chức năng: Cập nhật hồ sơ cá nhân hiện tại
+     + Yêu cầu: Header Authorization
+     + Tham số body: { 'heightCm', 'weightKg', 'dateOfBirth', 'phoneNumber', 'address', 'gender', 'country', 'displayName', 'lifestyle', 'eyeColor', 'hair' } (Các thuộc tính có thể truyền tùy chọn)
+   - POST /users/me/avatar
+     + Chức năng: Tải lên và cập nhật ảnh đại diện (avatar) dạng multipart/form-data
+     + Yêu cầu: Header Authorization
+     + Tham số body (FormData): { 'file': file_ảnh }
+   - DELETE /users/me
+     + Chức năng: Vô hiệu hóa tài khoản cá nhân hiện tại
+     + Yêu cầu: Header Authorization
+
+3. Dịch vụ Tủ đồ (WardrobeApiService)
+   Đường dẫn file nguồn: lib/data/datasources/wardrobe_api_service.dart
+   - GET /Wardrobe
+     + Chức năng: Lấy danh sách quần áo trong tủ đồ (có bộ lọc theo danh mục hoặc màu sắc)
+     + Yêu cầu: Header Authorization
+     + Tham số Query: ?category={category}&color={color} (Tùy chọn)
+   - GET /Wardrobe/{id}
+     + Chức năng: Lấy chi tiết thông tin của 1 món đồ cụ thể theo ID
+     + Yêu cầu: Header Authorization
+   - POST /Wardrobe/upload-and-create
+     + Chức năng: Tải lên hình ảnh và tự động phân loại, lưu món đồ mới vào tủ đồ
+     + Yêu cầu: Header Authorization
+     + Tham số body (FormData): { 'file': file_ảnh, 'category': category_id, 'name': name (tùy chọn), 'brand': brand (tùy chọn) }
+   - PUT /Wardrobe/{id}
+     + Chức năng: Cập nhật thông tin chi tiết của 1 món đồ
+     + Yêu cầu: Header Authorization
+     + Tham số body: Map các trường dữ liệu cần cập nhật
+   - DELETE /Wardrobe/{id}
+     + Chức năng: Xóa món đồ khỏi tủ đồ theo ID
+     + Yêu cầu: Header Authorization
+
+4. Dịch vụ Bộ trang phục (OutfitApiService)
+   Đường dẫn file nguồn: lib/data/datasources/outfit_api_service.dart
+   - GET /Outfits
+     + Chức năng: Lấy danh sách các bộ trang phục (outfits) đã lưu của người dùng
+     + Yêu cầu: Header Authorization
+   - POST /Outfits
+     + Chức năng: Lưu bộ trang phục tự thiết kế mới (gồm ảnh chụp collage và danh sách các món đồ cấu thành)
+     + Yêu cầu: Header Authorization
+     + Tham số body (FormData): { 'title': tiêu_đề, 'isPublic': public_hoặc_không, 'itemsJson': danh_sách_item_json, 'snapshot': file_ảnh_chụp_collage }
+   - PUT /Outfits/{id}/title
+     + Chức năng: Thay đổi tiêu đề/tên bộ trang phục
+     + Yêu cầu: Header Authorization
+     + Tham số body: { 'title': tiêu_đề_mới }
+   - DELETE /Outfits/{id}
+     + Chức năng: Xóa bộ trang phục theo ID
+     + Yêu cầu: Header Authorization
+
+5. Dịch vụ Thử đồ ảo (TryOnApiService)
+   Đường dẫn file nguồn: lib/data/datasources/tryon_api_service.dart
+   - POST /TryOn/run
+     + Chức năng: Chạy tiến trình thử đồ ảo bằng cách truyền trực tiếp URLs của ảnh người mẫu và ảnh quần áo
+     + Yêu cầu: Header Authorization
+     + Tham số body: { 'modelImageUrl': modelUrl, 'garmentImageUrl': garmentUrl, 'category': category (mặc định: auto), 'restoreBackground': restoreBackground }
+   - POST /TryOn/run-wardrobe
+     + Chức năng: Chạy tiến trình thử đồ ảo dựa trên món đồ cụ thể từ tủ đồ
+     + Yêu cầu: Header Authorization
+     + Tham số body: { 'wardrobeItemId': wardrobeItemId, 'modelImageUrl': modelUrl, 'category': category (mặc định: auto), 'restoreBackground': restoreBackground }
+   - GET /TryOn/status/{predictionId}
+     + Chức năng: Kiểm tra trạng thái của tiến trình thử đồ ảo (đang xử lý/thành công/lỗi) dựa trên ID tiến trình
+     + Yêu cầu: Header Authorization
+
+6. Dịch vụ Tách nền (BgRemovalService)
+   Đường dẫn file nguồn: lib/data/datasources/bg_removal_service.dart
+   - POST /Wardrobe/remove-bg
+     + Chức năng: Gọi API tách nền của hình ảnh quần áo trước khi thêm vào tủ đồ (nhận về dữ liệu raw bytes dạng ảnh PNG đã được tách nền)
+     + Yêu cầu: Header Authorization
+     + Tham số body (FormData): { 'file': file_ảnh }
