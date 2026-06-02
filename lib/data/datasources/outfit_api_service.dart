@@ -10,7 +10,7 @@ class OutfitApiService {
 
   Future<List<Map<String, dynamic>>> getUserOutfits() async {
     try {
-      final response = await _apiService.get('/Outfits');
+      final response = await _apiService.get('/api/outfits');
       final data = response.data;
       if (response.statusCode == 200 && data is List) {
         return data
@@ -41,7 +41,7 @@ class OutfitApiService {
         ),
       });
 
-      final response = await _apiService.post('/Outfits', data: formData);
+      final response = await _apiService.post('/api/outfits', data: formData);
       final data = response.data;
       if ((response.statusCode == 200 || response.statusCode == 201) && data is Map) {
         return Map<String, dynamic>.from(data);
@@ -59,7 +59,7 @@ class OutfitApiService {
 
   Future<void> deleteOutfit(String id) async {
     try {
-      await _apiService.delete('/Outfits/$id');
+      await _apiService.delete('/api/outfits/$id');
     } on DioException {
       rethrow;
     }
@@ -68,7 +68,7 @@ class OutfitApiService {
   Future<void> updateOutfitTitle(String id, String title) async {
     try {
       await _apiService.put(
-        '/Outfits/$id/title',
+        '/api/outfits/$id/title',
         data: {'title': title},
       );
     } on DioException {

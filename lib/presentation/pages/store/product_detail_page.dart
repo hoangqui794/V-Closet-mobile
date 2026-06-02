@@ -1,0 +1,1804 @@
+import 'dart:async';
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:animate_do/animate_do.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:get_it/get_it.dart';
+import 'package:dio/dio.dart' as dio_pkg;
+import 'package:image_gallery_saver_plus/image_gallery_saver_plus.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../data/datasources/affiliate_api_service.dart';
+import '../../../data/datasources/tryon_api_service.dart';
+import '../../../data/datasources/user_api_service.dart';
+import '../../../data/datasources/auth_local_storage.dart';
+import '../profile/subscription_page.dart';
+import 'dart:ui' as ui;
+import '../../../data/datasources/wardrobe_api_service.dart';
+import '../../../domain/entities/clothing_item.dart';
+
+class ProductDetailPage extends StatefulWidget {
+  final Map<String, dynamic> product;
+
+  const ProductDetailPage({super.key, required this.product});
+
+  @override
+  State<ProductDetailPage> createState() => _ProductDetailPageState();
+}
+
+class _ProductDetailPageState extends State<ProductDetailPage> {
+  final AffiliateApiService _affiliateApiService = GetIt.I<AffiliateApiService>();
+  String? _selectedSize;
+  bool _isOpening = false;
+
+  String _formatPrice(dynamic priceValue) {
+    if (priceValue == null) return '0đ';
+    if (priceValue is num) {
+      final str = priceValue.round().toString();
+      final buffer = StringBuffer();
+      int count = 0;
+      for (int i = str.length - 1; i >= 0; i--) {
+        if (count > 0 && count % 3 == 0) {
+          buffer.write('.');
+        }
+        buffer.write(str[i]);
+        count++;
+      }
+      return '${buffer.toString().split('').reversed.join('')}đ';
+    }
+    return '$priceValue';
+  }
+
+  String _getProductImage(Map<String, dynamic> product) {
+    return product['ImageUrl'] as String? ??
+        product['imageUrl'] as String? ??
+        product['image'] as String? ??
+        '';
+  }
+
+  String _getProductName(Map<String, dynamic> product) {
+    return product['Name'] as String? ??
+        product['name'] as String? ??
+        'Sản phẩm thời trang';
+  }
+
+  String _getProductCategory(Map<String, dynamic> product) {
+    final cat = product['Category'] as String? ??
+        product['category'] as String? ??
+        'Fashion';
+    if (cat.toLowerCase() == 'top' || cat.toLowerCase() == 'outerwear') return 'Áo';
+    if (cat.toLowerCase() == 'bottom') return 'Quần';
+    if (cat.toLowerCase() == 'dress') return 'Váy đầm';
+    if (cat.toLowerCase() == 'accessory' || cat.toLowerCase() == 'bag' || cat.toLowerCase() == 'shoes' || cat.toLowerCase() == 'other') return 'Phụ kiện';
+    return cat;
+  }
+
+  String _getProductDescription(Map<String, dynamic> product) {
+    return product['Description'] as String? ??
+        product['description'] as String? ??
+        'Sản phẩm chất lượng cao, thiết kế hiện đại và thời thượng. '
+        'Phù hợp với nhiều dịp khác nhau, từ công sở đến đi chơi. '
+        'Chất liệu thoáng mát, dễ chịu khi mặc. '
+        'Bảo quản bằng cách giặt tay hoặc giặt máy ở chế độ nhẹ.';
+  }
+
+  String _getProductId(Map<String, dynamic> product) {
+    return product['Id'] as String? ??
+        product['id'] as String? ??
+        '';
+  }
+
+  double _getProductRating(Map<String, dynamic> product) {
+    final rating = product['Rating'] ?? product['rating'];
+    if (rating is num) return rating.toDouble();
+    return 5.0;
+  }
+
+  String _getProductShopeeUrl(Map<String, dynamic> product) {
+    return product['AffiliateLink'] as String? ??
+        product['affiliateLink'] as String? ??
+        product['shopeeUrl'] as String? ??
+        'https://shopee.vn';
+  }
+
+  Future<void> _openShopee() async {
+    if (_isOpening) return;
+    setState(() => _isOpening = true);
+
+    String? targetUrl;
+    final productId = _getProductId(widget.product);
+
+    if (productId.isNotEmpty) {
+      try {
+        final result = await _affiliateApiService.recordClick(
+          productId: productId,
+          clickSource: 'Store_Detail',
+        );
+        if (result != null) {
+          targetUrl = result['TargetAffiliateLink'] as String? ??
+              result['targetAffiliateLink'] as String?;
+        }
+      } catch (e) {
+        debugPrint('Error recording click: $e');
+      }
+    }
+
+    targetUrl ??= _getProductShopeeUrl(widget.product);
+
+    final url = Uri.parse(targetUrl);
+    try {
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+      } else {
+        throw 'Could not launch $url';
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Không thể mở Shopee. Vui lòng thử lại! Lỗi: $e'),
+            backgroundColor: Colors.red.shade400,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            margin: const EdgeInsets.all(16),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isOpening = false);
+      }
+    }
+  }
+
+  void _openTryOnBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _ProductTryOnSheet(product: widget.product),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final sizes = List<String>.from(widget.product['sizes'] ?? widget.product['Sizes'] ?? []);
+    final imageUrl = _getProductImage(widget.product);
+
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: Stack(
+        children: [
+          // Ảnh sản phẩm full top
+          SizedBox(
+            height: MediaQuery.of(context).size.height * 0.48,
+            width: double.infinity,
+            child: (imageUrl.isNotEmpty && (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')))
+                ? Image.network(
+                    imageUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stack) => Container(
+                      color: const Color(0xFFF0F0F5),
+                      child: const Icon(Icons.image_not_supported_rounded, size: 80, color: Colors.grey),
+                    ),
+                  )
+                : Container(
+                    color: const Color(0xFFF0F0F5),
+                    child: const Icon(Icons.image_not_supported_rounded, size: 80, color: Colors.grey),
+                  ),
+          ),
+
+          // AppBar trong suốt
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _CircleButton(
+                      icon: Icons.arrow_back_ios_new_rounded,
+                      onTap: () => Navigator.pop(context),
+                    ),
+                    _CircleButton(
+                      icon: Icons.favorite_border_rounded,
+                      onTap: () {},
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // Bottom sheet chi tiết
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: FadeInUp(
+              duration: const Duration(milliseconds: 400),
+              child: Container(
+                height: MediaQuery.of(context).size.height * 0.58,
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+                ),
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.fromLTRB(24, 28, 24, 16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Tên + rating
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    _getProductName(widget.product),
+                                    style: const TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.w900,
+                                      color: AppColors.primary,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFFFF9E6),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.star_rounded, color: Colors.amber, size: 16),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        '${_getProductRating(widget.product)}',
+                                        style: const TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.primary,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 8),
+
+                            // Danh mục
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                              decoration: BoxDecoration(
+                                color: AppColors.primary.withValues(alpha: 0.08),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                _getProductCategory(widget.product),
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ),
+
+                            const SizedBox(height: 16),
+
+                            // Giá
+                            Text(
+                              _formatPrice(widget.product['Price'] ?? widget.product['price']),
+                              style: const TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.w900,
+                                color: AppColors.primaryLight,
+                              ),
+                            ),
+
+                            const SizedBox(height: 20),
+
+                            // Mô tả
+                            const Text(
+                              'Mô tả sản phẩm',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              _getProductDescription(widget.product),
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Colors.black54,
+                                height: 1.6,
+                              ),
+                            ),
+
+                            // Kích cỡ (chỉ hiện nếu có)
+                            if (sizes.isNotEmpty) ...[
+                              const SizedBox(height: 24),
+                              const Text(
+                                'Kích cỡ có sẵn',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w800,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              Wrap(
+                                spacing: 10,
+                                runSpacing: 10,
+                                children: sizes.map((size) {
+                                  final isSelected = _selectedSize == size;
+                                  return GestureDetector(
+                                    onTap: () => setState(() => _selectedSize = size),
+                                    child: AnimatedContainer(
+                                      duration: const Duration(milliseconds: 200),
+                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                      decoration: BoxDecoration(
+                                        color: isSelected ? AppColors.primary : const Color(0xFFF5F5F8),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Text(
+                                        size,
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w700,
+                                          color: isSelected ? Colors.white : AppColors.primary,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    // Hàng nút Mặc thử AI và Mua ngay cố định ở dưới (Sticky)
+                    Container(
+                      padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border(top: BorderSide(color: Colors.grey.withValues(alpha: 0.1), width: 1)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.03),
+                            blurRadius: 10,
+                            offset: const Offset(0, -4),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: SizedBox(
+                              height: 56,
+                              child: OutlinedButton.icon(
+                                onPressed: _openTryOnBottomSheet,
+                                icon: const Icon(Icons.face_retouching_natural_rounded, size: 22),
+                                label: const Text(
+                                  'Mặc thử AI',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: AppColors.primary,
+                                  side: const BorderSide(color: AppColors.primary, width: 1.5),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: SizedBox(
+                              height: 56,
+                              child: ElevatedButton(
+                                onPressed: _isOpening ? null : _openShopee,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFFEE4D2D), // màu cam Shopee
+                                  foregroundColor: Colors.white,
+                                  disabledBackgroundColor: const Color(0xFFEE4D2D).withValues(alpha: 0.6),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                                  elevation: 0,
+                                ),
+                                child: _isOpening
+                                    ? const SizedBox(
+                                        width: 24,
+                                        height: 24,
+                                        child: CircularProgressIndicator(
+                                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Image.network(
+                                            'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Shopee.svg/32px-Shopee.svg.png',
+                                            width: 22,
+                                            height: 22,
+                                            errorBuilder: (context, error, stack) =>
+                                                const Icon(Icons.shopping_bag_rounded, size: 22, color: Colors.white),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          const Text(
+                                            'Mua ngay',
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w800,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProductTryOnSheet extends StatefulWidget {
+  final Map<String, dynamic> product;
+
+  const _ProductTryOnSheet({required this.product});
+
+  @override
+  State<_ProductTryOnSheet> createState() => _ProductTryOnSheetState();
+}
+
+class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTickerProviderStateMixin {
+  final TryOnApiService _tryOnApiService = GetIt.I<TryOnApiService>();
+  final UserApiService _userApiService = GetIt.I<UserApiService>();
+  final AuthLocalStorage _localStorage = GetIt.I<AuthLocalStorage>();
+
+  final List<Map<String, String>> _sampleModels = [
+    {
+      'name': 'Mẫu Nữ 1',
+      'url': 'https://images.unsplash.com/photo-1617922001439-4a2e6562f328?q=80&w=600&auto=format&fit=crop',
+      'gender': 'female'
+    },
+    {
+      'name': 'Mẫu Nữ 2',
+      'url': 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?q=80&w=600&auto=format&fit=crop',
+      'gender': 'female'
+    },
+    {
+      'name': 'Mẫu Nam 1',
+      'url': 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=600&auto=format&fit=crop',
+      'gender': 'male'
+    },
+    {
+      'name': 'Mẫu Nam 2',
+      'url': 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=600&auto=format&fit=crop',
+      'gender': 'male'
+    },
+    {
+      'name': 'Mẫu Nữ 3',
+      'url': 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?q=80&w=600&auto=format&fit=crop',
+      'gender': 'female'
+    },
+    {
+      'name': 'Mẫu Nam 3',
+      'url': 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=600&auto=format&fit=crop',
+      'gender': 'male'
+    },
+  ];
+
+  late AnimationController _scanController;
+  late Animation<double> _scanAnimation;
+
+  bool _isLoadingProfile = true;
+  bool _isGenerating = false;
+  bool _isSavingImage = false;
+  
+  String? _selectedModelUrl;
+  String? _personalMannequinUrl;
+  File? _customModelFile;
+  List<ClothingItem> _wardrobeItems = [];
+  bool _isLoadingWardrobe = false;
+  ClothingItem? _selectedWardrobeItem;
+  String? _predictionId;
+  String? _resultUrl;
+  String? _errorMessage;
+  String _loadingMessage = 'Đang khởi tạo AI...';
+  bool _restoreBackground = true;
+
+  Timer? _timer;
+  int _elapsedSeconds = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedModelUrl = _sampleModels[0]['url'];
+    
+    _scanController = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    )..repeat(reverse: true);
+    
+    _scanAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _scanController, curve: Curves.easeInOut),
+    );
+
+    _loadUserProfile();
+    _loadWardrobe();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _scanController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadUserProfile() async {
+    try {
+      final profile = await _userApiService.getMyProfile();
+      final mannequinUrl = profile['mannequinImageUrl'] as String? ?? profile['MannequinImageUrl'] as String?;
+      if (mounted) {
+        setState(() {
+          _personalMannequinUrl = mannequinUrl;
+          if (mannequinUrl != null && mannequinUrl.isNotEmpty) {
+            _selectedModelUrl = mannequinUrl;
+          }
+          _isLoadingProfile = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading user profile: $e');
+      if (mounted) {
+        setState(() {
+          _isLoadingProfile = false;
+        });
+      }
+    }
+  }
+
+  void _showImageSourceDialog() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library_rounded, color: AppColors.primary),
+              title: const Text('Chọn từ Thư viện'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickModelImage(ImageSource.gallery);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt_rounded, color: AppColors.primary),
+              title: const Text('Chụp ảnh mới'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickModelImage(ImageSource.camera);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickModelImage(ImageSource source) async {
+    try {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(source: source);
+      if (pickedFile == null) return;
+
+      setState(() {
+        _customModelFile = File(pickedFile.path);
+        _selectedModelUrl = null; // Clear sample selection
+      });
+    } catch (e) {
+      debugPrint('Error picking model image: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Không thể chọn ảnh: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _loadWardrobe() async {
+    setState(() => _isLoadingWardrobe = true);
+    try {
+      final apiService = GetIt.I<WardrobeApiService>();
+      final items = await apiService.getItems();
+      if (mounted) {
+        setState(() {
+          _wardrobeItems = items;
+          _isLoadingWardrobe = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading wardrobe: $e');
+      if (mounted) {
+        setState(() => _isLoadingWardrobe = false);
+      }
+    }
+  }
+
+  Future<Uint8List> _generateShopAndWardrobeCollageBytes(String shopImageUrl, String shopCategory, ClothingItem wardrobeItem) async {
+    final dio = dio_pkg.Dio();
+    ui.Image? shopImg;
+    ui.Image? wardrobeImg;
+
+    try {
+      final response = await dio.get(shopImageUrl, options: dio_pkg.Options(responseType: dio_pkg.ResponseType.bytes));
+      final codec = await ui.instantiateImageCodec(Uint8List.fromList(response.data as List<int>));
+      final frame = await codec.getNextFrame();
+      shopImg = frame.image;
+    } catch (e) {
+      debugPrint('Error downloading shop image: $e');
+    }
+
+    try {
+      final url = wardrobeItem.originalImageUrl ?? wardrobeItem.imageUrl;
+      final response = await dio.get(url, options: dio_pkg.Options(responseType: dio_pkg.ResponseType.bytes));
+      final codec = await ui.instantiateImageCodec(Uint8List.fromList(response.data as List<int>));
+      final frame = await codec.getNextFrame();
+      wardrobeImg = frame.image;
+    } catch (e) {
+      debugPrint('Error downloading wardrobe image: $e');
+    }
+
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+    const canvasWidth = 600.0;
+    const canvasHeight = 800.0;
+
+    final paintBg = Paint()..color = const Color(0xFFF3F3F3);
+    canvas.drawRect(const Rect.fromLTWH(0, 0, canvasWidth, canvasHeight), paintBg);
+
+    Rect getRect(String category) {
+      category = category.toLowerCase();
+      if (category == 'top' || category == 'tops' || category == 'outerwear') {
+        return const Rect.fromLTWH(50, 50, 220, 280);
+      }
+      if (category == 'bottom' || category == 'bottoms') {
+        return const Rect.fromLTWH(50, 380, 220, 380);
+      }
+      if (category == 'dress' || category == 'one-pieces') {
+        return const Rect.fromLTWH(50, 80, 220, 550);
+      }
+      if (category == 'shoes') {
+        return const Rect.fromLTWH(330, 600, 220, 160);
+      }
+      return const Rect.fromLTWH(330, 200, 220, 220);
+    }
+
+    if (shopImg != null) {
+      _paintImageFit(canvas, shopImg, getRect(shopCategory));
+    }
+
+    if (wardrobeImg != null) {
+      _paintImageFit(canvas, wardrobeImg, getRect(wardrobeItem.category));
+    }
+
+    final picture = recorder.endRecording();
+    final img = await picture.toImage(canvasWidth.toInt(), canvasHeight.toInt());
+    final byteData = await img.toByteData(format: ui.ImageByteFormat.png);
+    return byteData!.buffer.asUint8List();
+  }
+
+  void _paintImageFit(Canvas canvas, ui.Image img, Rect rect) {
+    final double srcWidth = img.width.toDouble();
+    final double srcHeight = img.height.toDouble();
+    
+    final double destWidth = rect.width;
+    final double destHeight = rect.height;
+    
+    final double scale = (destWidth / srcWidth < destHeight / srcHeight)
+        ? destWidth / srcWidth
+        : destHeight / srcHeight;
+        
+    final double w = srcWidth * scale;
+    final double h = srcHeight * scale;
+    
+    final double x = rect.left + (destWidth - w) / 2;
+    final double y = rect.top + (destHeight - h) / 2;
+    
+    canvas.drawImageRect(
+      img,
+      Rect.fromLTWH(0, 0, srcWidth, srcHeight),
+      Rect.fromLTWH(x, y, w, h),
+      Paint()..isAntiAlias = true,
+    );
+  }
+
+  void _startTimer() {
+    _elapsedSeconds = 0;
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted) {
+        setState(() {
+          _elapsedSeconds++;
+          if (_elapsedSeconds < 4) {
+            _loadingMessage = 'Đang phân tích phom dáng hình thể...';
+          } else if (_elapsedSeconds < 8) {
+            _loadingMessage = 'Đang tách nền trang phục sản phẩm...';
+          } else if (_elapsedSeconds < 12) {
+            _loadingMessage = 'Đang mặc thử trang phục lên mô hình...';
+          } else {
+            _loadingMessage = 'AI đang căn chỉnh chi tiết cuối cùng...';
+          }
+        });
+      }
+    });
+  }
+
+  void _stopTimer() {
+    _timer?.cancel();
+  }
+
+  String _getProductImage(Map<String, dynamic> product) {
+    return product['ImageUrl'] as String? ??
+        product['imageUrl'] as String? ??
+        product['image'] as String? ??
+        '';
+  }
+
+  String _mapCategoryForApi(Map<String, dynamic> product) {
+    final cat = (product['Category'] as String? ?? product['category'] as String? ?? 'auto').toLowerCase();
+    if (cat == 'top' || cat == 'outerwear') return 'tops';
+    if (cat == 'bottom') return 'bottoms';
+    if (cat == 'dress') return 'one-pieces';
+    return 'auto';
+  }
+
+  Future<void> _startTryOn() async {
+    final tryonCredits = _localStorage.getTryOnCredits();
+    if (tryonCredits < 1) {
+      Navigator.pop(context);
+      SubscriptionPage.showOutOfCreditsSheet(context, isBgRemoval: false);
+      return;
+    }
+
+    setState(() {
+      _isGenerating = true;
+      _errorMessage = null;
+      _resultUrl = null;
+      _loadingMessage = 'Đang gửi yêu cầu phối đồ...';
+    });
+
+    _startTimer();
+
+    try {
+      final garmentUrl = _getProductImage(widget.product);
+      if (garmentUrl.isEmpty) {
+        throw Exception('Sản phẩm không có ảnh để thử đồ.');
+      }
+
+      final category = _mapCategoryForApi(widget.product);
+      final bool isCustomModel = _customModelFile != null && _selectedModelUrl == null;
+      final bool isMultiGarment = _selectedWardrobeItem != null;
+
+      if (isCustomModel || isMultiGarment) {
+        setState(() => _loadingMessage = 'Đang chuẩn bị ảnh người mẫu...');
+        List<int> modelBytes;
+        String modelFilename;
+
+        if (isCustomModel) {
+          modelBytes = await _customModelFile!.readAsBytes();
+          modelFilename = _customModelFile!.path.split(Platform.pathSeparator).last;
+        } else {
+          final dioClient = GetIt.I<dio_pkg.Dio>();
+          final modelResponse = await dioClient.get(
+            _selectedModelUrl!,
+            options: dio_pkg.Options(responseType: dio_pkg.ResponseType.bytes),
+          );
+          modelBytes = modelResponse.data as List<int>;
+          modelFilename = 'model.png';
+        }
+
+        List<int> garmentBytes;
+        if (isMultiGarment) {
+          setState(() => _loadingMessage = 'Đang ghép ảnh phối đồ (Flat Lay)...');
+          garmentBytes = await _generateShopAndWardrobeCollageBytes(
+            garmentUrl,
+            category,
+            _selectedWardrobeItem!,
+          );
+        } else {
+          setState(() => _loadingMessage = 'Đang tải thông tin trang phục...');
+          final dioClient = GetIt.I<dio_pkg.Dio>();
+          final garmentResponse = await dioClient.get(
+            garmentUrl,
+            options: dio_pkg.Options(responseType: dio_pkg.ResponseType.bytes),
+          );
+          garmentBytes = garmentResponse.data as List<int>;
+        }
+
+        setState(() => _loadingMessage = 'Đang gửi dữ liệu phối đồ lên AI...');
+        
+        final dioClient = GetIt.I<dio_pkg.Dio>();
+        final uploadFormData = dio_pkg.FormData.fromMap({
+          "modelFile": dio_pkg.MultipartFile.fromBytes(
+            modelBytes,
+            filename: modelFilename,
+          ),
+          "garmentFile": dio_pkg.MultipartFile.fromBytes(
+            garmentBytes,
+            filename: 'garment.png',
+          ),
+          "category": isMultiGarment ? 'auto' : category,
+          "restoreBackground": _restoreBackground.toString(),
+        });
+
+        final response = await dioClient.post(
+          '/api/tryon/run-files',
+          data: uploadFormData,
+        );
+
+        if (response.statusCode == 200 && response.data != null) {
+          _predictionId = response.data['predictionId'] as String?;
+        } else {
+          throw Exception('Lỗi khởi tạo tiến trình thử đồ phối.');
+        }
+      } else {
+        _predictionId = await _tryOnApiService.runTryOnWithUrls(
+          modelUrl: _selectedModelUrl ?? '',
+          garmentUrl: garmentUrl,
+          category: category,
+          restoreBackground: _restoreBackground,
+        );
+      }
+
+      if (_predictionId == null) {
+        throw Exception('Không nhận được ID tiến trình từ máy chủ AI.');
+      }
+
+      // Trừ 1 credit thử đồ AI
+      await _localStorage.updateCredits(tryonCredits: tryonCredits - 1);
+
+      // Bắt đầu poll status
+      _pollStatus();
+    } catch (e) {
+      _stopTimer();
+      String msg = e.toString();
+      if (e is dio_pkg.DioException) {
+        final errorData = e.response?.data;
+        if (errorData is Map) {
+          if (errorData.containsKey('error')) {
+            msg = errorData['error'].toString();
+          } else if (errorData.containsKey('message')) {
+            msg = errorData['message'].toString();
+          }
+        } else if (errorData != null) {
+          msg = errorData.toString();
+        }
+      }
+      setState(() {
+        _isGenerating = false;
+        _errorMessage = 'Lỗi: $msg';
+      });
+    }
+  }
+
+  Future<void> _pollStatus() async {
+    if (_predictionId == null) return;
+
+    int pollCount = 0;
+    const maxPolls = 30; // 30 * 3s = 90s timeout
+
+    Timer.periodic(const Duration(seconds: 3), (timer) async {
+      pollCount++;
+      if (!mounted || !_isGenerating) {
+        timer.cancel();
+        return;
+      }
+
+      if (pollCount > maxPolls) {
+        timer.cancel();
+        _stopTimer();
+        setState(() {
+          _isGenerating = false;
+          _errorMessage = 'Thời gian xử lý quá lâu. Vui lòng thử lại sau.';
+        });
+        return;
+      }
+
+      try {
+        final result = await _tryOnApiService.checkStatus(_predictionId!);
+        if (result == null) return;
+
+        final status = result['status'] as String;
+        final outputUrl = result['outputUrl'] as String?;
+        final error = result['error'] as String?;
+
+        if (status == 'completed' && outputUrl != null) {
+          timer.cancel();
+          _stopTimer();
+          setState(() {
+            _isGenerating = false;
+            _resultUrl = outputUrl;
+          });
+        } else if (status == 'failed' || error != null) {
+          timer.cancel();
+          _stopTimer();
+          setState(() {
+            _isGenerating = false;
+            _errorMessage = error ?? 'Thử đồ thất bại do lỗi xử lý AI.';
+          });
+        }
+      } catch (e) {
+        debugPrint('Lỗi kiểm tra trạng thái: $e');
+      }
+    });
+  }
+
+  Future<void> _saveImageToGallery(String imageUrl) async {
+    setState(() => _isSavingImage = true);
+    
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Đang tải hình ảnh xuống...'),
+          duration: Duration(seconds: 1),
+        ),
+      );
+    }
+
+    try {
+      final dioClient = dio_pkg.Dio();
+      final response = await dioClient.get(
+        imageUrl,
+        options: dio_pkg.Options(responseType: dio_pkg.ResponseType.bytes),
+      );
+
+      final result = await ImageGallerySaverPlus.saveImage(
+        Uint8List.fromList(response.data as List<int>),
+        quality: 100,
+        name: "vcloset_tryon_${DateTime.now().millisecondsSinceEpoch}",
+      );
+
+      if (result != null && result['isSuccess'] == true) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Đã lưu ảnh thử đồ vào Thư viện thành công!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } else {
+        throw Exception(result?['errorMessage'] ?? 'Lưu thất bại.');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Không thể lưu ảnh: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSavingImage = false);
+      }
+    }
+  }
+
+  Widget _buildWardrobeSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Phối thêm đồ từ Tủ đồ của bạn (Tùy chọn):',
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.bold,
+            color: AppColors.primary,
+          ),
+        ),
+        const SizedBox(height: 12),
+        if (_isLoadingWardrobe)
+          const SizedBox(
+            height: 90,
+            child: Center(child: CircularProgressIndicator(color: AppColors.primary)),
+          )
+        else if (_wardrobeItems.isEmpty)
+          Container(
+            height: 90,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: Colors.grey[50],
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.grey[200]!),
+            ),
+            child: Text(
+              'Tủ đồ của bạn chưa có sản phẩm nào.',
+              style: TextStyle(color: Colors.grey[500], fontStyle: FontStyle.italic),
+            ),
+          )
+        else
+          SizedBox(
+            height: 90,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: _wardrobeItems.length,
+              itemBuilder: (context, index) {
+                final item = _wardrobeItems[index];
+                final isSelected = _selectedWardrobeItem == item;
+                final imgUrl = item.originalImageUrl ?? item.imageUrl;
+                
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _selectedWardrobeItem = isSelected ? null : item;
+                    });
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 12),
+                    child: Column(
+                      children: [
+                        Stack(
+                          children: [
+                            Container(
+                              width: 60,
+                              height: 60,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: isSelected ? AppColors.primary : Colors.grey[300]!,
+                                  width: isSelected ? 3 : 1.5,
+                                ),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: Image.network(
+                                  imgUrl,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stack) => const Icon(Icons.image),
+                                ),
+                              ),
+                            ),
+                            if (isSelected)
+                              const Positioned(
+                                right: 0,
+                                bottom: 0,
+                                child: CircleAvatar(
+                                  radius: 9,
+                                  backgroundColor: AppColors.primary,
+                                  child: Icon(Icons.check, size: 12, color: Colors.white),
+                                ),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        SizedBox(
+                          width: 60,
+                          child: Text(
+                            item.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                              color: isSelected ? AppColors.primary : Colors.black54,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildUploadModelItem() {
+    final isCustomSelected = _customModelFile != null && _selectedModelUrl == null;
+    return GestureDetector(
+      onTap: _showImageSourceDialog,
+      child: Column(
+        children: [
+          Stack(
+            children: [
+              Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: isCustomSelected ? AppColors.primary : Colors.grey[300]!,
+                    width: isCustomSelected ? 3 : 1.5,
+                  ),
+                ),
+                child: ClipOval(
+                  child: _customModelFile != null
+                      ? Image.file(
+                          _customModelFile!,
+                          fit: BoxFit.cover,
+                        )
+                      : Container(
+                          color: Colors.grey[100],
+                          child: const Icon(
+                            Icons.add_photo_alternate_rounded,
+                            color: Colors.grey,
+                            size: 26,
+                          ),
+                        ),
+                ),
+              ),
+              if (isCustomSelected)
+                const Positioned(
+                  right: 0,
+                  bottom: 0,
+                  child: CircleAvatar(
+                    radius: 9,
+                    backgroundColor: AppColors.primary,
+                    child: Icon(Icons.check, size: 12, color: Colors.white),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            _customModelFile != null ? 'Ảnh đã chọn' : 'Tự tải ảnh',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: isCustomSelected ? FontWeight.bold : FontWeight.normal,
+              color: isCustomSelected ? AppColors.primary : Colors.black54,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildModelItem({required String name, required String url, bool isPersonal = false}) {
+    final isSelected = _selectedModelUrl == url && _customModelFile == null;
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedModelUrl = url;
+          _customModelFile = null;
+        });
+      },
+      child: Column(
+        children: [
+          Stack(
+            children: [
+              Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: isSelected ? AppColors.primary : Colors.grey[300]!,
+                    width: isSelected ? 3 : 1.5,
+                  ),
+                ),
+                child: ClipOval(
+                  child: Image.network(
+                    url,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stack) => const Icon(Icons.person),
+                  ),
+                ),
+              ),
+              if (isSelected)
+                const Positioned(
+                  right: 0,
+                  bottom: 0,
+                  child: CircleAvatar(
+                    radius: 9,
+                    backgroundColor: AppColors.primary,
+                    child: Icon(Icons.check, size: 12, color: Colors.white),
+                  ),
+                ),
+              if (isPersonal)
+                Positioned(
+                  left: 0,
+                  top: 0,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.blueAccent,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: const Text(
+                      'Mannequin',
+                      style: TextStyle(fontSize: 8, color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            name,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              color: isSelected ? AppColors.primary : Colors.black54,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBody(String garmentUrl) {
+    if (_isLoadingProfile) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(color: AppColors.primary),
+            SizedBox(height: 16),
+            Text(
+              'Đang tải cấu hình...',
+              style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w600),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_isGenerating) {
+      return Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 220,
+              height: 300,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(28),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
+                  )
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(28),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    if (_selectedModelUrl != null)
+                      Image.network(_selectedModelUrl!, fit: BoxFit.cover)
+                    else if (_customModelFile != null)
+                      Image.file(_customModelFile!, fit: BoxFit.cover)
+                    else
+                      Container(color: Colors.grey[200]),
+                    Container(color: Colors.black26),
+                    AnimatedBuilder(
+                      animation: _scanAnimation,
+                      builder: (context, child) {
+                        return Positioned(
+                          top: _scanAnimation.value * 280 + 10,
+                          left: 10,
+                          right: 10,
+                          child: Container(
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: Colors.greenAccent,
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.greenAccent.withOpacity(0.8),
+                                  blurRadius: 12,
+                                  spreadRadius: 2,
+                                )
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 32),
+            const SizedBox(
+              width: 40,
+              height: 40,
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                strokeWidth: 3,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              _loadingMessage,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Quá trình này có thể mất tới 15-30 giây. Vui lòng không đóng ứng dụng.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 13,
+                color: Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Đã trôi qua: ${_elapsedSeconds}s',
+              style: const TextStyle(
+                fontSize: 13,
+                fontFamily: 'monospace',
+                fontWeight: FontWeight.bold,
+                color: Colors.blueGrey,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_resultUrl != null) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+        child: Column(
+          children: [
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(28),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    )
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(28),
+                  child: Image.network(
+                    _resultUrl!,
+                    fit: BoxFit.cover,
+                    loadingBuilder: (context, child, progress) {
+                      if (progress == null) return child;
+                      return const Center(child: CircularProgressIndicator());
+                    },
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              '✨ Thử đồ ảo thành công! ✨',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.green,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    height: 52,
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        setState(() {
+                          _resultUrl = null;
+                        });
+                      },
+                      icon: const Icon(Icons.refresh_rounded),
+                      label: const Text('Thử lại'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.primary,
+                        side: const BorderSide(color: AppColors.primary),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: SizedBox(
+                    height: 52,
+                    child: ElevatedButton.icon(
+                      onPressed: _isSavingImage ? null : () => _saveImageToGallery(_resultUrl!),
+                      icon: _isSavingImage 
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          )
+                        : const Icon(Icons.download_rounded),
+                      label: const Text('Tải về máy'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_errorMessage != null) {
+      return Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline_rounded, size: 64, color: Colors.redAccent),
+            const SizedBox(height: 16),
+            const Text(
+              'Không thể hoàn tất mặc thử',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primary),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              _errorMessage!,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 14, color: Colors.black54),
+            ),
+            const SizedBox(height: 32),
+            SizedBox(
+              width: 180,
+              height: 48,
+              child: ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    _errorMessage = null;
+                  });
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                ),
+                child: const Text('Quay lại chọn mẫu'),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+      child: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 90,
+                        height: 120,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: Image.network(garmentUrl, fit: BoxFit.cover),
+                        ),
+                      ),
+                      if (_selectedWardrobeItem != null) ...[
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 8),
+                          child: Icon(Icons.link_rounded, size: 24, color: Colors.grey),
+                        ),
+                        Container(
+                          width: 90,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(16),
+                            child: Image.network(
+                              _selectedWardrobeItem!.originalImageUrl ?? _selectedWardrobeItem!.imageUrl,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                      ],
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 12),
+                        child: Icon(Icons.add_rounded, size: 28, color: Colors.grey),
+                      ),
+                      Container(
+                        width: 90,
+                        height: 120,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: _selectedModelUrl != null
+                              ? Image.network(_selectedModelUrl!, fit: BoxFit.cover)
+                              : (_customModelFile != null
+                                  ? Image.file(_customModelFile!, fit: BoxFit.cover)
+                                  : Container(color: Colors.grey[200])),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  const Text(
+                    'Chọn người mẫu thử đồ:',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    height: 90,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      children: [
+                        _buildUploadModelItem(),
+                        const SizedBox(width: 12),
+                        if (_personalMannequinUrl != null && _personalMannequinUrl!.isNotEmpty) ...[
+                          _buildModelItem(
+                            name: 'Cá nhân',
+                            url: _personalMannequinUrl!,
+                            isPersonal: true,
+                          ),
+                          const SizedBox(width: 12),
+                        ],
+                        ..._sampleModels.map((model) => Padding(
+                          padding: const EdgeInsets.only(right: 12),
+                          child: _buildModelItem(
+                            name: model['name']!,
+                            url: model['url']!,
+                            isPersonal: false,
+                          ),
+                        )),
+                      ],
+                    ),
+                  ),
+                  if (_personalMannequinUrl == null || _personalMannequinUrl!.isEmpty) ...[
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Icon(Icons.lightbulb_rounded, size: 16, color: Colors.amber[700]),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            'Mẹo: Tạo Mannequin riêng bằng cách cập nhật chiều cao/cân nặng tại trang Cá nhân.',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                  const SizedBox(height: 16),
+                  _buildWardrobeSection(),
+                  const SizedBox(height: 8),
+                ],
+              ),
+            ),
+          ),
+          const Divider(height: 1),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Row(
+                children: [
+                  Icon(Icons.landscape_rounded, color: Colors.grey, size: 20),
+                  SizedBox(width: 8),
+                  Text(
+                    'Giữ nguyên phông nền ảnh mẫu',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                  ),
+                ],
+              ),
+              Switch(
+                value: _restoreBackground,
+                onChanged: (val) {
+                  setState(() {
+                    _restoreBackground = val;
+                  });
+                },
+                activeColor: AppColors.primary,
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.amber[50],
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.info_outline_rounded, size: 18, color: Colors.amber[800]),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Lượt thử AI còn lại: ${_localStorage.getTryOnCredits()} lượt. Thử đồ sẽ tốn 1 lượt.',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.amber[900],
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            height: 54,
+            child: ElevatedButton.icon(
+              onPressed: _startTryOn,
+              icon: const Icon(Icons.auto_awesome_rounded),
+              label: const Text(
+                'Bắt đầu mặc thử',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final garmentUrl = _getProductImage(widget.product);
+
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+      ),
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: SafeArea(
+        top: false,
+        child: SizedBox(
+          height: MediaQuery.of(context).size.height * 0.78,
+          child: Column(
+            children: [
+              const SizedBox(height: 12),
+              Container(
+                width: 48,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Mặc thử AI',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close_rounded, color: AppColors.primary),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(height: 1),
+              Expanded(
+                child: _buildBody(garmentUrl),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// Widget nút tròn back/favorite
+class _CircleButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _CircleButton({required this.icon, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 44,
+        height: 44,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Icon(icon, color: AppColors.primary, size: 20),
+      ),
+    );
+  }
+}

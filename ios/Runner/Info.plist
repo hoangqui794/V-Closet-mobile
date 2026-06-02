@@ -47,5 +47,18 @@
 	<true/>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Chúng tôi cần quyền truy cập thư viện ảnh để tải xuống ảnh thử đồ ảo của bạn.</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.vcloset.app</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>vcloset</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

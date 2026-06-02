@@ -9,12 +9,16 @@ import 'package:image_picker/image_picker.dart';
 import 'package:dio/dio.dart';
 import 'package:image_gallery_saver_plus/image_gallery_saver_plus.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../data/datasources/outfit_api_service.dart';
 import '../../../data/datasources/tryon_api_service.dart';
 import '../../../data/datasources/wardrobe_api_service.dart';
+import '../../../data/datasources/auth_local_storage.dart';
 import '../../../domain/entities/clothing_item.dart';
+import '../profile/subscription_page.dart';
 
 class OutfitPage extends StatefulWidget {
-  const OutfitPage({super.key});
+  final VoidCallback? onMenuPressed;
+  const OutfitPage({super.key, this.onMenuPressed});
 
   @override
   State<OutfitPage> createState() => _OutfitPageState();
@@ -23,7 +27,10 @@ class OutfitPage extends StatefulWidget {
 class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
   final TryOnApiService _tryOnApiService = GetIt.I<TryOnApiService>();
   final WardrobeApiService _wardrobeApiService = GetIt.I<WardrobeApiService>();
+  final OutfitApiService _outfitApiService = GetIt.I<OutfitApiService>();
   final ImagePicker _picker = ImagePicker();
+
+
 
   // Selected state
   String? _selectedModelUrl;
@@ -32,10 +39,18 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
   String _selectedCategory = 'auto'; // auto, tops, bottoms, one-pieces
   bool _restoreBackground = true;
 
+  // Selected saved outfit snapshot as garment
+  String? _selectedOutfitSnapshotUrl;  // URL ảnh snapshot bộ phối đồ đã chọn
+  String? _selectedOutfitTitle;         // Tên bộ phối đồ đã chọn
+
   // Wardrobe list state
   List<ClothingItem> _wardrobeItems = [];
   bool _isLoadingWardrobe = true;
   String _wardrobeFilter = 'Tất cả';
+
+  // Saved outfits state (for section 2 outfit picker)
+  List<Map<String, dynamic>> _savedOutfits = [];
+  bool _isLoadingOutfits = true;
 
   // AI Generation State
   bool _isGenerating = false;
@@ -89,6 +104,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _fetchWardrobe();
+    _fetchSavedOutfits();
 
     // Setup scanning animation
     _scanController = AnimationController(
@@ -130,8 +146,22 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
     }
   }
 
+  Future<void> _fetchSavedOutfits() async {
+    setState(() => _isLoadingOutfits = true);
+    try {
+      final outfits = await _outfitApiService.getUserOutfits();
+      setState(() {
+        _savedOutfits = outfits;
+        _isLoadingOutfits = false;
+      });
+    } catch (e) {
+      setState(() => _isLoadingOutfits = false);
+      debugPrint('Lỗi tải bộ phối đồ: $e');
+    }
+  }
+
   Future<void> _refreshAllData() async {
-    await _fetchWardrobe();
+    await Future.wait([_fetchWardrobe(), _fetchSavedOutfits()]);
   }
 
   // Pick custom model photo
@@ -205,11 +235,12 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
     });
   }
 
-  Future<Uint8List> _generateCollageBytes() async {
+  Future<Uint8List> _generateCollageBytes({List<ClothingItem>? targetItems}) async {
+    final itemsToUse = targetItems ?? _selectedGarments;
     final dio = Dio();
     final Map<String, ui.Image> decodedImages = {};
     
-    for (final item in _selectedGarments) {
+    for (final item in itemsToUse) {
       try {
         final url = item.originalImageUrl ?? item.imageUrl;
         final response = await dio.get(
@@ -236,7 +267,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
     canvas.drawRect(const Rect.fromLTWH(0, 0, canvasWidth, canvasHeight), paintBg);
     
     // Draw each item based on its category
-    for (final item in _selectedGarments) {
+    for (final item in itemsToUse) {
       final img = decodedImages[item.id];
       if (img == null) continue;
       
@@ -300,10 +331,29 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
 
   // Start Virtual Tryon Process
   Future<void> _startTryOn() async {
-    if (_selectedGarments.isEmpty) {
+    if (_selectedGarments.isEmpty && _selectedOutfitSnapshotUrl == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Vui lòng chọn trang phục để thử.')),
       );
+      return;
+    }
+
+    final bool isMultiGarment = _selectedGarments.length > 1;
+    final int requiredCredits = isMultiGarment ? 2 : 1;
+
+    // Kiểm tra Credits trước khi thực hiện
+    final localStorage = GetIt.I<AuthLocalStorage>();
+    final tryonCredits = localStorage.getTryOnCredits();
+    if (tryonCredits < requiredCredits) {
+      if (tryonCredits > 0 && isMultiGarment) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Bạn cần ít nhất 2 lượt thử đồ AI để phối bộ. Hãy nạp thêm hoặc xem quảng cáo nhé!'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+      SubscriptionPage.showOutOfCreditsSheet(context, isBgRemoval: false);
       return;
     }
 
@@ -323,10 +373,10 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
       String? modelUrlToUse = _selectedModelUrl;
 
       // Check if we need to run via the files upload API
-      final bool isMultiGarment = _selectedGarments.length > 1;
       final bool isCustomModel = _selectedModelFile != null;
+      final bool isOutfitSnapshot = _selectedOutfitSnapshotUrl != null;
 
-      if (isMultiGarment || isCustomModel) {
+      if (isMultiGarment || isCustomModel || isOutfitSnapshot) {
         // We will call the /api/TryOn/run-files endpoint using FormData
         
         // 1. Prepare model file bytes
@@ -349,7 +399,14 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
 
         // 2. Prepare garment file bytes
         List<int> garmentBytes;
-        if (isMultiGarment) {
+        if (isOutfitSnapshot) {
+          setState(() => _loadingMessage = 'Đang tải ảnh bộ phối đồ...');
+          final snapshotResponse = await dio.get(
+            _selectedOutfitSnapshotUrl!,
+            options: Options(responseType: ResponseType.bytes),
+          );
+          garmentBytes = snapshotResponse.data as List<int>;
+        } else if (isMultiGarment) {
           setState(() => _loadingMessage = 'Đang ghép ảnh phối đồ (Flat Lay)...');
           garmentBytes = await _generateCollageBytes();
         } else {
@@ -378,11 +435,16 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
           "restoreBackground": _restoreBackground.toString(),
         });
         
-        final apiEndpoint = '${dio.options.baseUrl}/TryOn/run-files';
-        final response = await dio.post(apiEndpoint, data: uploadFormData);
+        final response = await GetIt.I<Dio>().post(
+          '/TryOn/run-files',
+          data: uploadFormData,
+        );
         
         if (response.statusCode == 200 && response.data != null) {
           _predictionId = response.data['predictionId'] as String?;
+          // Trừ credits thử đồ AI dựa theo loại phối đồ (phối bộ trừ 2 lượt)
+          final creditsToSubtract = isMultiGarment ? 2 : 1;
+          await localStorage.updateCredits(tryonCredits: tryonCredits - creditsToSubtract);
         } else {
           throw Exception('Lỗi khởi tạo tiến trình thử đồ phối.');
         }
@@ -396,6 +458,8 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
           category: _selectedCategory,
           restoreBackground: _restoreBackground,
         );
+        // Trừ 1 credit thử đồ AI
+        await localStorage.updateCredits(tryonCredits: tryonCredits - 1);
       }
 
       if (_predictionId == null) {
@@ -567,77 +631,55 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
         backgroundColor: AppColors.background,
-        appBar: AppBar(
-          backgroundColor: AppColors.background,
-          elevation: 0,
-          title: const Text(
-            'Studio Phối Đồ AI',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w800,
-              color: AppColors.primary,
+        elevation: 0,
+        leadingWidth: 74,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 20),
+          child: Center(
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(14),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.06),
+                    blurRadius: 14,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: IconButton(
+                onPressed: () {
+                  final scaffold = Scaffold.maybeOf(context);
+                  if (scaffold != null && scaffold.hasDrawer) {
+                    scaffold.openDrawer();
+                  } else {
+                    widget.onMenuPressed?.call();
+                  }
+                },
+                icon: const Icon(
+                  Icons.menu_rounded,
+                  color: AppColors.primary,
+                ),
+              ),
             ),
           ),
         ),
-        body: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // ── Tab Bar ──────────────────────────────────────────────
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: TabBar(
-                    indicator: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [AppColors.primary, AppColors.primaryLight],
-                      ),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    indicatorSize: TabBarIndicatorSize.tab,
-                    dividerColor: Colors.transparent,
-                    labelColor: Colors.white,
-                    unselectedLabelColor: AppColors.primary,
-                    labelStyle: const TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 14,
-                    ),
-                    tabs: const [
-                      Tab(
-                        icon: Icon(Icons.face_rounded, size: 18),
-                        text: 'Phòng thử đồ ảo',
-                        height: 52,
-                      ),
-                      Tab(
-                        icon: Icon(Icons.lightbulb_outline_rounded, size: 18),
-                        text: 'Gợi ý phối đồ',
-                        height: 52,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Expanded(
-                child: TabBarView(
-                  physics: const BouncingScrollPhysics(),
-                  children: [
-                    _buildVirtualTryOnRoom(),
-                    _buildStaticAiOutfits(),
-                  ],
-                ),
-              ),
-            ],
+        title: const Text(
+          'Studio Phối Đồ AI',
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.w800,
+            color: AppColors.primary,
           ),
         ),
+      ),
+      body: SafeArea(
+        child: _buildVirtualTryOnRoom(),
       ),
     );
   }
@@ -662,28 +704,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            FadeInDown(
-              duration: const Duration(milliseconds: 400),
-              child: const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Phòng thử đồ thông minh',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    'Mặc thử bất kỳ trang phục nào lên người mẫu ảo chỉ trong vài giây.',
-                    style: TextStyle(color: AppColors.textMuted, fontSize: 13),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
+
   
             // 1. SELECT MODEL IMAGE
             _sectionHeader('1. Chọn người mẫu thử đồ'),
@@ -692,7 +713,9 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
             const SizedBox(height: 24),
   
             // 2. SELECT WARDROBE ITEM
-            _sectionHeader('2. Chọn quần áo từ tủ đồ'),
+            _sectionHeader('2. Chọn quần áo từ tủ đồ hoặc bộ phối đồ'),
+            const SizedBox(height: 10),
+            _buildOutfitPicker(),
             const SizedBox(height: 12),
             _buildGarmentSelector(),
             _buildSelectedGarmentsPreview(),
@@ -712,13 +735,13 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
                   gradient: LinearGradient(
-                    colors: _selectedGarments.isEmpty 
+                    colors: (_selectedGarments.isEmpty && _selectedOutfitSnapshotUrl == null)
                         ? [Colors.grey.shade400, Colors.grey.shade400] 
                         : [AppColors.primary, AppColors.primaryLight],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
-                  boxShadow: _selectedGarments.isEmpty ? [] : [
+                  boxShadow: (_selectedGarments.isEmpty && _selectedOutfitSnapshotUrl == null) ? [] : [
                     BoxShadow(
                       color: AppColors.primary.withValues(alpha: 0.25),
                       blurRadius: 16,
@@ -732,7 +755,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                     shadowColor: Colors.transparent,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   ),
-                  onPressed: _selectedGarments.isEmpty ? null : _startTryOn,
+                  onPressed: (_selectedGarments.isEmpty && _selectedOutfitSnapshotUrl == null) ? null : _startTryOn,
                   icon: const Icon(Icons.auto_awesome_rounded, color: Colors.white),
                   label: const Text(
                     'Bắt đầu thử đồ ảo AI',
@@ -937,6 +960,222 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
               ),
             );
           }),
+        ],
+      ),
+    );
+  }
+
+  // ─── Saved Outfit Picker (section 2) ─────────────────────────────────────
+  Widget _buildOutfitPicker() {
+    // Loading state
+    if (_isLoadingOutfits) {
+      return const SizedBox(
+        height: 108,
+        child: Center(child: CircularProgressIndicator(color: AppColors.primary, strokeWidth: 2)),
+      );
+    }
+
+    // Empty state
+    if (_savedOutfits.isEmpty) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: Colors.grey.shade200),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.style_outlined, color: Colors.grey.shade400, size: 28),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Chưa có bộ phối đồ nào',
+                      style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: Colors.grey)),
+                  const SizedBox(height: 2),
+                  Text('Tạo bộ phối đồ trong tab Tủ đồ trước',
+                      style: TextStyle(fontSize: 11, color: Colors.grey.shade400)),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Outfit cards
+    return FadeInLeft(
+      duration: const Duration(milliseconds: 300),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.style_rounded, size: 14, color: AppColors.primary),
+              const SizedBox(width: 5),
+              const Text(
+                'Chọn từ bộ phối đồ đã lưu',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primary),
+              ),
+              const Spacer(),
+              if (_selectedOutfitSnapshotUrl != null)
+                GestureDetector(
+                  onTap: () => setState(() {
+                    _selectedOutfitSnapshotUrl = null;
+                    _selectedOutfitTitle = null;
+                  }),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.close_rounded, size: 13, color: Colors.red.shade400),
+                      const SizedBox(width: 2),
+                      Text('Bỏ chọn', style: TextStyle(fontSize: 11, color: Colors.red.shade400, fontWeight: FontWeight.w600)),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            height: 110,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              itemCount: _savedOutfits.length,
+              itemBuilder: (context, index) {
+                final outfit = _savedOutfits[index];
+                final snapshotUrl = outfit['CanvasSnapshotUrl'] as String? ??
+                    outfit['canvasSnapshotUrl'] as String? ??
+                    outfit['snapshotUrl'] as String? ??
+                    '';
+                final title = outfit['Title'] as String? ??
+                    outfit['title'] as String? ??
+                    'Bộ phối đồ';
+                final isSelected = _selectedOutfitSnapshotUrl == snapshotUrl;
+
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      if (isSelected) {
+                        _selectedOutfitSnapshotUrl = null;
+                        _selectedOutfitTitle = null;
+                      } else {
+                        _selectedOutfitSnapshotUrl = snapshotUrl;
+                        _selectedOutfitTitle = title;
+                        // Clear individual wardrobe selections
+                        _selectedGarments.clear();
+                      }
+                    });
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    width: 86,
+                    margin: const EdgeInsets.only(right: 10),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: isSelected ? AppColors.primaryLight : Colors.grey.shade200,
+                        width: isSelected ? 2.5 : 1,
+                      ),
+                      boxShadow: isSelected
+                          ? [BoxShadow(color: AppColors.primary.withValues(alpha: 0.18), blurRadius: 8, offset: const Offset(0, 4))]
+                          : [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 4, offset: const Offset(0, 2))],
+                    ),
+                    child: Stack(
+                      children: [
+                        // Snapshot image
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: snapshotUrl.isNotEmpty
+                              ? Image.network(
+                                  snapshotUrl,
+                                  width: 86,
+                                  height: 110,
+                                  fit: BoxFit.cover,
+                                  loadingBuilder: (context, child, progress) {
+                                    if (progress == null) return child;
+                                    return Container(
+                                      width: 86,
+                                      height: 110,
+                                      color: Colors.grey.shade100,
+                                      child: const Center(child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary)),
+                                    );
+                                  },
+                                  errorBuilder: (context, error, stack) => Container(
+                                    width: 86,
+                                    height: 110,
+                                    color: Colors.grey.shade100,
+                                    child: const Icon(Icons.broken_image_outlined, color: Colors.grey, size: 28),
+                                  ),
+                                )
+                              : Container(
+                                  width: 86,
+                                  height: 110,
+                                  color: Colors.grey.shade100,
+                                  child: const Icon(Icons.style_rounded, color: Colors.grey, size: 30),
+                                ),
+                        ),
+                        // Title overlay at bottom
+                        Positioned(
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                            decoration: BoxDecoration(
+                              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(12)),
+                              gradient: LinearGradient(
+                                begin: Alignment.bottomCenter,
+                                end: Alignment.topCenter,
+                                colors: [Colors.black.withValues(alpha: 0.72), Colors.transparent],
+                              ),
+                            ),
+                            child: Text(
+                              title,
+                              style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold),
+                              maxLines: 2,
+                              textAlign: TextAlign.center,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+                        // Selected checkmark
+                        if (isSelected)
+                          const Positioned(
+                            top: 5,
+                            right: 5,
+                            child: CircleAvatar(
+                              radius: 10,
+                              backgroundColor: AppColors.primaryLight,
+                              child: Icon(Icons.check_rounded, size: 12, color: Colors.white),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          if (_selectedOutfitSnapshotUrl != null) ...[
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                const Icon(Icons.check_circle_rounded, color: AppColors.primaryLight, size: 14),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    'Đã chọn: "$_selectedOutfitTitle" — ảnh này sẽ được dùng làm trang phục thử đồ AI',
+                    style: const TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w600),
+                    maxLines: 2,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );
@@ -1585,161 +1824,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
     );
   }
 
-  // ================= TAB 2: ORIGINAL STATIC AI OUTFIT SUGGESTIONS =================
 
-  Widget _buildStaticAiOutfits() {
-    return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 110),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(24),
-              gradient: const LinearGradient(
-                colors: [Color(0xFF4A3728), Color(0xFF7F5539)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.25),
-                  blurRadius: 24,
-                  offset: const Offset(0, 12),
-                ),
-              ],
-            ),
-            child: const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Gợi ý phối đồ bằng AI',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                SizedBox(height: 8),
-                Text(
-                  'Sẵn sàng cho outfit tiếp theo?',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                SizedBox(height: 8),
-                Text(
-                  'Kết hợp tự động áo, quần, váy và áo khoác chỉ với một chạm.',
-                  style: TextStyle(color: Colors.white70, fontSize: 13),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 24),
-          _featureCard(
-            icon: Icons.auto_awesome_rounded,
-            title: 'Phối nhanh một chạm',
-            description:
-                'Gợi ý thông minh dựa trên cân bằng danh mục và phong cách thiết kế.',
-          ),
-          _featureCard(
-            icon: Icons.palette_outlined,
-            title: 'Hài hòa màu sắc',
-            description: 'Tận dụng vòng tròn màu sắc để outfit luôn đồng điệu.',
-          ),
-          _featureCard(
-            icon: Icons.calendar_month_outlined,
-            title: 'Mẫu theo dịp',
-            description:
-                'Gợi ý tối ưu cho đi học, đi làm, hẹn hò hoặc dã ngoại.',
-          ),
-          const SizedBox(height: 24),
-          SizedBox(
-            width: double.infinity,
-            height: 52,
-            child: ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-              ),
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Tính năng gợi ý phối đồ đang được cập nhật!')),
-                );
-              },
-              icon: const Icon(Icons.checkroom_rounded),
-              label: const Text('Phối đồ thông minh ngay', style: TextStyle(fontWeight: FontWeight.bold)),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _featureCard({
-    required IconData icon,
-    required String title,
-    required String description,
-  }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.04),
-            blurRadius: 14,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: AppColors.secondary,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, color: AppColors.primary),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.primary,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  description,
-                  style: TextStyle(
-                    height: 1.35,
-                    color: AppColors.primary.withValues(alpha: 0.65),
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 // Fade in scale animation helper for result state

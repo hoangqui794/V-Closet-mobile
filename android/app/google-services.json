@@ -1,0 +1,63 @@
+{
+  "project_info": {
+    "project_number": "3533462823",
+    "project_id": "v-closet-8acb3",
+    "storage_bucket": "v-closet-8acb3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:3533462823:android:abed7b5986b98e93699d02",
+        "android_client_info": {
+          "package_name": "com.sentinels.vcloset"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "3533462823-a680kjkegsd0ngidsgdm4lv0u0taubdc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.sentinels.vcloset",
+            "certificate_hash": "196998e40b027f06a904681a5b86cb78ce429062"
+          }
+        },
+        {
+          "client_id": "3533462823-noebhl1qtcc0s8quefkscivu9jhcqsib.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.sentinels.vcloset",
+            "certificate_hash": "21db5935ede7845fea1da811784312a24f0f10fc"
+          }
+        },
+        {
+          "client_id": "3533462823-voqch211n833ai2rt2ksp4f0olbsk0dc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.sentinels.vcloset",
+            "certificate_hash": "da109fbcd1a67bdb950194e0719b03351eab9411"
+          }
+        },
+        {
+          "client_id": "3533462823-2k0gvs8nl5urrqj4rdbkhrdjnrkci8ip.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBIVbxgd5QA86eZkaCDJPeI6ErU5g2jTPg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "3533462823-2k0gvs8nl5urrqj4rdbkhrdjnrkci8ip.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
