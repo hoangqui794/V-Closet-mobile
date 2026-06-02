@@ -670,7 +670,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
         });
         
         final response = await GetIt.I<Dio>().post(
-          '/TryOn/run-files',
+          '/api/tryon/run-files',
           data: uploadFormData,
         );
         
