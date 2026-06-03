@@ -720,9 +720,11 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
           }
         }
       }
+      debugPrint('Try-on exception: $e');
+      debugPrint('Try-on error message: $msg');
       setState(() {
         _isGenerating = false;
-        _errorMessage = 'Lỗi: $msg';
+        _errorMessage = 'Không thể thực hiện thử đồ. Vui lòng thử lại sau.';
       });
     }
   }
@@ -772,9 +774,10 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
           timer.cancel();
           _stopTimer();
           _scanController.stop();
+          debugPrint('Try-on failed error: $error');
           setState(() {
             _isGenerating = false;
-            _errorMessage = error ?? 'Thử đồ thất bại do lỗi xử lý AI.';
+            _errorMessage = 'Thử đồ thất bại do lỗi xử lý AI. Vui lòng thử lại sau.';
           });
         }
       } catch (e) {
@@ -824,11 +827,12 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
         throw Exception(result?['errorMessage'] ?? 'Không thể lưu ảnh vào thư viện.');
       }
     } catch (e) {
+      debugPrint('Save image exception: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Lưu thất bại: ${e.toString()}'),
+          const SnackBar(
+            content: Text('Lưu ảnh thất bại. Vui lòng thử lại sau.'),
             backgroundColor: Colors.red,
           ),
         );
@@ -946,7 +950,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
             const SizedBox(height: 24),
   
             // 2. SELECT WARDROBE ITEM
-            _sectionHeader('2. Chọn quần áo từ tủ đồ hoặc bộ phối đồ'),
+            _sectionHeader('2. Chọn quần áo từ tủ đồ hoặc trang phục'),
             const SizedBox(height: 10),
             _buildOutfitPicker(),
             const SizedBox(height: 12),
@@ -1204,10 +1208,10 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Chưa có bộ phối đồ nào',
+                  const Text('Chưa có trang phục nào',
                       style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: Colors.grey)),
                   const SizedBox(height: 2),
-                  Text('Tạo bộ phối đồ trong tab Tủ đồ trước',
+                  Text('Tạo trang phục trong tab Tủ đồ trước',
                       style: TextStyle(fontSize: 11, color: Colors.grey.shade400)),
                 ],
               ),
@@ -1228,7 +1232,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
               const Icon(Icons.style_rounded, size: 14, color: AppColors.primary),
               const SizedBox(width: 5),
               const Text(
-                'Chọn từ bộ phối đồ đã lưu',
+                'Chọn từ trang phục đã lưu',
                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primary),
               ),
               const Spacer(),

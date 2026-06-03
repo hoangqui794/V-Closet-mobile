@@ -238,7 +238,7 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Đã lưu bộ phối đồ thành công! 🎉'),
+            content: Text('Đã lưu trang phục thành công! 🎉'),
             behavior: SnackBarBehavior.floating,
             backgroundColor: Colors.green,
           ),
@@ -373,7 +373,7 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
                       ),
                       const SizedBox(width: 12),
                       const Text(
-                        'Lưu bộ phối đồ',
+                        'Lưu trang phục',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w800,
@@ -386,7 +386,7 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
                   TextFormField(
                     initialValue: title,
                     decoration: InputDecoration(
-                      labelText: 'Tên bộ phối đồ',
+                      labelText: 'Tên trang phục',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -431,7 +431,7 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
                       ),
                       icon: const Icon(Icons.save_rounded),
                       label: const Text(
-                        'Lưu bộ phối đồ',
+                        'Lưu trang phục',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
@@ -471,7 +471,7 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
-          'Tạo bộ phối đồ',
+          'Tạo trang phục',
           style: TextStyle(
             color: AppColors.primary,
             fontWeight: FontWeight.w800,

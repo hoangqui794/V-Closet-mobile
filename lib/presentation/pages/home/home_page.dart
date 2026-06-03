@@ -7,6 +7,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../data/datasources/auth_local_storage.dart';
 import '../../../data/datasources/signalr_service.dart';
 import '../../../data/datasources/wardrobe_api_service.dart';
+import '../../../data/datasources/outfit_api_service.dart';
 import '../../../data/datasources/gemini_api_service.dart';
 import '../../../domain/entities/clothing_item.dart';
 import '../profile/subscription_page.dart';
@@ -23,10 +24,13 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final _localStorage = GetIt.I<AuthLocalStorage>();
   final _wardrobeApi = GetIt.I<WardrobeApiService>();
+  final _outfitApi = GetIt.I<OutfitApiService>();
   final _signalR = SignalRService();
 
   List<ClothingItem> _recentItems = [];
   bool _isLoadingItems = true;
+  List<Map<String, dynamic>> _recentOutfits = [];
+  bool _isLoadingOutfits = true;
   int _unreadCount = 0;
   StreamSubscription<int>? _unreadSub;
 
@@ -43,6 +47,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _loadRecentItems();
+    _loadRecentOutfits();
     _fetchWeatherAndLocation();
     // Lắng nghe badge thông báo từ SignalR
     _unreadSub = _signalR.onUnreadCountChanged.listen((count) {
@@ -69,6 +74,21 @@ class _HomePageState extends State<HomePage> {
       }
     } catch (_) {
       if (mounted) setState(() => _isLoadingItems = false);
+    }
+  }
+
+  Future<void> _loadRecentOutfits() async {
+    if (mounted) setState(() => _isLoadingOutfits = true);
+    try {
+      final outfits = await _outfitApi.getUserOutfits();
+      if (mounted) {
+        setState(() {
+          _recentOutfits = outfits.take(6).toList();
+          _isLoadingOutfits = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _isLoadingOutfits = false);
     }
   }
 
@@ -277,6 +297,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> _refreshData() async {
     await Future.wait([
       _loadRecentItems(),
+      _loadRecentOutfits(),
       _fetchWeatherAndLocation(),
     ]);
   }
@@ -330,6 +351,24 @@ class _HomePageState extends State<HomePage> {
 
               // ── Grid quần áo gần nhất ─────────────────────────
               _buildWardrobeSliver(),
+
+              // ── Trang phục của tôi ─────────────────────────────
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 28, 20, 0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _sectionHeader(
+                        'Trang phục của tôi',
+                        onViewAll: () => widget.onNavigateTo?.call(1),
+                      ),
+                      const SizedBox(height: 14),
+                      _buildRecentOutfits(),
+                    ],
+                  ),
+                ),
+              ),
 
               // ── AI Stylist Recommendation ──────────────────────
               SliverToBoxAdapter(
@@ -841,6 +880,127 @@ class _HomePageState extends State<HomePage> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────────
+  // Trang phục của tôi (Danh sách outfits phối sẵn)
+  // ─────────────────────────────────────────────────────────────────
+  Widget _buildRecentOutfits() {
+    if (_isLoadingOutfits) {
+      return const SizedBox(
+        height: 160,
+        child: Center(child: CircularProgressIndicator(color: AppColors.primary)),
+      );
+    }
+
+    if (_recentOutfits.isEmpty) {
+      return Container(
+        height: 120,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: AppColors.primary.withValues(alpha: 0.08)),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.style_outlined, color: AppColors.primary.withValues(alpha: 0.25), size: 36),
+              const SizedBox(height: 8),
+              Text(
+                'Chưa có trang phục phối sẵn nào',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.primary.withValues(alpha: 0.6),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return SizedBox(
+      height: 180,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        itemCount: _recentOutfits.length,
+        separatorBuilder: (context, index) => const SizedBox(width: 14),
+        itemBuilder: (context, index) {
+          final outfit = _recentOutfits[index];
+          final String title = outfit['Title']?.toString() ?? outfit['title']?.toString() ?? 'Trang phục';
+          final String? snapshotUrl = outfit['CanvasSnapshotUrl']?.toString() ??
+              outfit['canvasSnapshotUrl']?.toString() ??
+              outfit['snapshotUrl']?.toString();
+
+          return GestureDetector(
+            onTap: () {
+              widget.onNavigateTo?.call(1);
+            },
+            child: Container(
+              width: 130,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.05),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(18),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      child: Container(
+                        color: const Color(0xFFF8F9FA),
+                        child: snapshotUrl == null || snapshotUrl.isEmpty
+                            ? const Icon(Icons.style_rounded, color: AppColors.primary, size: 36)
+                            : Image.network(
+                                snapshotUrl,
+                                fit: BoxFit.contain,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    const Icon(Icons.broken_image_outlined, color: AppColors.primary, size: 36),
+                                loadingBuilder: (context, child, progress) {
+                                  if (progress == null) return child;
+                                  return const Center(
+                                    child: SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+                                    ),
+                                  );
+                                },
+                              ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      child: Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }

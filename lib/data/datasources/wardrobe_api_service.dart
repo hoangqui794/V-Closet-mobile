@@ -11,36 +11,67 @@ class WardrobeApiService {
 
   /// Lấy danh sách tủ đồ từ backend
   Future<List<ClothingItem>> getItems({String? category, String? color}) async {
-    try {
-      final queryParams = <String, dynamic>{};
-      if (category != null && category.isNotEmpty) queryParams['category'] = category;
-      if (color != null && color.isNotEmpty) queryParams['color'] = color;
+    int retries = 3;
+    int delayMs = 1000;
 
-      final response = await _apiService.get('/api/Wardrobe', queryParameters: queryParams);
-      
-      if (response.statusCode == 200) {
-        final List<dynamic> data = response.data;
-        return data.map((json) => ClothingItem.fromJson(json)).toList();
+    for (int attempt = 1; attempt <= retries; attempt++) {
+      try {
+        final queryParams = <String, dynamic>{};
+        if (category != null && category.isNotEmpty) queryParams['category'] = category;
+        if (color != null && color.isNotEmpty) queryParams['color'] = color;
+
+        final response = await _apiService.get('/api/Wardrobe', queryParameters: queryParams);
+        
+        if (response.statusCode == 200) {
+          final List<dynamic> data = response.data;
+          return data.map((json) => ClothingItem.fromJson(json)).toList();
+        }
+        
+        if (attempt < retries) {
+          print('Lấy danh sách tủ đồ thất bại (status: ${response.statusCode}), đang thử lại lần $attempt...');
+          await Future.delayed(Duration(milliseconds: delayMs * attempt));
+          continue;
+        }
+        return [];
+      } catch (e) {
+        print('Lỗi lấy danh sách tủ đồ (lần thử $attempt): $e');
+        if (attempt < retries) {
+          await Future.delayed(Duration(milliseconds: delayMs * attempt));
+        } else {
+          return [];
+        }
       }
-      return [];
-    } catch (e) {
-      print('Lỗi lấy danh sách tủ đồ: $e');
-      return [];
     }
+    return [];
   }
 
   /// Lấy chi tiết 1 item
   Future<ClothingItem?> getItem(String id) async {
-    try {
-      final response = await _apiService.get('/api/Wardrobe/$id');
-      if (response.statusCode == 200) {
-        return ClothingItem.fromJson(response.data);
+    int retries = 3;
+    int delayMs = 1000;
+
+    for (int attempt = 1; attempt <= retries; attempt++) {
+      try {
+        final response = await _apiService.get('/api/Wardrobe/$id');
+        if (response.statusCode == 200) {
+          return ClothingItem.fromJson(response.data);
+        }
+        if (attempt < retries) {
+          print('Lấy chi tiết item thất bại (status: ${response.statusCode}), đang thử lại lần $attempt...');
+          await Future.delayed(Duration(milliseconds: delayMs * attempt));
+          continue;
+        }
+        return null;
+      } catch (e) {
+        print('Lỗi lấy chi tiết item (lần thử $attempt): $e');
+        if (attempt < retries) {
+          await Future.delayed(Duration(milliseconds: delayMs * attempt));
+        } else {
+          return null;
+        }
       }
-      return null;
-    } catch (e) {
-      print('Lỗi lấy chi tiết item: $e');
-      return null;
     }
+    return null;
   }
 
   /// Upload ảnh và tạo item mới vào tủ đồ

@@ -123,7 +123,7 @@ class _ClosetPageState extends State<ClosetPage>
       if (!mounted) return;
       setState(() => _isLoadingOutfits = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Không thể tải bộ phối đồ: $e')),
+        SnackBar(content: Text('Không thể tải trang phục: $e')),
       );
     }
   }
@@ -282,7 +282,7 @@ class _ClosetPageState extends State<ClosetPage>
                     ),
                     Tab(
                       icon: Icon(Icons.style_rounded, size: 18),
-                      text: 'Bộ phối đồ',
+                      text: 'Trang phục',
                       height: 52,
                     ),
                   ],
@@ -843,11 +843,11 @@ class _ClosetPageState extends State<ClosetPage>
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Đổi tên bộ phối đồ'),
+          title: const Text('Đổi tên trang phục'),
           content: TextField(
             controller: textController,
             decoration: const InputDecoration(
-              labelText: 'Tên bộ phối đồ',
+              labelText: 'Tên trang phục',
               hintText: 'Nhập tên mới...',
             ),
             autofocus: true,
@@ -877,7 +877,7 @@ class _ClosetPageState extends State<ClosetPage>
         await _outfitApiService.updateOutfitTitle(outfitId, newTitle);
         Navigator.pop(context); // Close loading dialog
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Đổi tên bộ phối đồ thành công!')),
+          const SnackBar(content: Text('Đổi tên trang phục thành công!')),
         );
         _fetchOutfits();
       } catch (e) {
@@ -899,7 +899,7 @@ class _ClosetPageState extends State<ClosetPage>
       builder: (context) {
         return AlertDialog(
           title: const Text('Xác nhận xóa'),
-          content: Text('Bạn có chắc chắn muốn xóa bộ phối đồ "$title" không?'),
+          content: Text('Bạn có chắc chắn muốn xóa trang phục "$title" không?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
@@ -921,7 +921,7 @@ class _ClosetPageState extends State<ClosetPage>
         await _outfitApiService.deleteOutfit(outfitId);
         Navigator.pop(context); // Close loading dialog
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Đã xóa bộ phối đồ thành công!')),
+          const SnackBar(content: Text('Đã xóa trang phục thành công!')),
         );
         _fetchOutfits();
       } catch (e) {
@@ -999,7 +999,7 @@ class _ClosetPageState extends State<ClosetPage>
           ),
           const SizedBox(height: 12),
           const Text(
-            'Chưa có bộ phối đồ nào',
+            'Chưa có trang phục nào',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w800,

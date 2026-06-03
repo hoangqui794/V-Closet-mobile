@@ -1115,9 +1115,11 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
           msg = errorData.toString();
         }
       }
+      debugPrint('Try-on exception: $e');
+      debugPrint('Try-on error message: $msg');
       setState(() {
         _isGenerating = false;
-        _errorMessage = 'Lỗi: $msg';
+        _errorMessage = 'Không thể thực hiện thử đồ. Vui lòng thử lại sau.';
       });
     }
   }
@@ -1163,9 +1165,10 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
         } else if (status == 'failed' || error != null) {
           timer.cancel();
           _stopTimer();
+          debugPrint('Try-on failed error: $error');
           setState(() {
             _isGenerating = false;
-            _errorMessage = error ?? 'Thử đồ thất bại do lỗi xử lý AI.';
+            _errorMessage = 'Thử đồ thất bại do lỗi xử lý AI. Vui lòng thử lại sau.';
           });
         }
       } catch (e) {
@@ -1212,10 +1215,11 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
         throw Exception(result?['errorMessage'] ?? 'Lưu thất bại.');
       }
     } catch (e) {
+      debugPrint('Save image exception: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Không thể lưu ảnh: ${e.toString()}'),
+          const SnackBar(
+            content: Text('Lưu ảnh thất bại. Vui lòng thử lại sau.'),
             backgroundColor: Colors.red,
           ),
         );
