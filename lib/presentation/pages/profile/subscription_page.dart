@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -6,6 +7,8 @@ import '../../../core/theme/app_colors.dart';
 import '../../../data/datasources/auth_local_storage.dart';
 import '../../../data/datasources/subscription_api_service.dart';
 import '../../../data/datasources/ad_service.dart';
+import '../../../data/datasources/signalr_service.dart';
+import 'manual_payment_sheet.dart';
 
 class SubscriptionPage extends StatefulWidget {
   const SubscriptionPage({super.key});
@@ -33,16 +36,24 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
   List<PaymentTransaction> _transactions = [];
   bool _isLoadingPlans = true;
   bool _isLoadingTransactions = true;
+  StreamSubscription<Map<String, dynamic>>? _paymentUpdateSubscription;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _loadSubscriptionData();
+
+    // Đăng ký lắng nghe cập nhật trạng thái thanh toán thời gian thực từ SignalR
+    _paymentUpdateSubscription = SignalRService().onPaymentUpdate.listen((update) {
+      if (!mounted) return;
+      _handlePaymentUpdate(update);
+    });
   }
 
   @override
   void dispose() {
+    _paymentUpdateSubscription?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -52,6 +63,87 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
     if (state == AppLifecycleState.resumed) {
       _loadSubscriptionData();
     }
+  }
+
+  void _handlePaymentUpdate(Map<String, dynamic> update) {
+    final status = update['status']?.toString();
+    final message = update['message']?.toString() ?? 'Cập nhật trạng thái thanh toán mới.';
+
+    if (status == 'success') {
+      _showPaymentResultDialog(
+        isSuccess: true,
+        title: 'Thanh toán thành công',
+        message: message,
+      );
+      _loadSubscriptionData();
+    } else if (status == 'failed') {
+      _showPaymentResultDialog(
+        isSuccess: false,
+        title: 'Thanh toán thất bại',
+        message: message,
+      );
+      _loadSubscriptionData();
+    }
+  }
+
+  void _showPaymentResultDialog({
+    required bool isSuccess,
+    required String title,
+    required String message,
+  }) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: AppColors.background,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          title: Row(
+            children: [
+              Icon(
+                isSuccess ? Icons.check_circle_rounded : Icons.error_rounded,
+                color: isSuccess ? Colors.green : AppColors.error,
+                size: 28,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          content: Text(
+            message,
+            style: const TextStyle(
+              color: AppColors.primary,
+              fontSize: 14,
+              height: 1.4,
+            ),
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: isSuccess ? Colors.green : AppColors.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              ),
+              child: const Text(
+                'Đồng ý',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<void> _loadSubscriptionData() async {
@@ -115,12 +207,21 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (context) {
+      builder: (sheetContext) {
         return _PaymentGatewaySelectorSheet(
           packageName: plan.name,
           price: plan.price,
           onSelected: (gateway) {
-            Navigator.pop(context); // Close gateway selector
+            Navigator.pop(sheetContext); // Close gateway selector
+            if (gateway == 'momo' || gateway == 'vnpay') {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Tính năng đang phát triển. Vui lòng chọn chuyển khoản thủ công.'),
+                  duration: Duration(seconds: 2),
+                ),
+              );
+              return;
+            }
             _initiatePurchase(plan, gateway);
           },
         );
@@ -129,6 +230,23 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
   }
 
   void _initiatePurchase(SubscriptionPlan plan, String gateway) async {
+    if (gateway == 'manual_transfer') {
+      showModalBottomSheet(
+        context: context,
+        backgroundColor: Colors.transparent,
+        isScrollControlled: true,
+        builder: (context) {
+          return ManualPaymentSheet(
+            plan: plan,
+            onSubmitSuccess: () {
+              _loadSubscriptionData();
+            },
+          );
+        },
+      );
+      return;
+    }
+
     if (gateway == 'vnpay') {
       final confirmed = await showDialog<bool>(
         context: context,
@@ -709,7 +827,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
                         isSuccess
                             ? 'Thành công'
                             : isPending
-                                ? 'Chờ'
+                                ? (tx.paymentGateway == 'manual_transfer' ? 'Chờ duyệt' : 'Chờ')
                                 : 'Thất bại',
                         style: TextStyle(
                           fontSize: 10,
@@ -1927,6 +2045,16 @@ class _PaymentGatewaySelectorSheet extends StatelessWidget {
             iconColor: const Color(0xFF005BAA),
             logoText: 'VNPay',
             logoBgColor: const Color(0xFFE6F0FA),
+          ),
+          const SizedBox(height: 12),
+          _buildGatewayCard(
+            context: context,
+            gateway: 'manual_transfer',
+            title: 'Chuyển khoản thủ công (VietQR)',
+            subtitle: 'Chuyển khoản ngân hàng 24/7 bằng mã VietQR hoặc STK',
+            iconColor: AppColors.primary,
+            logoText: 'Bank',
+            logoBgColor: AppColors.primary.withValues(alpha: 0.08),
           ),
           const SizedBox(height: 24),
           TextButton(

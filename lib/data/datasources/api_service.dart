@@ -178,6 +178,15 @@ class ApiService {
     }
   }
 
+  // PATCH request
+  Future<Response> patch(String path, {dynamic data}) async {
+    try {
+      return await _dio.patch(path, data: data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<void> _logoutAndRedirectToLogin() async {
     if (GetIt.I.isRegistered<AuthLocalStorage>()) {
       await GetIt.I<AuthLocalStorage>().clearSession();

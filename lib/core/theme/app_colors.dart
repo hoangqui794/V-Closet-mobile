@@ -1,25 +1,24 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // Primary colors (Brown palette)
-  static const Color primary = Color(0xFF4A3728);
-  static const Color primaryLight = Color(0xFF7F5539);
-  static const Color primaryDark = Color(0xFF32251B);
+  // Primary colors (~Dusty Grape)
+  static const Color primary = Color(0xFF4A4E69);
+  static const Color primaryLight = Color(0xFF6B6F8A);
+  static const Color primaryDark = Color(0xFF33364D);
 
-  // Secondary/Accent colors (Cream palette)
-  static const Color accent = Color(0xFFE3D5CA);
-  static const Color secondary = Color(0xFFF0E6DA);
-  static const Color muted = Color(0xFFF1EAE2);
-  
-  // Neutral colors
-  static const Color background = Color(0xFFFDFAF6);
-  static const Color surface = Colors.white;
+  // Secondary/Accent colors (~Lilac Ash & Almond Silk)
+  static const Color accent = Color(0xFF9A8C98);
+  static const Color secondary = Color(0xFFC9ADA7);
+  static const Color muted = Color(0xFFDDD5D0);
+
+  // Neutral colors (~Seashell)
+  static const Color background = Color(0xFFF2E9E4);
+  static const Color surface = Color(0xFFFAF6F4);
   static const Color error = Color(0xFFC0392B);
 
   // Text colors
-  static const Color onPrimary = Color(0xFFFDFAF6);
-  static const Color onBackground = Color(0xFF4A3728);
-  static const Color onSurface = Color(0xFF4A3728);
-  static const Color textMuted = Color(0xB24A3728); // 70% opacity
+  static const Color onPrimary = Color(0xFFF2E9E4);
+  static const Color onBackground = Color(0xFF4A4E69);
+  static const Color onSurface = Color(0xFF4A4E69);
+  static const Color textMuted = Color(0xFF9A8C98); // Lilac Ash
 }
-

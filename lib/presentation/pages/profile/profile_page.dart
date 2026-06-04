@@ -9,6 +9,7 @@ import '../auth/login_page.dart';
 import 'change_password_page.dart';
 import 'edit_profile_page.dart';
 import 'subscription_page.dart';
+import 'notification_page.dart';
 import '../../../data/datasources/signalr_service.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -450,7 +451,16 @@ class _ProfilePageState extends State<ProfilePage> {
                                 ).then((_) => setState(() {}));
                               },
                             ),
-                            _menuTile(Icons.notifications_outlined, 'Thông báo'),
+                            _menuTile(
+                              Icons.notifications_outlined,
+                              'Thông báo',
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const NotificationPage()),
+                                );
+                              },
+                            ),
                             const SizedBox(height: 18),
                             const Text(
                               'Hỗ trợ & Bảo mật',

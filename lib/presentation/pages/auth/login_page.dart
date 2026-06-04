@@ -21,7 +21,7 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final _authService = GetIt.I<AuthApiService>();
-  
+
   final GoogleSignIn _googleSignIn = GoogleSignIn(
     scopes: ['email', 'profile'],
     serverClientId: '3533462823-2k0gvs8nl5urrqj4rdbkhrdjnrkci8ip.apps.googleusercontent.com',
@@ -79,10 +79,8 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _googleLogin() async {
     setState(() => _isLoading = true);
     try {
-      // Bắt đầu luồng đăng nhập Google
       final googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
-        // Người dùng hủy đăng nhập
         return;
       }
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
@@ -92,7 +90,6 @@ class _LoginPageState extends State<LoginPage> {
         throw Exception('Không lấy được ID Token từ tài khoản Google của bạn.');
       }
 
-      // Gửi Token lên API Backend
       final response = await _authService.googleLogin(idToken);
       final role = (response['Role'] ?? response['role']) as String? ?? 'Customer';
       final isOnboarding =
@@ -254,14 +251,14 @@ class _LoginPageState extends State<LoginPage> {
                                   hintText: 'Nhập email của bạn',
                                   prefixIcon: const Icon(
                                     Icons.email_rounded,
-                                    color: Color(0xFFD4A373),
+                                    color: AppColors.accent,
                                   ),
-                                  fillColor: const Color(0xFFFAF9F6),
+                                  fillColor: AppColors.surface,
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(16),
                                     borderSide: BorderSide.none,
                                   ),
-                                  contentPadding: isSmallScreen 
+                                  contentPadding: isSmallScreen
                                       ? const EdgeInsets.symmetric(horizontal: 16, vertical: 12)
                                       : const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                                 ),
@@ -273,9 +270,10 @@ class _LoginPageState extends State<LoginPage> {
                                   Text(
                                     'Mật khẩu',
                                     style: TextStyle(
-                                        fontSize: isSmallScreen ? 13.0 : 14.0,
-                                        fontWeight: FontWeight.w700,
-                                        color: AppColors.primary),
+                                      fontSize: isSmallScreen ? 13.0 : 14.0,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppColors.primary,
+                                    ),
                                   ),
                                   TextButton(
                                     onPressed: () {
@@ -306,14 +304,14 @@ class _LoginPageState extends State<LoginPage> {
                                   hintText: '••••••••',
                                   prefixIcon: const Icon(
                                     Icons.lock_rounded,
-                                    color: Color(0xFFD4A373),
+                                    color: AppColors.accent,
                                   ),
-                                  fillColor: const Color(0xFFFAF9F6),
+                                  fillColor: AppColors.surface,
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(16),
                                     borderSide: BorderSide.none,
                                   ),
-                                  contentPadding: isSmallScreen 
+                                  contentPadding: isSmallScreen
                                       ? const EdgeInsets.symmetric(horizontal: 16, vertical: 12)
                                       : const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                                   suffixIcon: IconButton(
@@ -334,7 +332,7 @@ class _LoginPageState extends State<LoginPage> {
                               ElevatedButton(
                                 onPressed: _login,
                                 style: ElevatedButton.styleFrom(
-                                  padding: isSmallScreen 
+                                  padding: isSmallScreen
                                       ? const EdgeInsets.symmetric(vertical: 12)
                                       : const EdgeInsets.symmetric(vertical: 16),
                                 ),
@@ -356,7 +354,7 @@ class _LoginPageState extends State<LoginPage> {
                         children: [
                           Expanded(
                             child: Divider(
-                              color: const Color(0xFFDCCBB5).withValues(alpha: 0.6),
+                              color: AppColors.secondary.withValues(alpha: 0.6),
                             ),
                           ),
                           Padding(
@@ -366,20 +364,19 @@ class _LoginPageState extends State<LoginPage> {
                               style: TextStyle(
                                 fontSize: isSmallScreen ? 10.0 : 12.0,
                                 fontWeight: FontWeight.bold,
-                                color: const Color(0x664A3728),
+                                color: AppColors.textMuted,
                                 letterSpacing: 0.6,
                               ),
                             ),
                           ),
                           Expanded(
                             child: Divider(
-                              color: const Color(0xFFDCCBB5).withValues(alpha: 0.6),
+                              color: AppColors.secondary.withValues(alpha: 0.6),
                             ),
                           ),
                         ],
                       ),
                       SizedBox(height: spacingSmall),
-                      // Nút đăng nhập Google full width, bỏ hoàn toàn nút Apple
                       _socialButton(
                         label: 'Đăng nhập bằng Google',
                         icon: FontAwesomeIcons.google,
