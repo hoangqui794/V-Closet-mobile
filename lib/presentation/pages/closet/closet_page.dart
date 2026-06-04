@@ -11,6 +11,7 @@ import '../../../../data/datasources/bg_removal_service.dart';
 import '../../../../data/datasources/wardrobe_api_service.dart';
 import '../../../../data/datasources/outfit_api_service.dart';
 import '../../../../data/datasources/auth_local_storage.dart';
+import '../../../../data/datasources/subscription_api_service.dart';
 import '../profile/subscription_page.dart';
 import '../../../../domain/entities/clothing_item.dart';
 import 'canvas_outfit_page.dart';
@@ -919,6 +920,9 @@ class _ClosetPageState extends State<ClosetPage>
       _showLoadingDialog('Đang xóa...');
       try {
         await _outfitApiService.deleteOutfit(outfitId);
+        try {
+          await GetIt.I<SubscriptionApiService>().syncSubscriptionStatus();
+        } catch (_) {}
         Navigator.pop(context); // Close loading dialog
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Đã xóa trang phục thành công!')),
@@ -1208,6 +1212,11 @@ class _ClosetPageState extends State<ClosetPage>
       Navigator.pop(context);
 
       if (deleted) {
+        // Giảm số lượng tủ đồ cục bộ
+        final localStorage = GetIt.I<AuthLocalStorage>();
+        final currentCount = localStorage.getWardrobeItemCount();
+        await localStorage.saveWardrobeItemCount(currentCount > 0 ? currentCount - 1 : 0);
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Đã xóa món đồ khỏi tủ đồ thành công!')),
         );
@@ -1760,6 +1769,10 @@ class _ClosetPageState extends State<ClosetPage>
       }
 
       if (newItem != null) {
+        // Tăng số lượng tủ đồ cục bộ
+        final currentCount = localStorage.getWardrobeItemCount();
+        await localStorage.saveWardrobeItemCount(currentCount + 1);
+
         _fetchItems();
 
         if (mounted) {
@@ -1796,8 +1809,17 @@ class _ClosetPageState extends State<ClosetPage>
     } catch (e) {
       if (mounted) {
         Navigator.of(context, rootNavigator: true).pop();
+        String errorMsg = e.toString();
+        if (e is DioException) {
+          final data = e.response?.data;
+          if (data is Map && data['error'] != null) {
+            errorMsg = data['error'].toString();
+          } else if (data is Map && data['message'] != null) {
+            errorMsg = data['message'].toString();
+          }
+        }
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Đã xảy ra lỗi: $e')),
+          SnackBar(content: Text(errorMsg)),
         );
       }
     }

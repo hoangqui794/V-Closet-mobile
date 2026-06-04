@@ -1589,8 +1589,6 @@ class _OutOfCreditsSheetState extends State<_OutOfCreditsSheet> {
   final int _countdown = 5;
 
   void _watchAdForCredit() async {
-    final localStorage = GetIt.I<AuthLocalStorage>();
-
     // Kiểm tra ad đã sẵn sàng chưa
     if (!AdService().isAdLoaded) {
       if (mounted) {
@@ -1609,24 +1607,29 @@ class _OutOfCreditsSheetState extends State<_OutOfCreditsSheet> {
     // Phát rewarded ad thật
     await AdService().showRewardedAd(
       onRewarded: (_) async {
-        // User xem đủ video → cộng 1 credit
-        if (widget.isBgRemoval) {
-          final current = localStorage.getBgRemovalCredits();
-          await localStorage.updateCredits(bgCredits: current + 1);
-        } else {
-          final current = localStorage.getTryOnCredits();
-          await localStorage.updateCredits(tryonCredits: current + 1);
-        }
+        try {
+          final rewardType = widget.isBgRemoval ? 'bg_removal' : 'try_on';
+          await GetIt.I<SubscriptionApiService>().claimAdReward(rewardType);
 
-        if (!mounted) return;
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('🎉 Cảm ơn bạn! Đã cộng 1 lượt miễn phí.'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 2),
-          ),
-        );
+          if (!mounted) return;
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('🎉 Cảm ơn bạn! Đã cộng 1 lượt miễn phí.'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+            ),
+          );
+        } catch (e) {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Không thể nhận phần thưởng: $e'),
+              backgroundColor: Colors.redAccent,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
       },
       onFailed: () {
         if (mounted) {

@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
@@ -9,6 +11,9 @@ import 'auth_local_storage.dart';
 
 class ApiService {
   final Dio _dio;
+  bool _isRefreshing = false;
+  final List<Completer<String?>> _refreshCompleters = [];
+  bool _isLoggingOut = false;
 
   ApiService(this._dio) {
     _dio.options.baseUrl = dotenv.get('API_URL');
@@ -41,6 +46,7 @@ class ApiService {
             if (isAuthApi) {
               // Nếu là chính API login hoặc refresh-token mà trả về 401 thì văng app liền
               await _logoutAndRedirectToLogin();
+              return handler.next(error);
             } else {
               // Nếu không phải API login/refresh, thử refresh token
               if (GetIt.I.isRegistered<AuthLocalStorage>()) {
@@ -49,6 +55,35 @@ class ApiService {
                 final refreshToken = localStorage.getRefreshToken();
 
                 if (accessToken != null && refreshToken != null) {
+                  if (_isRefreshing) {
+                    final completer = Completer<String?>();
+                    _refreshCompleters.add(completer);
+                    try {
+                      final newAccess = await completer.future;
+                      if (newAccess != null && newAccess.isNotEmpty) {
+                        // Cập nhật token trong request bị lỗi ban đầu và gửi lại
+                        final opts = error.requestOptions;
+                        opts.headers['Authorization'] = 'Bearer $newAccess';
+
+                        final cloneReq = await _dio.request(
+                          opts.path,
+                          options: Options(
+                            method: opts.method,
+                            headers: opts.headers,
+                            contentType: opts.contentType,
+                          ),
+                          data: opts.data,
+                          queryParameters: opts.queryParameters,
+                        );
+                        return handler.resolve(cloneReq);
+                      }
+                    } catch (e) {
+                      print('Lỗi khi chờ token làm mới: $e');
+                    }
+                    return handler.next(error);
+                  }
+
+                  _isRefreshing = true;
                   try {
                     // Tạo một Dio instance tạm thời để gọi refresh token tránh vòng lặp vô hạn
                     final refreshDio = Dio(BaseOptions(baseUrl: _dio.options.baseUrl));
@@ -63,7 +98,30 @@ class ApiService {
                       final data = response.data as Map<String, dynamic>;
                       final newAccess = (data['AccessToken'] ?? data['accessToken']) as String? ?? '';
                       final newRefresh = (data['RefreshToken'] ?? data['refreshToken']) as String? ?? '';
-                      final userId       = (data['UserId']        ?? data['userId'])        as int?    ?? 0;
+                      
+                      // Parse userId linh hoạt (hỗ trợ cả int và String Guid từ JWT)
+                      int userId = 0;
+                      final rawUserId = data['UserId'] ?? data['userId'];
+                      if (rawUserId is int) {
+                        userId = rawUserId;
+                      } else if (rawUserId is String && newAccess.isNotEmpty) {
+                        try {
+                          final parts = newAccess.split('.');
+                          if (parts.length >= 2) {
+                            final payload = parts[1];
+                            final normalized = base64Url.normalize(payload);
+                            final decoded = utf8.decode(base64Url.decode(normalized));
+                            final jwtPayload = json.decode(decoded) as Map<String, dynamic>;
+                            final nameid = jwtPayload['nameid'] ?? jwtPayload['sub'];
+                            if (nameid != null) {
+                              userId = int.tryParse(nameid.toString()) ?? 0;
+                            }
+                          }
+                        } catch (e) {
+                          print('Lỗi giải mã JWT khi refresh token: $e');
+                        }
+                      }
+
                       final email        = (data['Email']         ?? data['email'])         as String? ?? '';
                       final displayName  = (data['DisplayName']   ?? data['displayName'])   as String? ?? '';
                       final role         = (data['Role']          ?? data['role'])          as String? ?? 'Customer';
@@ -85,38 +143,60 @@ class ApiService {
                           isOnboardingCompleted: isOnboardingCompleted,
                           isPasswordSet: isPasswordSet,
                         );
+
+                        // Giải phóng cho toàn bộ request đang chờ
+                        for (final completer in _refreshCompleters) {
+                          completer.complete(newAccess);
+                        }
+                        _refreshCompleters.clear();
+                        _isRefreshing = false;
+
+                        // Cập nhật token trong request bị lỗi ban đầu và gửi lại
+                        final opts = error.requestOptions;
+                        opts.headers['Authorization'] = 'Bearer $newAccess';
+
+                        final cloneReq = await _dio.request(
+                          opts.path,
+                          options: Options(
+                            method: opts.method,
+                            headers: opts.headers,
+                            contentType: opts.contentType,
+                          ),
+                          data: opts.data,
+                          queryParameters: opts.queryParameters,
+                        );
+                        return handler.resolve(cloneReq);
                       } else {
                         throw Exception('Token returned from server is empty.');
                       }
-
-                      // Cập nhật token trong request bị lỗi ban đầu và gửi lại
-                      final opts = error.requestOptions;
-                      opts.headers['Authorization'] = 'Bearer $newAccess';
-
-                      final cloneReq = await _dio.request(
-                        opts.path,
-                        options: Options(
-                          method: opts.method,
-                          headers: opts.headers,
-                          contentType: opts.contentType,
-                        ),
-                        data: opts.data,
-                        queryParameters: opts.queryParameters,
-                      );
-                      return handler.resolve(cloneReq);
+                    } else {
+                      throw Exception('Refresh token failed with status ${response.statusCode}');
                     }
                   } catch (e) {
                     // Nếu refresh token thất bại (user bị khoá / token hết hạn hoàn toàn)
                     print('Lỗi làm mới token: $e');
+                    
+                    // Giải phóng toàn bộ completer với null
+                    for (final completer in _refreshCompleters) {
+                      completer.complete(null);
+                    }
+                    _refreshCompleters.clear();
+                    _isRefreshing = false;
+
                     await _logoutAndRedirectToLogin();
+                    return handler.next(error);
                   }
                 } else {
                   // Không có token hợp lệ
                   await _logoutAndRedirectToLogin();
+                  return handler.next(error);
                 }
               } else {
                 // Không có LocalStorage đăng ký
-                navigatorKey.currentState?.pushNamedAndRemoveUntil('/login', (route) => false);
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  navigatorKey.currentState?.pushNamedAndRemoveUntil('/login', (route) => false);
+                });
+                return handler.next(error);
               }
             }
           }
@@ -188,22 +268,33 @@ class ApiService {
   }
 
   Future<void> _logoutAndRedirectToLogin() async {
-    if (GetIt.I.isRegistered<AuthLocalStorage>()) {
-      await GetIt.I<AuthLocalStorage>().clearSession();
-    }
-    
-    final context = navigatorKey.currentContext;
-    if (context != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Tài khoản đã bị khoá hoặc phiên đăng nhập hết hạn!'),
-          backgroundColor: Colors.red,
-          duration: Duration(seconds: 3),
-        ),
-      );
-      Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
-    } else {
-      navigatorKey.currentState?.pushNamedAndRemoveUntil('/login', (route) => false);
+    if (_isLoggingOut) return;
+    _isLoggingOut = true;
+
+    try {
+      if (GetIt.I.isRegistered<AuthLocalStorage>()) {
+        await GetIt.I<AuthLocalStorage>().clearSession();
+      }
+      
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final context = navigatorKey.currentContext;
+        if (context != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Tài khoản đã bị khoá hoặc phiên đăng nhập hết hạn!'),
+              backgroundColor: Colors.red,
+              duration: Duration(seconds: 3),
+            ),
+          );
+          Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+        } else {
+          navigatorKey.currentState?.pushNamedAndRemoveUntil('/login', (route) => false);
+        }
+      });
+    } finally {
+      Future.delayed(const Duration(seconds: 2), () {
+        _isLoggingOut = false;
+      });
     }
   }
 }

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'api_service.dart';
 import 'auth_local_storage.dart';
@@ -230,6 +231,21 @@ class AuthApiService {
     return 'Đăng xuất thành công.';
   }
 
+  /// Giải mã JWT payload để lấy thông tin claim
+  Map<String, dynamic> _decodeJwt(String token) {
+    try {
+      final parts = token.split('.');
+      if (parts.length < 2) return {};
+      final payload = parts[1];
+      final normalized = base64Url.normalize(payload);
+      final decoded = utf8.decode(base64Url.decode(normalized));
+      return json.decode(decoded) as Map<String, dynamic>;
+    } catch (e) {
+      print('Lỗi giải mã JWT: $e');
+      return {};
+    }
+  }
+
   /// Lưu thông tin AuthResponse vào Storage
   /// BE trả về camelCase (accessToken, refreshToken...)
   /// → đọc cả PascalCase lẫn camelCase để tương thích
@@ -237,7 +253,20 @@ class AuthApiService {
     // Đọc PascalCase trước (thực tế BE), fallback camelCase
     final accessToken  = (data['AccessToken']  ?? data['accessToken'])  as String? ?? '';
     final refreshToken = (data['RefreshToken'] ?? data['refreshToken']) as String? ?? '';
-    final userId       = (data['UserId']        ?? data['userId'])        as int?    ?? 0;
+    
+    // Parse userId linh hoạt (hỗ trợ cả int và String Guid từ JWT)
+    int userId = 0;
+    final rawUserId = data['UserId'] ?? data['userId'];
+    if (rawUserId is int) {
+      userId = rawUserId;
+    } else if (rawUserId is String && accessToken.isNotEmpty) {
+      final jwtPayload = _decodeJwt(accessToken);
+      final nameid = jwtPayload['nameid'] ?? jwtPayload['sub'];
+      if (nameid != null) {
+        userId = int.tryParse(nameid.toString()) ?? 0;
+      }
+    }
+
     final email        = (data['Email']         ?? data['email'])         as String? ?? '';
     final displayName  = (data['DisplayName']   ?? data['displayName'])   as String? ?? '';
     final role         = (data['Role']          ?? data['role'])          as String? ?? 'Customer';
@@ -265,7 +294,16 @@ class AuthApiService {
     );
     // Lưu premium status ngay sau login — dùng hasActivePremium (bool) cho badge, planType cho credits
     await _localStorage.saveHasActivePremium(hasActivePremium);
-    await _localStorage.saveSubscription(planType, 5, 5);
+    
+    int initialBg = 1;
+    int initialTryOn = 1;
+    final planLower = planType.toLowerCase();
+    if (planLower == 'premium_monthly' || planLower == 'monthly' ||
+        planLower == 'premium_yearly' || planLower == 'yearly') {
+      initialBg = 2;
+      initialTryOn = 2;
+    }
+    await _localStorage.saveSubscription(planType, initialBg, initialTryOn);
   }
 
   /// Chuyển đổi lỗi Dio thành thông báo thân thiện bằng tiếng Việt

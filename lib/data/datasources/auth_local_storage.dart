@@ -19,6 +19,8 @@ class AuthLocalStorage {
   static const String _kTryOnCredits = 'try_on_credits';
   static const String _kHasActivePremium = 'has_active_premium';
   static const String _kWardrobeItemCount = 'wardrobe_item_count';
+  static const String _kOutfitCount = 'outfit_count';
+  static const String _kOutfitLimit = 'outfit_limit';
 
   Future<void> saveTokens(String accessToken, String refreshToken) async {
     await _prefs.setString(_kAccessToken, accessToken);
@@ -80,6 +82,11 @@ class AuthLocalStorage {
     await _prefs.remove(_kIsPasswordSet);
     await _prefs.remove(_kHasActivePremium);
     await _prefs.remove(_kSubscriptionType);
+    await _prefs.remove(_kWardrobeItemCount);
+    await _prefs.remove(_kBgRemovalCredits);
+    await _prefs.remove(_kTryOnCredits);
+    await _prefs.remove(_kOutfitCount);
+    await _prefs.remove(_kOutfitLimit);
   }
 
   bool hasSession() {
@@ -87,9 +94,11 @@ class AuthLocalStorage {
   }
 
   String getSubscriptionType() => _prefs.getString(_kSubscriptionType) ?? 'free';
-  int getBgRemovalCredits() => _prefs.getInt(_kBgRemovalCredits) ?? 5;
-  int getTryOnCredits() => _prefs.getInt(_kTryOnCredits) ?? 5;
+  int getBgRemovalCredits() => _prefs.getInt(_kBgRemovalCredits) ?? 1;
+  int getTryOnCredits() => _prefs.getInt(_kTryOnCredits) ?? 1;
   bool getHasActivePremium() => _prefs.getBool(_kHasActivePremium) ?? false;
+  int getOutfitCount() => _prefs.getInt(_kOutfitCount) ?? 0;
+  int? getOutfitLimit() => _prefs.getInt(_kOutfitLimit);
 
   Future<void> saveHasActivePremium(bool value) async {
     await _prefs.setBool(_kHasActivePremium, value);
@@ -103,6 +112,18 @@ class AuthLocalStorage {
 
   Future<void> saveWardrobeItemCount(int count) async {
     await _prefs.setInt(_kWardrobeItemCount, count);
+  }
+
+  Future<void> saveOutfitCount(int count) async {
+    await _prefs.setInt(_kOutfitCount, count);
+  }
+
+  Future<void> saveOutfitLimit(int? limit) async {
+    if (limit == null) {
+      await _prefs.remove(_kOutfitLimit);
+    } else {
+      await _prefs.setInt(_kOutfitLimit, limit);
+    }
   }
 
   Future<void> updateCredits({int? bgCredits, int? tryonCredits}) async {

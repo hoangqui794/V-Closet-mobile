@@ -1119,7 +1119,7 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
       debugPrint('Try-on error message: $msg');
       setState(() {
         _isGenerating = false;
-        _errorMessage = 'Không thể thực hiện thử đồ. Vui lòng thử lại sau.';
+        _errorMessage = msg;
       });
     }
   }

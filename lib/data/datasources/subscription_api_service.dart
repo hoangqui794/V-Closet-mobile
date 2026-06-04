@@ -46,6 +46,8 @@ class MySubscription {
   final int tryOnCredits;
   final int wardrobeItemCount;
   final int? wardrobeItemLimit;
+  final int outfitCount;
+  final int? outfitLimit;
 
   MySubscription({
     required this.hasActivePremium,
@@ -57,6 +59,8 @@ class MySubscription {
     required this.tryOnCredits,
     required this.wardrobeItemCount,
     this.wardrobeItemLimit,
+    required this.outfitCount,
+    this.outfitLimit,
   });
 
   factory MySubscription.fromJson(Map<String, dynamic> json) {
@@ -72,6 +76,8 @@ class MySubscription {
       tryOnCredits: json['tryOnCredits'] as int? ?? 0,
       wardrobeItemCount: json['wardrobeItemCount'] as int? ?? 0,
       wardrobeItemLimit: json['wardrobeItemLimit'] as int?,
+      outfitCount: json['outfitCount'] as int? ?? 0,
+      outfitLimit: json['outfitLimit'] as int?,
     );
   }
 }
@@ -155,40 +161,34 @@ class SubscriptionApiService {
 
     // Luôn cập nhật hasActivePremium từ server — nguồn dữ liệu chính xác nhất
     await localStorage.saveHasActivePremium(mySub.hasActivePremium);
+    // Lưu số lượng đồ tủ đồ
+    await localStorage.saveWardrobeItemCount(mySub.wardrobeItemCount);
+    // Lưu số lượng outfit
+    await localStorage.saveOutfitCount(mySub.outfitCount);
+    await localStorage.saveOutfitLimit(mySub.outfitLimit);
 
-    final localPlan = localStorage.getSubscriptionType();
     final serverPlan = mySub.planType ?? 'free';
-
-    if (localPlan != serverPlan) {
-      // Đổi loại gói: Cấp phát credits mặc định cho gói mới
-      int initialBg = 5;
-      int initialTryOn = 5;
-
-      if (serverPlan == 'premium_monthly') {
-        initialBg = 30;
-        initialTryOn = 30;
-      } else if (serverPlan == 'premium_yearly') {
-        initialBg = 360;
-        initialTryOn = 360;
-      }
-
-      await localStorage.saveSubscription(serverPlan, initialBg, initialTryOn);
-    } else {
-      // Gói giữ nguyên: Cập nhật nếu server trả về giá trị thực tế > 0, nếu không giữ credits cũ
-      int finalBg = localStorage.getBgRemovalCredits();
-      int finalTryOn = localStorage.getTryOnCredits();
-
-      if (mySub.bgRemovalCredits > 0) {
-        finalBg = mySub.bgRemovalCredits;
-      }
-      if (mySub.tryOnCredits > 0) {
-        finalTryOn = mySub.tryOnCredits;
-      }
-
-      await localStorage.saveSubscription(serverPlan, finalBg, finalTryOn);
-    }
+    await localStorage.saveSubscription(serverPlan, mySub.bgRemovalCredits, mySub.tryOnCredits);
 
     return mySub;
+  }
+
+  /// POST /api/subscriptions/ad-reward
+  /// Trả về MySubscription cập nhật mới
+  Future<MySubscription> claimAdReward(String rewardType) async {
+    try {
+      final response = await _apiService.post(
+        '/api/subscriptions/ad-reward',
+        data: {'rewardType': rewardType},
+      );
+      if (response.statusCode == 200) {
+        // Đồng bộ lại local storage sau khi nhận phần thưởng ad thành công
+        return await syncSubscriptionStatus();
+      }
+      throw Exception('Không thể nhận phần thưởng từ quảng cáo.');
+    } on DioException catch (e) {
+      throw Exception(_getDioErrorMessage(e));
+    }
   }
 
   /// GET /api/subscriptions/transactions

@@ -724,7 +724,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
       debugPrint('Try-on error message: $msg');
       setState(() {
         _isGenerating = false;
-        _errorMessage = 'Không thể thực hiện thử đồ. Vui lòng thử lại sau.';
+        _errorMessage = msg;
       });
     }
   }

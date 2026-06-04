@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:get_it/get_it.dart';
 import 'package:camera/camera.dart';
+import 'package:dio/dio.dart';
 import '../../../data/datasources/bg_removal_service.dart';
 import '../../../data/datasources/wardrobe_api_service.dart';
 import '../../../data/datasources/auth_local_storage.dart';
@@ -496,6 +497,10 @@ class _CameraPageState extends State<CameraPage> {
       setState(() => _isLoading = false);
 
       if (newItem != null && mounted) {
+        // Tăng số lượng tủ đồ cục bộ
+        final currentCount = localStorage.getWardrobeItemCount();
+        await localStorage.saveWardrobeItemCount(currentCount + 1);
+
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
@@ -527,8 +532,17 @@ class _CameraPageState extends State<CameraPage> {
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
+        String errorMsg = e.toString();
+        if (e is DioException) {
+          final data = e.response?.data;
+          if (data is Map && data['error'] != null) {
+            errorMsg = data['error'].toString();
+          } else if (data is Map && data['message'] != null) {
+            errorMsg = data['message'].toString();
+          }
+        }
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Đã xảy ra lỗi: $e')),
+          SnackBar(content: Text(errorMsg)),
         );
       }
     }

@@ -5,9 +5,12 @@ import 'package:flutter/rendering.dart';
 import 'package:get_it/get_it.dart';
 import 'package:image_gallery_saver_plus/image_gallery_saver_plus.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../data/datasources/auth_local_storage.dart';
 import '../../../../data/datasources/outfit_api_service.dart';
+import '../../../../data/datasources/subscription_api_service.dart';
 import '../../../../data/datasources/wardrobe_api_service.dart';
 import '../../../../domain/entities/clothing_item.dart';
+import '../profile/subscription_page.dart';
 
 // ─── Data model for each item placed on canvas ────────────────────────────────
 
@@ -163,6 +166,60 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
   // ── Save ─────────────────────────────────────────────────────────────────
 
   Future<void> _saveOutfit() async {
+    final localStorage = GetIt.I<AuthLocalStorage>();
+    final count = localStorage.getOutfitCount();
+    final limit = localStorage.getOutfitLimit();
+
+    if (limit != null && count >= limit) {
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            title: const Row(
+              children: [
+                Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 28),
+                SizedBox(width: 8),
+                Text(
+                  'Giới hạn tủ phối đồ',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                ),
+              ],
+            ),
+            content: Text(
+              'Tài khoản Miễn phí chỉ được tạo tối đa $limit bộ phối đồ. Vui lòng nâng cấp Premium để phối đồ không giới hạn!',
+              style: const TextStyle(fontSize: 15),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Đóng', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                onPressed: () {
+                  Navigator.pop(context); // Close dialog
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const SubscriptionPage()),
+                  ).then((_) {
+                    GetIt.I<SubscriptionApiService>().syncSubscriptionStatus();
+                  });
+                },
+                child: const Text('Nâng cấp ngay', style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
+        );
+      }
+      return;
+    }
+
     if (_canvasItems.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -234,6 +291,12 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
         snapshotBytes: bytes,
         items: apiItems,
       );
+
+      try {
+        await GetIt.I<SubscriptionApiService>().syncSubscriptionStatus();
+      } catch (e) {
+        debugPrint('Lỗi đồng bộ gói dịch vụ sau khi lưu outfit: $e');
+      }
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
