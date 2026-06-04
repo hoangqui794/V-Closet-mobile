@@ -10,7 +10,9 @@ import 'home/home_page.dart';
 import 'outfit/outfit_page.dart';
 import 'profile/profile_page.dart';
 import 'profile/subscription_page.dart';
+import 'dart:async';
 import 'store/store_page.dart';
+import 'profile/notification_page.dart';
 import '../../data/datasources/subscription_api_service.dart';
 import '../../data/datasources/signalr_service.dart';
 
@@ -25,12 +27,59 @@ class _MainScreenState extends State<MainScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final _localStorage = GetIt.I<AuthLocalStorage>();
   int _currentIndex = 0;
+  StreamSubscription<Map<String, dynamic>>? _notificationSub;
+  OverlayEntry? _overlayEntry;
 
   @override
   void initState() {
     super.initState();
     _syncSubscription();
     SignalRService().initSignalR();
+    _listenNotifications();
+  }
+
+  @override
+  void dispose() {
+    _notificationSub?.cancel();
+    _overlayEntry?.remove();
+    super.dispose();
+  }
+
+  void _listenNotifications() {
+    _notificationSub = SignalRService().onNewNotification.listen((notification) {
+      if (!mounted) return;
+      _syncSubscription(); // Đồng bộ ngay lập tức để có Premium features
+      _showFloatingNotification(notification);
+    });
+  }
+
+  void _showFloatingNotification(Map<String, dynamic> notification) {
+    final title = notification['title']?.toString() ?? notification['Title']?.toString() ?? 'Thông báo mới';
+    final body = notification['body']?.toString() ?? notification['Body']?.toString() ?? '';
+    final type = notification['type']?.toString() ?? notification['Type']?.toString() ?? 'System';
+
+    _overlayEntry?.remove();
+    _overlayEntry = null;
+
+    _overlayEntry = OverlayEntry(
+      builder: (context) => _FloatingNotificationBanner(
+        title: title,
+        body: body,
+        type: type,
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const NotificationPage()),
+          );
+        },
+        onDismiss: () {
+          _overlayEntry?.remove();
+          _overlayEntry = null;
+        },
+      ),
+    );
+
+    Overlay.of(context).insert(_overlayEntry!);
   }
 
   Future<void> _syncSubscription() async {
@@ -326,7 +375,7 @@ class _MainScreenState extends State<MainScreen> {
             : const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: active
-              ? AppColors.accent.withValues(alpha: 0.90)
+              ? AppColors.secondary.withValues(alpha: 0.90)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(24),
         ),
@@ -447,6 +496,173 @@ class _MainScreenState extends State<MainScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _FloatingNotificationBanner extends StatefulWidget {
+  final String title;
+  final String body;
+  final String type;
+  final VoidCallback onTap;
+  final VoidCallback onDismiss;
+
+  const _FloatingNotificationBanner({
+    required this.title,
+    required this.body,
+    required this.type,
+    required this.onTap,
+    required this.onDismiss,
+  });
+
+  @override
+  State<_FloatingNotificationBanner> createState() => _FloatingNotificationBannerState();
+}
+
+class _FloatingNotificationBannerState extends State<_FloatingNotificationBanner> {
+  bool _isVisible = false;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() => _isVisible = true);
+      }
+    });
+
+    _timer = Timer(const Duration(seconds: 4), () {
+      if (mounted) {
+        setState(() => _isVisible = false);
+        Future.delayed(const Duration(milliseconds: 300), () {
+          widget.onDismiss();
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final topPadding = MediaQuery.of(context).padding.top;
+    
+    IconData icon = Icons.notifications_active_rounded;
+    Color iconColor = AppColors.primaryLight;
+    Color iconBgColor = AppColors.primary.withOpacity(0.06);
+
+    if (widget.type.toLowerCase() == 'payment') {
+      icon = Icons.account_balance_wallet_rounded;
+      iconColor = const Color(0xFFD4AF37);
+      iconBgColor = const Color(0xFFFCF8F2);
+    }
+
+    return AnimatedPositioned(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOutBack,
+      top: _isVisible ? topPadding + 10 : -120,
+      left: 16,
+      right: 16,
+      child: Material(
+        color: Colors.transparent,
+        child: GestureDetector(
+          onTap: () {
+            setState(() => _isVisible = false);
+            widget.onTap();
+            Future.delayed(const Duration(milliseconds: 300), () {
+              widget.onDismiss();
+            });
+          },
+          onPanUpdate: (details) {
+            if (details.delta.dy < -5) {
+              setState(() => _isVisible = false);
+              Future.delayed(const Duration(milliseconds: 300), () {
+                widget.onDismiss();
+              });
+            }
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.12),
+                  blurRadius: 18,
+                  offset: const Offset(0, 8),
+                ),
+                BoxShadow(
+                  color: AppColors.primary.withOpacity(0.04),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+              border: Border.all(
+                color: AppColors.primary.withOpacity(0.08),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: iconBgColor,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    icon,
+                    color: iconColor,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        widget.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        widget.body,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: AppColors.primary.withOpacity(0.7),
+                          fontSize: 12,
+                          height: 1.3,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Icon(
+                  Icons.drag_handle_rounded,
+                  color: AppColors.primary.withOpacity(0.2),
+                  size: 20,
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

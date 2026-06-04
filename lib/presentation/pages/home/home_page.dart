@@ -9,8 +9,10 @@ import '../../../data/datasources/signalr_service.dart';
 import '../../../data/datasources/wardrobe_api_service.dart';
 import '../../../data/datasources/outfit_api_service.dart';
 import '../../../data/datasources/gemini_api_service.dart';
+import '../../../data/datasources/notification_api_service.dart';
 import '../../../domain/entities/clothing_item.dart';
 import '../profile/subscription_page.dart';
+import '../profile/notification_page.dart';
 
 class HomePage extends StatefulWidget {
   final VoidCallback? onMenuPressed;
@@ -49,10 +51,24 @@ class _HomePageState extends State<HomePage> {
     _loadRecentItems();
     _loadRecentOutfits();
     _fetchWeatherAndLocation();
+    _loadInitialUnreadCount();
     // Lắng nghe badge thông báo từ SignalR
     _unreadSub = _signalR.onUnreadCountChanged.listen((count) {
       if (mounted) setState(() => _unreadCount = count);
     });
+  }
+
+  Future<void> _loadInitialUnreadCount() async {
+    try {
+      final count = await GetIt.I<NotificationApiService>().getUnreadCount();
+      if (mounted) {
+        setState(() {
+          _unreadCount = count;
+        });
+      }
+    } catch (e) {
+      debugPrint('Lỗi tải số thông báo chưa đọc ban đầu: $e');
+    }
   }
 
   @override
@@ -494,13 +510,10 @@ class _HomePageState extends State<HomePage> {
               ),
               child: IconButton(
                 onPressed: () {
-                  // TODO: navigate tới trang thông báo
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Trang thông báo đang phát triển'),
-                      duration: Duration(seconds: 1),
-                    ),
-                  );
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const NotificationPage()),
+                  ).then((_) => _loadInitialUnreadCount());
                 },
                 icon: const Icon(Icons.notifications_outlined, color: AppColors.primary, size: 22),
               ),

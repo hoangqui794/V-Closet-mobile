@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'api_service.dart';
@@ -224,6 +225,56 @@ class SubscriptionApiService {
         return paymentUrl;
       }
       throw Exception('Khởi tạo giao dịch mua gói thất bại.');
+    } on DioException catch (e) {
+      throw Exception(_getDioErrorMessage(e));
+    }
+  }
+
+  /// Upload ảnh bill/chứng từ chuyển khoản lên BE
+  Future<String> uploadPaymentProof(File imageFile) async {
+    try {
+      final fileName = imageFile.path.split(Platform.pathSeparator).last;
+      final formData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(
+          imageFile.path,
+          filename: fileName,
+        ),
+      });
+
+      final response = await _apiService.post(
+        '/api/manual-payments/upload-proof',
+        data: formData,
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data as Map<String, dynamic>;
+        return data['url'] as String;
+      }
+      throw Exception('Upload ảnh chứng từ thất bại.');
+    } on DioException catch (e) {
+      throw Exception(_getDioErrorMessage(e));
+    }
+  }
+
+  /// Nộp chứng từ thanh toán chuyển khoản thủ công
+  Future<Map<String, dynamic>> submitManualPayment({
+    required String planId,
+    required String proofImageUrl,
+    String? userNote,
+  }) async {
+    try {
+      final response = await _apiService.post(
+        '/api/manual-payments/submit',
+        data: {
+          'planId': planId,
+          'proofImageUrl': proofImageUrl,
+          'userNote': userNote,
+        },
+      );
+      if (response.statusCode == 200) {
+        return response.data as Map<String, dynamic>;
+      }
+      throw Exception('Nộp chứng từ chuyển khoản thất bại.');
     } on DioException catch (e) {
       throw Exception(_getDioErrorMessage(e));
     }

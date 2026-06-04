@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // Primary colors (~Dusty Grape palette)
+  // Primary colors (~Dusty Grape)
   static const Color primary = Color(0xFF4A4E69);
   static const Color primaryLight = Color(0xFF6B6F8A);
   static const Color primaryDark = Color(0xFF33364D);
@@ -20,7 +20,5 @@ class AppColors {
   static const Color onPrimary = Color(0xFFF2E9E4);
   static const Color onBackground = Color(0xFF4A4E69);
   static const Color onSurface = Color(0xFF4A4E69);
-  static const Color textMuted = Color(0xB24A4E69); // 70% opacity
+  static const Color textMuted = Color(0xFF9A8C98); // Lilac Ash
 }
-
-

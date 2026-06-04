@@ -14,6 +14,7 @@ import 'data/datasources/tryon_api_service.dart';
 import 'data/datasources/affiliate_api_service.dart';
 import 'data/datasources/subscription_api_service.dart';
 import 'data/datasources/gemini_api_service.dart';
+import 'data/datasources/notification_api_service.dart';
 
 final sl = GetIt.instance; // sl: Service Locator
 
@@ -40,5 +41,6 @@ Future<void> init() async {
   sl.registerLazySingleton(() => AffiliateApiService(sl()));
   sl.registerLazySingleton(() => SubscriptionApiService(sl()));
   sl.registerLazySingleton(() => GeminiApiService());
+  sl.registerLazySingleton(() => NotificationApiService(sl()));
   // Register your Repositories, UseCases here
 }

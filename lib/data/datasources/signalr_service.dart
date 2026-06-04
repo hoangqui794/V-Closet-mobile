@@ -24,6 +24,10 @@ class SignalRService {
   final _notificationController = StreamController<Map<String, dynamic>>.broadcast();
   Stream<Map<String, dynamic>> get onNewNotification => _notificationController.stream;
 
+  // Stream để các widget lắng nghe cập nhật trạng thái thanh toán mới
+  final _paymentUpdateController = StreamController<Map<String, dynamic>>.broadcast();
+  Stream<Map<String, dynamic>> get onPaymentUpdate => _paymentUpdateController.stream;
+
   void initSignalR() {
     final token = _localStorage.getAccessToken();
     if (token == null || token.isEmpty) {
@@ -75,6 +79,22 @@ class SignalRService {
           _notificationController.add(notification);
         } catch (e) {
           debugPrint("SignalR: Lỗi parse ReceiveNotification: $e");
+        }
+      }
+    });
+
+    // Lắng nghe sự kiện "ReceivePaymentUpdate" — BE gửi cập nhật trạng thái thanh toán
+    _hubConnection!.on("ReceivePaymentUpdate", (arguments) {
+      if (arguments != null && arguments.isNotEmpty) {
+        try {
+          final raw = arguments.first;
+          final Map<String, dynamic> update = (raw is Map)
+              ? Map<String, dynamic>.from(raw)
+              : {};
+          debugPrint("SignalR: ReceivePaymentUpdate = $update");
+          _paymentUpdateController.add(update);
+        } catch (e) {
+          debugPrint("SignalR: Lỗi parse ReceivePaymentUpdate: $e");
         }
       }
     });
