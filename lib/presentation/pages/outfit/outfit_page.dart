@@ -706,17 +706,26 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
       _scanController.stop();
       String msg = e.toString();
       if (e is DioException) {
-        final errorData = e.response?.data;
-        if (errorData is Map) {
-          if (errorData.containsKey('error')) {
-            msg = errorData['error'].toString();
-          } else if (errorData.containsKey('message')) {
-            msg = errorData['message'].toString();
-          }
-        } else if (errorData != null) {
-          msg = errorData.toString();
-          if (msg.length > 250) {
-            msg = '${msg.substring(0, 250)}...';
+        if (e.response?.statusCode == 413) {
+          msg = 'Dung lượng ảnh quá lớn (giới hạn 30MB). Vui lòng chọn hoặc chụp ảnh nhẹ hơn.';
+        } else {
+          final errorData = e.response?.data;
+          if (errorData is Map) {
+            if (errorData.containsKey('error')) {
+              msg = errorData['error'].toString();
+            } else if (errorData.containsKey('message')) {
+              msg = errorData['message'].toString();
+            }
+          } else if (errorData != null) {
+            final errorStr = errorData.toString();
+            if (errorStr.contains('<html') || errorStr.contains('<!DOCTYPE html>')) {
+              msg = 'Máy chủ AI tạm thời không phản hồi. Vui lòng thử lại sau.';
+            } else {
+              msg = errorStr;
+              if (msg.length > 250) {
+                msg = '${msg.substring(0, 250)}...';
+              }
+            }
           }
         }
       }

@@ -534,11 +534,27 @@ class _CameraPageState extends State<CameraPage> {
       if (mounted) {
         String errorMsg = e.toString();
         if (e is DioException) {
-          final data = e.response?.data;
-          if (data is Map && data['error'] != null) {
-            errorMsg = data['error'].toString();
-          } else if (data is Map && data['message'] != null) {
-            errorMsg = data['message'].toString();
+          if (e.response?.statusCode == 413) {
+            errorMsg = 'Ảnh chụp quá lớn (giới hạn 30MB). Vui lòng chọn hoặc chụp ảnh nhẹ hơn.';
+          } else {
+            final data = e.response?.data;
+            if (data is Map) {
+              if (data['error'] != null) {
+                errorMsg = data['error'].toString();
+              } else if (data['message'] != null) {
+                errorMsg = data['message'].toString();
+              }
+            } else if (data != null) {
+              final dataStr = data.toString();
+              if (dataStr.contains('<html') || dataStr.contains('<!DOCTYPE html>')) {
+                errorMsg = 'Không thể kết nối đến hệ thống. Vui lòng thử lại sau.';
+              } else {
+                errorMsg = dataStr;
+                if (errorMsg.length > 250) {
+                  errorMsg = '${errorMsg.substring(0, 250)}...';
+                }
+              }
+            }
           }
         }
         ScaffoldMessenger.of(context).showSnackBar(
