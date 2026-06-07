@@ -10,7 +10,7 @@ class SubscriptionPlan {
   final String? description;
   final double price;
   final String currency;
-  final int durationDays;
+  final int? durationDays;
   final bool isActive;
 
   SubscriptionPlan({
@@ -19,7 +19,7 @@ class SubscriptionPlan {
     this.description,
     required this.price,
     required this.currency,
-    required this.durationDays,
+    this.durationDays,
     required this.isActive,
   });
 
@@ -30,7 +30,7 @@ class SubscriptionPlan {
       description: json['description'] as String?,
       price: (json['price'] as num? ?? 0.0).toDouble(),
       currency: json['currency'] as String? ?? 'VND',
-      durationDays: json['durationDays'] as int? ?? 30,
+      durationDays: json['durationDays'] as int?,
       isActive: json['isActive'] as bool? ?? true,
     );
   }

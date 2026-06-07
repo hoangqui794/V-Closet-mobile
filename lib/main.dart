@@ -24,6 +24,13 @@ class MyHttpOverrides extends HttpOverrides {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    debugPrint('=== CUSTOM ERROR HANDLER ===');
+    debugPrint('Exception: ${details.exception}');
+    debugPrint('Stacktrace:\n${details.stack}');
+    debugPrint('============================');
+  };
   HttpOverrides.global = MyHttpOverrides();
   await di.init();
 

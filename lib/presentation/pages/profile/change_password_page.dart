@@ -147,7 +147,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                       : 'Tài khoản của bạn chưa có mật khẩu ứng dụng. Vui lòng thiết lập mật khẩu mới.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: AppColors.primary.withValues(alpha: 0.7),
+                    color: AppColors.primary.withOpacity(0.7),
                     fontSize: 14,
                   ),
                 ),
@@ -162,7 +162,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.03),
+                        color: Colors.black.withOpacity(0.03),
                         blurRadius: 18,
                         offset: const Offset(0, 4),
                       ),

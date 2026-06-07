@@ -226,7 +226,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 ),
                                 Container(
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withValues(alpha: 0.2),
+                                    color: Colors.white.withOpacity(0.2),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: IconButton(
@@ -254,13 +254,13 @@ class _ProfilePageState extends State<ProfilePage> {
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
                             color: _localStorage.getSubscriptionType() == 'free'
-                                ? AppColors.primary.withValues(alpha: 0.08)
-                                : const Color(0xFFD4AF37).withValues(alpha: 0.3),
+                                ? AppColors.primary.withOpacity(0.08)
+                                : const Color(0xFFD4AF37).withOpacity(0.3),
                             width: 1.5,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: AppColors.primary.withValues(alpha: 0.04),
+                              color: AppColors.primary.withOpacity(0.04),
                               blurRadius: 12,
                               offset: const Offset(0, 4),
                             ),
@@ -367,7 +367,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 Container(
                                   width: 1.5,
                                   height: 36,
-                                  color: AppColors.primary.withValues(alpha: 0.08),
+                                  color: AppColors.primary.withOpacity(0.08),
                                 ),
                                 const SizedBox(width: 16),
                                 Expanded(
@@ -528,7 +528,7 @@ class _ProfilePageState extends State<ProfilePage> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.04),
+            color: AppColors.primary.withOpacity(0.04),
             blurRadius: 14,
             offset: const Offset(0, 6),
           ),

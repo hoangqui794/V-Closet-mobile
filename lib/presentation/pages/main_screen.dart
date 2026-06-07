@@ -335,13 +335,13 @@ class _MainScreenState extends State<MainScreen> {
             borderRadius: BorderRadius.circular(36),
             boxShadow: [
               BoxShadow(
-                color: AppColors.primaryDark.withValues(alpha: 0.45),
+                color: AppColors.primaryDark.withOpacity(0.45),
                 blurRadius: 28,
                 spreadRadius: 0,
                 offset: const Offset(0, 10),
               ),
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.18),
+                color: Colors.black.withOpacity(0.18),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
@@ -375,7 +375,7 @@ class _MainScreenState extends State<MainScreen> {
             : const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: active
-              ? AppColors.secondary.withValues(alpha: 0.90)
+              ? AppColors.secondary.withOpacity(0.90)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(24),
         ),
@@ -386,7 +386,7 @@ class _MainScreenState extends State<MainScreen> {
               icon,
               color: active
                   ? AppColors.primaryDark
-                  : Colors.white.withValues(alpha: 0.60),
+                  : Colors.white.withOpacity(0.60),
               size: active ? 20 : 22,
             ),
             AnimatedSize(
@@ -436,17 +436,17 @@ class _MainScreenState extends State<MainScreen> {
               end: Alignment.bottomRight,
             ),
             border: Border.all(
-              color: Colors.white.withValues(alpha: active ? 0.35 : 0.20),
+              color: Colors.white.withOpacity(active ? 0.35 : 0.20),
               width: 2.5,
             ),
             boxShadow: [
               BoxShadow(
-                color: AppColors.primary.withValues(alpha: active ? 0.55 : 0.32),
+                color: AppColors.primary.withOpacity(active ? 0.55 : 0.32),
                 blurRadius: active ? 24 : 14,
                 offset: const Offset(0, 8),
               ),
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.2),
+                color: Colors.black.withOpacity(0.2),
                 blurRadius: 8,
                 offset: const Offset(0, 3),
               ),
@@ -454,7 +454,7 @@ class _MainScreenState extends State<MainScreen> {
           ),
           child: Icon(
             Icons.camera_alt_rounded,
-            color: Colors.white.withValues(alpha: active ? 1.0 : 0.85),
+            color: Colors.white.withOpacity(active ? 1.0 : 0.85),
             size: 26,
           ),
         ),

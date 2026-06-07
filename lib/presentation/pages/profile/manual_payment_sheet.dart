@@ -154,7 +154,7 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
         width: 100,
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          border: Border.all(color: AppColors.primary.withValues(alpha: 0.1)),
+          border: Border.all(color: AppColors.primary.withOpacity(0.1)),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Column(
@@ -271,7 +271,7 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
             'Giao dịch chuyển khoản thủ công của bạn đang chờ Admin xác nhận. Gói Premium sẽ được kích hoạt ngay khi được phê duyệt.',
             style: TextStyle(
               fontSize: 13,
-              color: AppColors.primary.withValues(alpha: 0.7),
+              color: AppColors.primary.withOpacity(0.7),
               height: 1.5,
             ),
             textAlign: TextAlign.center,
@@ -322,7 +322,7 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
             'Vui lòng giữ kết nối mạng ổn định trong lúc tải ảnh biên lai và tạo giao dịch.',
             style: TextStyle(
               fontSize: 12,
-              color: AppColors.primary.withValues(alpha: 0.6),
+              color: AppColors.primary.withOpacity(0.6),
             ),
             textAlign: TextAlign.center,
           ),
@@ -341,7 +341,7 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
           height: 4,
           margin: const EdgeInsets.only(top: 12, bottom: 8),
           decoration: BoxDecoration(
-            color: AppColors.primary.withValues(alpha: 0.1),
+            color: AppColors.primary.withOpacity(0.1),
             borderRadius: BorderRadius.circular(2),
           ),
         ),
@@ -382,7 +382,7 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
                     borderRadius: BorderRadius.circular(18),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.primary.withValues(alpha: 0.03),
+                        color: AppColors.primary.withOpacity(0.03),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       )
@@ -404,7 +404,9 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Thời hạn: ${widget.plan.durationDays} ngày',
+                            widget.plan.durationDays != null
+                                ? 'Thời hạn: ${widget.plan.durationDays} ngày'
+                                : 'Thời hạn: Không giới hạn (Nạp credits)',
                             style: const TextStyle(
                               fontSize: 11,
                               color: AppColors.textMuted,
@@ -446,7 +448,7 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
                           borderRadius: BorderRadius.circular(24),
                           boxShadow: [
                             BoxShadow(
-                              color: AppColors.primary.withValues(alpha: 0.05),
+                              color: AppColors.primary.withOpacity(0.05),
                               blurRadius: 15,
                               offset: const Offset(0, 6),
                             )
@@ -563,7 +565,7 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
                     floatingLabelBehavior: FloatingLabelBehavior.always,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide(color: AppColors.primary.withValues(alpha: 0.1)),
+                      borderSide: BorderSide(color: AppColors.primary.withOpacity(0.1)),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
@@ -612,7 +614,7 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
             color: Colors.white,
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
-              color: AppColors.primary.withValues(alpha: 0.15),
+              color: AppColors.primary.withOpacity(0.15),
               style: BorderStyle.solid,
               width: 1.5,
             ),
@@ -620,7 +622,7 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.add_photo_alternate_outlined, color: AppColors.primary.withValues(alpha: 0.5), size: 36),
+              Icon(Icons.add_photo_alternate_outlined, color: AppColors.primary.withOpacity(0.5), size: 36),
               const SizedBox(height: 10),
               const Text(
                 'Bấm vào để chụp/chọn ảnh biên lai',
@@ -642,7 +644,7 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.1)),
+        border: Border.all(color: AppColors.primary.withOpacity(0.1)),
       ),
       padding: const EdgeInsets.all(12),
       child: Row(
@@ -699,11 +701,11 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: isHighlighted ? AppColors.secondary.withValues(alpha: 0.15) : Colors.white,
+        color: isHighlighted ? AppColors.secondary.withOpacity(0.15) : Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: isHighlighted
-            ? Border.all(color: AppColors.secondary.withValues(alpha: 0.5), width: 1)
-            : Border.all(color: AppColors.primary.withValues(alpha: 0.05)),
+            ? Border.all(color: AppColors.secondary.withOpacity(0.5), width: 1)
+            : Border.all(color: AppColors.primary.withOpacity(0.05)),
       ),
       child: Row(
         children: [

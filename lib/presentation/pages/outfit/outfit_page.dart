@@ -198,7 +198,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                 width: 42,
                 height: 5,
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.12),
+                  color: AppColors.primary.withOpacity(0.12),
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
@@ -238,7 +238,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                   child: Container(
                     height: 110,
                     decoration: BoxDecoration(
-                      color: Colors.green.shade50.withValues(alpha: 0.6),
+                      color: Colors.green.shade50.withOpacity(0.6),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: Colors.green.shade200, width: 1),
                     ),
@@ -276,7 +276,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                   child: Container(
                     height: 110,
                     decoration: BoxDecoration(
-                      color: Colors.red.shade50.withValues(alpha: 0.6),
+                      color: Colors.red.shade50.withOpacity(0.6),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: Colors.red.shade200, width: 1),
                     ),
@@ -319,7 +319,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppColors.accent.withValues(alpha: 0.3)),
+                border: Border.all(color: AppColors.accent.withOpacity(0.3)),
               ),
               child: Column(
                 children: [
@@ -892,7 +892,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                 borderRadius: BorderRadius.circular(14),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.06),
+                    color: AppColors.primary.withOpacity(0.06),
                     blurRadius: 14,
                     offset: const Offset(0, 6),
                   ),
@@ -991,7 +991,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                   ),
                   boxShadow: (_selectedGarments.isEmpty && _selectedOutfitSnapshotUrl == null) ? [] : [
                     BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.25),
+                      color: AppColors.primary.withOpacity(0.25),
                       blurRadius: 16,
                       offset: const Offset(0, 8),
                     )
@@ -1102,7 +1102,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                   ),
                   boxShadow: isSelected ? [
                     BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.18),
+                      color: AppColors.primary.withOpacity(0.18),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     )
@@ -1147,7 +1147,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                             gradient: LinearGradient(
                               begin: Alignment.bottomCenter,
                               end: Alignment.topCenter,
-                              colors: [Colors.black.withValues(alpha: 0.75), Colors.transparent],
+                              colors: [Colors.black.withOpacity(0.75), Colors.transparent],
                             ),
                           ),
                           child: Row(
@@ -1305,8 +1305,8 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                         width: isSelected ? 2.5 : 1,
                       ),
                       boxShadow: isSelected
-                          ? [BoxShadow(color: AppColors.primary.withValues(alpha: 0.18), blurRadius: 8, offset: const Offset(0, 4))]
-                          : [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 4, offset: const Offset(0, 2))],
+                          ? [BoxShadow(color: AppColors.primary.withOpacity(0.18), blurRadius: 8, offset: const Offset(0, 4))]
+                          : [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 4, offset: const Offset(0, 2))],
                     ),
                     child: Stack(
                       children: [
@@ -1354,7 +1354,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                               gradient: LinearGradient(
                                 begin: Alignment.bottomCenter,
                                 end: Alignment.topCenter,
-                                colors: [Colors.black.withValues(alpha: 0.72), Colors.transparent],
+                                colors: [Colors.black.withOpacity(0.72), Colors.transparent],
                               ),
                             ),
                             child: Text(
@@ -1507,8 +1507,8 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                     boxShadow: [
                       BoxShadow(
                         color: isSelected
-                            ? AppColors.primary.withValues(alpha: 0.12)
-                            : Colors.black.withValues(alpha: 0.04),
+                            ? AppColors.primary.withOpacity(0.12)
+                            : Colors.black.withOpacity(0.04),
                         blurRadius: 8,
                         offset: const Offset(0, 4),
                       )
@@ -1629,7 +1629,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                   margin: const EdgeInsets.only(right: 10),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: AppColors.primaryLight.withValues(alpha: 0.6), width: 1.5),
+                    border: Border.all(color: AppColors.primaryLight.withOpacity(0.6), width: 1.5),
                   ),
                   child: Stack(
                     clipBehavior: Clip.none,
@@ -1653,7 +1653,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                         right: 0,
                         child: Container(
                           decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.55),
+                            color: Colors.black.withOpacity(0.55),
                             borderRadius: const BorderRadius.vertical(bottom: Radius.circular(12)),
                           ),
                           padding: const EdgeInsets.symmetric(vertical: 3),
@@ -1695,7 +1695,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: AppColors.accent.withValues(alpha: 0.2),
+                color: AppColors.accent.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Row(
@@ -1777,9 +1777,9 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.secondary.withValues(alpha: 0.5),
+        color: AppColors.secondary.withOpacity(0.5),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.accent.withValues(alpha: 0.5)),
+        border: Border.all(color: AppColors.accent.withOpacity(0.5)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1824,7 +1824,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
         Icon(
           icon,
           size: 16,
-          color: AppColors.primaryLight.withValues(alpha: 0.8),
+          color: AppColors.primaryLight.withOpacity(0.8),
         ),
         const SizedBox(width: 8),
         Expanded(
@@ -1866,7 +1866,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                       borderRadius: BorderRadius.circular(28),
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.12),
+                          color: AppColors.primary.withOpacity(0.12),
                           blurRadius: 30,
                           offset: const Offset(0, 10),
                         )
@@ -1907,7 +1907,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                             borderRadius: BorderRadius.circular(10),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.greenAccent.withValues(alpha: 0.8),
+                                color: Colors.greenAccent.withOpacity(0.8),
                                 blurRadius: 16,
                                 spreadRadius: 3,
                               )
@@ -2034,7 +2034,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                   borderRadius: BorderRadius.circular(28),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.1),
+                      color: AppColors.primary.withOpacity(0.1),
                       blurRadius: 24,
                       offset: const Offset(0, 8),
                     )

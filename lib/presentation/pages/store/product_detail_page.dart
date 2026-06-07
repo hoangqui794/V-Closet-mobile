@@ -279,7 +279,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                               decoration: BoxDecoration(
-                                color: AppColors.primary.withValues(alpha: 0.08),
+                                color: AppColors.primary.withOpacity(0.08),
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Text(
@@ -374,10 +374,10 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        border: Border(top: BorderSide(color: Colors.grey.withValues(alpha: 0.1), width: 1)),
+                        border: Border(top: BorderSide(color: Colors.grey.withOpacity(0.1), width: 1)),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.03),
+                            color: Colors.black.withOpacity(0.03),
                             blurRadius: 10,
                             offset: const Offset(0, -4),
                           ),
@@ -415,7 +415,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFFEE4D2D), // màu cam Shopee
                                   foregroundColor: Colors.white,
-                                  disabledBackgroundColor: const Color(0xFFEE4D2D).withValues(alpha: 0.6),
+                                  disabledBackgroundColor: const Color(0xFFEE4D2D).withOpacity(0.6),
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
                                   elevation: 0,
                                 ),
@@ -598,7 +598,7 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
                 width: 42,
                 height: 5,
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.12),
+                  color: AppColors.primary.withOpacity(0.12),
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
@@ -638,7 +638,7 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
                   child: Container(
                     height: 110,
                     decoration: BoxDecoration(
-                      color: Colors.green.shade50.withValues(alpha: 0.6),
+                      color: Colors.green.shade50.withOpacity(0.6),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: Colors.green.shade200, width: 1),
                     ),
@@ -676,7 +676,7 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
                   child: Container(
                     height: 110,
                     decoration: BoxDecoration(
-                      color: Colors.red.shade50.withValues(alpha: 0.6),
+                      color: Colors.red.shade50.withOpacity(0.6),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: Colors.red.shade200, width: 1),
                     ),
@@ -719,7 +719,7 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppColors.accent.withValues(alpha: 0.3)),
+                border: Border.all(color: AppColors.accent.withOpacity(0.3)),
               ),
               child: Column(
                 children: [
@@ -2029,7 +2029,7 @@ class _CircleButton extends StatelessWidget {
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
+              color: Colors.black.withOpacity(0.08),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),

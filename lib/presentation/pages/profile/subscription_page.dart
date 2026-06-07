@@ -347,24 +347,6 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
     }
   }
 
-  void _triggerPayment(String title, double price, VoidCallback onSuccess) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return _VietQRPaymentSimulatorSheet(
-          packageName: title,
-          price: price,
-          onPaymentSuccess: () {
-            onSuccess();
-            if (mounted) setState(() {});
-          },
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final currentPlan = _localStorage.getSubscriptionType();
@@ -409,7 +391,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.15),
+                    color: AppColors.primary.withOpacity(0.15),
                     blurRadius: 18,
                     offset: const Offset(0, 8),
                   ),
@@ -433,7 +415,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
                           color: !hasActivePremium
-                              ? Colors.white.withValues(alpha: 0.15)
+                              ? Colors.white.withOpacity(0.15)
                               : const Color(0xFFD4AF37),
                           borderRadius: BorderRadius.circular(30),
                         ),
@@ -486,7 +468,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 20),
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.05),
+                color: AppColors.primary.withOpacity(0.05),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: TabBar(
@@ -513,7 +495,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
                     height: 38,
                     child: Align(
                       alignment: Alignment.center,
-                      child: Text('Nạp Credits Lẻ'),
+                      child: Text('Nạp Lượt Thử'),
                     ),
                   ),
                   Tab(
@@ -573,133 +555,223 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
       return const Center(child: CircularProgressIndicator(color: AppColors.primary));
     }
 
-    final formatCurrency = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
+    try {
+      final formatCurrency = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
 
-    return RefreshIndicator(
-      onRefresh: _loadSubscriptionData,
-      color: AppColors.primary,
-      child: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        children: [
-          // FREE plan
-          _planCard(
-            title: 'Gói Miễn Phí (FREE)',
-            price: '0 đ',
-            period: 'Mặc định',
-            isPremium: false,
-            features: [
-              'Tối đa 30 món đồ trong Tủ đồ số',
-              '5 lượt xóa nền tự động / tháng',
-              '5 lượt thử đồ AI thông minh / tháng',
-              'Hiển thị quảng cáo biểu ngữ/video',
-            ],
-            buttonText: !hasActivePremium ? 'Đang sử dụng' : 'Gói mặc định',
-            onPressed: null,
-            isActive: !hasActivePremium,
-          ),
-          const SizedBox(height: 16),
+      return RefreshIndicator(
+        onRefresh: _loadSubscriptionData,
+        color: AppColors.primary,
+        child: ListView(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          children: [
+            // FREE plan
+            _planCard(
+              title: 'Gói Miễn Phí (FREE)',
+              price: '0 đ',
+              period: 'Mặc định',
+              isPremium: false,
+              features: [
+                'Tối đa 30 món đồ trong Tủ đồ số',
+                '5 lượt xóa nền tự động / tháng',
+                '5 lượt thử đồ AI thông minh / tháng',
+                'Hiển thị quảng cáo biểu ngữ/video',
+              ],
+              buttonText: !hasActivePremium ? 'Đang sử dụng' : 'Gói mặc định',
+              onPressed: null,
+              isActive: !hasActivePremium,
+            ),
+            const SizedBox(height: 16),
 
-          // Dynamic plans from BE (chỉ hiển thị các gói có phí)
-          ..._plans.where((plan) => plan.price > 0).map((plan) {
-            final formattedPrice = plan.price.toStringAsFixed(0).replaceAllMapped(formatCurrency, (Match m) => '${m[1]}.');
-            final isMonthly = plan.durationDays <= 30;
-            // BE có thể trả planType dạng "monthly"/"yearly" hoặc "premium_monthly"/"premium_yearly"
-            final isPlanActive = hasActivePremium && (
-              isMonthly
-                ? (currentPlan == 'monthly' || currentPlan == 'premium_monthly')
-                : (currentPlan == 'yearly' || currentPlan == 'premium_yearly')
-            );
-            
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: _planCard(
-                title: plan.name,
-                price: '$formattedPrice đ',
-                period: ' / ${plan.durationDays} ngày',
-                isPremium: true,
-                isBestValue: isMonthly,
-                features: isMonthly
-                    ? [
-                        'Không giới hạn tủ đồ số & canvas phối',
-                        '30 lượt xóa nền tự động / tháng',
-                        '30 lượt thử đồ AI / tháng',
-                        'Không hiển thị quảng cáo (Ad-Free)',
-                        'Ưu tiên tốc độ xử lý hàng đợi AI',
-                      ]
-                    : [
-                        'Tương đương gói Premium Tháng',
-                        'Cấp ngay 360 lượt xóa nền tự động',
-                        'Cấp ngay 360 lượt thử đồ AI',
-                        'Tiết kiệm chi phí lên đến 45%',
-                        'Trải nghiệm sớm các tính năng AI mới',
-                      ],
-                buttonText: isPlanActive ? 'Đang sử dụng' : 'Đăng ký ngay',
-                onPressed: isPlanActive
-                    ? null
-                    : () {
-                        _purchasePlan(plan);
-                      },
-                isActive: isPlanActive,
+            // Dynamic plans from BE (chỉ hiển thị các gói có phí và không phải gói lẻ)
+            ..._plans.where((plan) {
+              return plan.price > 0 && plan.durationDays != null;
+            }).map((plan) {
+              final formattedPrice = plan.price.toStringAsFixed(0).replaceAllMapped(formatCurrency, (Match m) => '${m[1]}.');
+              final isMonthly = plan.durationDays! <= 30;
+              // BE có thể trả planType dạng "monthly"/"yearly" hoặc "premium_monthly"/"premium_yearly"
+              final isPlanActive = hasActivePremium && (
+                isMonthly
+                  ? (currentPlan == 'monthly' || currentPlan == 'premium_monthly')
+                  : (currentPlan == 'yearly' || currentPlan == 'premium_yearly')
+              );
+              
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: _planCard(
+                  title: plan.name,
+                  price: '$formattedPrice đ',
+                  period: ' / ${plan.durationDays} ngày',
+                  isPremium: true,
+                  isBestValue: isMonthly,
+                  features: isMonthly
+                      ? [
+                          'Không giới hạn tủ đồ số & canvas phối',
+                          '30 lượt xóa nền tự động / tháng',
+                          '30 lượt thử đồ AI / tháng',
+                          'Không hiển thị quảng cáo (Ad-Free)',
+                          'Ưu tiên tốc độ xử lý hàng đợi AI',
+                        ]
+                      : [
+                          'Tương đương gói Premium Tháng',
+                          'Cấp ngay 360 lượt xóa nền tự động',
+                          'Cấp ngay 360 lượt thử đồ AI',
+                          'Tiết kiệm chi phí lên đến 45%',
+                          'Trải nghiệm sớm các tính năng AI mới',
+                        ],
+                  buttonText: isPlanActive ? 'Đang sử dụng' : 'Đăng ký ngay',
+                  onPressed: isPlanActive
+                      ? null
+                      : () {
+                          _purchasePlan(plan);
+                        },
+                  isActive: isPlanActive,
+                ),
+              );
+            }),
+            const SizedBox(height: 80),
+          ],
+        ),
+      );
+    } catch (e, stack) {
+      debugPrint('CRITICAL ERROR in _buildPlansTab: $e\n$stack');
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline_rounded, color: Colors.red, size: 48),
+              const SizedBox(height: 12),
+              const Text(
+                'Lỗi hiển thị gói đăng ký',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.red),
               ),
-            );
-          }),
-          const SizedBox(height: 80),
-        ],
-      ),
-    );
+              const SizedBox(height: 8),
+              Text(
+                '$e',
+                style: const TextStyle(fontSize: 12, color: Colors.black54),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
   }
 
   Widget _buildTopupTab() {
-    return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: 16, left: 4),
-          child: Text(
-            'Hết lượt thử đồ trước kỳ hạn? Nạp thêm credits lẻ tức thì để tiếp tục sáng tạo phong cách không giới hạn.',
-            style: TextStyle(
-              color: AppColors.primary.withValues(alpha: 0.6),
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              height: 1.4,
+    if (_isLoadingPlans) {
+      return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+    }
+
+    try {
+      final topupPlans = _plans.where((plan) {
+        return plan.durationDays == null && plan.price > 0;
+      }).toList();
+
+      if (topupPlans.isEmpty) {
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.auto_awesome_rounded, size: 64, color: AppColors.primary.withOpacity(0.2)),
+              const SizedBox(height: 12),
+              const Text(
+                'Không tìm thấy gói cước lẻ',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.primary),
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                'Vui lòng làm mới danh sách gói cước.',
+                style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+              ),
+            ],
+          ),
+        );
+      }
+
+      final formatCurrency = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
+
+      return RefreshIndicator(
+        onRefresh: _loadSubscriptionData,
+        color: AppColors.primary,
+        child: ListView(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 16, left: 4),
+              child: Text(
+                'Hết lượt thử đồ trước kỳ hạn? Nạp thêm credits lẻ tức thì để tiếp tục sáng tạo phong cách không giới hạn.',
+                style: TextStyle(
+                  color: AppColors.primary.withOpacity(0.6),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  height: 1.4,
+                ),
+              ),
             ),
+            ...topupPlans.map((plan) {
+              final formattedPrice = plan.price.toStringAsFixed(0).replaceAllMapped(formatCurrency, (Match m) => '${m[1]}.');
+              
+              int credits = 10;
+              var match = RegExp(r'\d+').firstMatch(plan.name);
+              if (match != null) {
+                final matchStr = match.group(0);
+                if (matchStr != null) {
+                  credits = int.tryParse(matchStr) ?? 10;
+                }
+              }
+              if (credits <= 0) {
+                credits = 1;
+              }
+              
+              final unitCostValue = plan.price / credits;
+              final unitCost = unitCostValue.toStringAsFixed(0).replaceAllMapped(formatCurrency, (Match m) => '${m[1]}.');
+
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: _topupCard(
+                  title: plan.name,
+                  price: '$formattedPrice đ',
+                  unitCost: 'Chỉ $unitCost đ / lượt thử',
+                  credits: credits,
+                  description: plan.description ?? 'Hỗ trợ nạp nhanh cho nhu cầu phối đồ.',
+                  isPopular: credits >= 25,
+                  onPressed: () {
+                    _purchasePlan(plan);
+                  },
+                ),
+              );
+            }),
+            const SizedBox(height: 80),
+          ],
+        ),
+      );
+    } catch (e, stack) {
+      debugPrint('CRITICAL ERROR in _buildTopupTab: $e\n$stack');
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline_rounded, color: Colors.red, size: 48),
+              const SizedBox(height: 12),
+              const Text(
+                'Lỗi hiển thị gói cước lẻ',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.red),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '$e',
+                style: const TextStyle(fontSize: 12, color: Colors.black54),
+                textAlign: TextAlign.center,
+              ),
+            ],
           ),
         ),
-
-        // 10 Credits Pack
-        _topupCard(
-          title: 'Gói 10 Credits Thử đồ AI',
-          price: '29.000 đ',
-          unitCost: 'Chỉ 2.900 đ / lượt thử',
-          credits: 10,
-          description: 'Hỗ trợ nạp nhanh cho nhu cầu phối đồ đột xuất.',
-          onPressed: () {
-            _triggerPayment('Gói 10 Credits', 29000, () async {
-              final current = _localStorage.getTryOnCredits();
-              await _localStorage.updateCredits(tryonCredits: current + 10);
-            });
-          },
-        ),
-        const SizedBox(height: 16),
-
-        // 25 Credits Pack
-        _topupCard(
-          title: 'Gói 25 Credits Thử đồ AI',
-          price: '69.000 đ',
-          unitCost: 'Chỉ 2.760 đ / lượt thử (Tiết kiệm)',
-          credits: 25,
-          description: 'Lựa chọn phổ biến cho các tín đồ mê thời trang.',
-          isPopular: true,
-          onPressed: () {
-            _triggerPayment('Gói 25 Credits', 69000, () async {
-              final current = _localStorage.getTryOnCredits();
-              await _localStorage.updateCredits(tryonCredits: current + 25);
-            });
-          },
-        ),
-        const SizedBox(height: 80),
-      ],
-    );
+      );
+    }
   }
 
   Widget _buildTransactionsTab() {
@@ -707,147 +779,187 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
       return const Center(child: CircularProgressIndicator(color: AppColors.primary));
     }
 
-    if (_transactions.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.history_rounded, size: 64, color: AppColors.primary.withValues(alpha: 0.2)),
-            const SizedBox(height: 12),
-            const Text(
-              'Chưa có giao dịch nào',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.primary),
-            ),
-            const SizedBox(height: 4),
-            const Text(
-              'Các giao dịch thanh toán của bạn sẽ xuất hiện tại đây.',
-              style: TextStyle(fontSize: 12, color: AppColors.textMuted),
-            ),
-          ],
-        ),
-      );
-    }
+    try {
+      if (_transactions.isEmpty) {
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.history_rounded, size: 64, color: AppColors.primary.withOpacity(0.2)),
+              const SizedBox(height: 12),
+              const Text(
+                'Chưa có giao dịch nào',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.primary),
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                'Các giao dịch thanh toán của bạn sẽ xuất hiện tại đây.',
+                style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+              ),
+            ],
+          ),
+        );
+      }
 
-    final formatCurrency = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
+      final formatCurrency = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
 
-    return RefreshIndicator(
-      onRefresh: _loadSubscriptionData,
-      color: AppColors.primary,
-      child: ListView.builder(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        itemCount: _transactions.length,
-        itemBuilder: (context, index) {
-          final tx = _transactions[index];
-          final formattedPrice = tx.amount.toStringAsFixed(0).replaceAllMapped(formatCurrency, (Match m) => '${m[1]}.');
-          final isSuccess = tx.status == 'completed' || tx.status == 'success';
-          final isPending = tx.status == 'pending';
-          
-          return Container(
-            margin: const EdgeInsets.only(bottom: 12),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(18),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.03),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-              border: Border.all(color: AppColors.primary.withValues(alpha: 0.05)),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: isSuccess
-                        ? Colors.green.withValues(alpha: 0.08)
-                        : isPending
-                            ? Colors.orange.withValues(alpha: 0.08)
-                            : Colors.red.withValues(alpha: 0.08),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    isSuccess
-                        ? Icons.check_circle_outline_rounded
-                        : isPending
-                            ? Icons.pending_actions_rounded
-                            : Icons.error_outline_rounded,
-                    color: isSuccess
-                        ? Colors.green
-                        : isPending
-                            ? Colors.orange
-                            : Colors.red,
-                    size: 24,
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        tx.planName,
-                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.primary),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Cổng: ${tx.paymentGateway.toUpperCase()}',
-                        style: const TextStyle(fontSize: 11, color: AppColors.textMuted, fontWeight: FontWeight.w500),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Thời gian: ${tx.createdAt.toLocal().toString().substring(0, 16)}',
-                        style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
-                      ),
-                    ],
-                  ),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      '+$formattedPrice đ',
-                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: AppColors.primary),
+      return RefreshIndicator(
+        onRefresh: _loadSubscriptionData,
+        color: AppColors.primary,
+        child: ListView.builder(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          itemCount: _transactions.length,
+          itemBuilder: (context, index) {
+            try {
+              final tx = _transactions[index];
+              final formattedPrice = tx.amount.toStringAsFixed(0).replaceAllMapped(formatCurrency, (Match m) => '${m[1]}.');
+              final isSuccess = tx.status == 'completed' || tx.status == 'success';
+              final isPending = tx.status == 'pending';
+              
+              return Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(18),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withOpacity(0.03),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
                     ),
-                    const SizedBox(height: 4),
+                  ],
+                  border: Border.all(color: AppColors.primary.withOpacity(0.05)),
+                ),
+                child: Row(
+                  children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
                         color: isSuccess
-                            ? Colors.green.withValues(alpha: 0.08)
+                            ? Colors.green.withOpacity(0.08)
                             : isPending
-                                ? Colors.orange.withValues(alpha: 0.08)
-                                : Colors.red.withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(8),
+                                ? Colors.orange.withOpacity(0.08)
+                                : Colors.red.withOpacity(0.08),
+                        shape: BoxShape.circle,
                       ),
-                      child: Text(
+                      child: Icon(
                         isSuccess
-                            ? 'Thành công'
+                            ? Icons.check_circle_outline_rounded
                             : isPending
-                                ? (tx.paymentGateway == 'manual_transfer' ? 'Chờ duyệt' : 'Chờ')
-                                : 'Thất bại',
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          color: isSuccess
-                              ? Colors.green
-                              : isPending
-                                  ? Colors.orange
-                                  : Colors.red,
-                        ),
+                                ? Icons.pending_actions_rounded
+                                : Icons.error_outline_rounded,
+                        color: isSuccess
+                            ? Colors.green
+                            : isPending
+                                ? Colors.orange
+                                : Colors.red,
+                        size: 24,
                       ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            tx.planName,
+                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.primary),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Cổng: ${tx.paymentGateway.toUpperCase()}',
+                            style: const TextStyle(fontSize: 11, color: AppColors.textMuted, fontWeight: FontWeight.w500),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Thời gian: ${tx.createdAt.toLocal().toString().substring(0, 16)}',
+                            style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          '+$formattedPrice đ',
+                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: AppColors.primary),
+                        ),
+                        const SizedBox(height: 4),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: isSuccess
+                                ? Colors.green.withOpacity(0.08)
+                                : isPending
+                                    ? Colors.orange.withOpacity(0.08)
+                                    : Colors.red.withOpacity(0.08),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            isSuccess
+                                ? 'Thành công'
+                                : isPending
+                                    ? (tx.paymentGateway == 'manual_transfer' ? 'Chờ duyệt' : 'Chờ')
+                                    : 'Thất bại',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: isSuccess
+                                  ? Colors.green
+                                  : isPending
+                                      ? Colors.orange
+                                      : Colors.red,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
+              );
+            } catch (e, stack) {
+              debugPrint('CRITICAL ERROR in Transactions itemBuilder: $e\n$stack');
+              return Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: Colors.red.shade200),
+                ),
+                child: Text('Lỗi tải giao dịch: $e\n$stack', style: const TextStyle(color: Colors.red, fontSize: 10)),
+              );
+            }
+          },
+        ),
+      );
+    } catch (e, stack) {
+      debugPrint('CRITICAL ERROR in _buildTransactionsTab: $e\n$stack');
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline_rounded, color: Colors.red, size: 48),
+              const SizedBox(height: 12),
+              const Text(
+                'Lỗi hiển thị lịch sử',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.red),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '$e',
+                style: const TextStyle(fontSize: 12, color: Colors.black54),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
   }
 
   Widget _planCard({
@@ -870,12 +982,12 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
               ? AppColors.primary
               : isBestValue
                   ? const Color(0xFFD4AF37)
-                  : AppColors.primary.withValues(alpha: 0.08),
+                  : AppColors.primary.withOpacity(0.08),
           width: isActive || isBestValue ? 2 : 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.03),
+            color: AppColors.primary.withOpacity(0.03),
             blurRadius: 16,
             offset: const Offset(0, 8),
           ),
@@ -901,7 +1013,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
                       margin: const EdgeInsets.only(bottom: 6),
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.08),
+                        color: AppColors.primary.withOpacity(0.08),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: const Text(
@@ -984,7 +1096,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
                       onPressed: onPressed,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: isActive
-                            ? AppColors.primary.withValues(alpha: 0.1)
+                            ? AppColors.primary.withOpacity(0.1)
                             : isPremium
                                 ? const Color(0xFFD4AF37)
                                 : AppColors.primary,
@@ -1031,12 +1143,12 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
         color: Colors.white,
         borderRadius: BorderRadius.circular(22),
         border: Border.all(
-          color: isPopular ? AppColors.primary : AppColors.primary.withValues(alpha: 0.08),
+          color: isPopular ? AppColors.primary : AppColors.primary.withOpacity(0.08),
           width: isPopular ? 2 : 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.03),
+            color: AppColors.primary.withOpacity(0.03),
             blurRadius: 14,
             offset: const Offset(0, 6),
           ),
@@ -1047,7 +1159,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.06),
+              color: AppColors.primary.withOpacity(0.06),
               borderRadius: BorderRadius.circular(16),
             ),
             child: const Icon(
@@ -1096,26 +1208,28 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
                   ),
                 ),
                 const SizedBox(height: 6),
-                Row(
-                  children: [
-                    Text(
-                      price,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w900,
-                        color: AppColors.primary,
+                Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: price,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.primary,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      '($unitCost)',
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: AppColors.primary.withValues(alpha: 0.6),
-                        fontWeight: FontWeight.w600,
+                      const TextSpan(text: '   '),
+                      TextSpan(
+                        text: '($unitCost)',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: AppColors.primary.withOpacity(0.6),
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -1124,6 +1238,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
           ElevatedButton(
             onPressed: onPressed,
             style: ElevatedButton.styleFrom(
+              minimumSize: const Size(0, 0),
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
               elevation: 0,
@@ -1176,404 +1291,6 @@ class PositionBar extends StatelessWidget {
       ),
     );
   }
-}
-
-class _VietQRPaymentSimulatorSheet extends StatefulWidget {
-  final String packageName;
-  final double price;
-  final VoidCallback onPaymentSuccess;
-
-  const _VietQRPaymentSimulatorSheet({
-    required this.packageName,
-    required this.price,
-    required this.onPaymentSuccess,
-  });
-
-  @override
-  State<_VietQRPaymentSimulatorSheet> createState() => _VietQRPaymentSimulatorSheetState();
-}
-
-class _VietQRPaymentSimulatorSheetState extends State<_VietQRPaymentSimulatorSheet> {
-  bool _isChecking = false;
-  String _checkStatusText = '';
-
-  void _confirmPayment() async {
-    setState(() {
-      _isChecking = true;
-      _checkStatusText = 'Đang khởi tạo kết nối PayOS...';
-    });
-
-    await Future.delayed(const Duration(milliseconds: 800));
-    if (!mounted) return;
-    setState(() {
-      _checkStatusText = 'Đang kiểm tra giao dịch chuyển khoản VietQR...';
-    });
-
-    await Future.delayed(const Duration(milliseconds: 1200));
-    if (!mounted) return;
-    setState(() {
-      _checkStatusText = 'Đang gọi PayOS Webhook cập nhật trạng thái...';
-    });
-
-    await Future.delayed(const Duration(milliseconds: 1000));
-    if (!mounted) return;
-
-    // Payment Success!
-    widget.onPaymentSuccess();
-
-    Navigator.pop(context); // Close Payment Sheet
-
-    // Show Success Dialog
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: const BoxDecoration(
-                color: Color(0xFFE8F5E9),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.check_circle_rounded,
-                color: Colors.green,
-                size: 54,
-              ),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'Thanh Toán Thành Công!',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w900,
-                color: AppColors.primary,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Giao dịch của bạn cho "${widget.packageName}" đã được xử lý hoàn tất qua PayOS.',
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 13,
-                color: AppColors.textMuted,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              height: 46,
-              child: ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 0,
-                ),
-                child: const Text(
-                  'Tuyệt vời',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final formatCurrency = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
-    final formattedPrice = widget.price.toStringAsFixed(0).replaceAllMapped(formatCurrency, (Match m) => '${m[1]}.');
-    final randomTxId = Random().nextInt(89999) + 10000;
-    final txMemo = 'VCLOSET$randomTxId';
-
-    return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(28),
-          topRight: Radius.circular(28),
-        ),
-      ),
-      padding: EdgeInsets.fromLTRB(24, 20, 24, MediaQuery.of(context).viewInsets.bottom + 24),
-      child: _isChecking
-          ? SizedBox(
-              height: 360,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const CircularProgressIndicator(color: AppColors.primary),
-                    const SizedBox(height: 24),
-                    Text(
-                      _checkStatusText,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            )
-          : Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Handle bar
-                Container(
-                  width: 40,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: 20),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Thanh toán chuyển khoản',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.primary),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close_rounded, color: AppColors.primary),
-                      onPressed: () => Navigator.pop(context),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                    ),
-                  ],
-                ),
-                const Divider(height: 24),
-
-                // Package details
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      widget.packageName,
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.primary),
-                    ),
-                    Text(
-                      '$formattedPrice đ',
-                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: AppColors.primary),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-
-                // VietQR info & fake code
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(color: AppColors.primary.withValues(alpha: 0.06)),
-                  ),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Image.network(
-                            'https://img.vietqr.io/image/logo-mbbank.png',
-                            height: 26,
-                            errorBuilder: (context, error, stackTrace) {
-                              return const Icon(Icons.account_balance_rounded, color: AppColors.primaryLight, size: 24);
-                            },
-                          ),
-                          const SizedBox(width: 8),
-                          const Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Ngân hàng Quân Đội (MB Bank)',
-                                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.primary),
-                                ),
-                                Text(
-                                  'Cổng thanh toán tự động PayOS',
-                                  style: TextStyle(fontSize: 10, color: AppColors.textMuted, fontWeight: FontWeight.w500),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      _bankInfoRow('Số tài khoản:', '090123456789'),
-                      _bankInfoRow('Chủ tài khoản:', 'CONG TY CP V-CLOSET'),
-                      _bankInfoRow('Số tiền chuyển:', '$formattedPrice đ'),
-                      _bankInfoRow('Nội dung chuyển:', txMemo, highlight: true),
-                      const Divider(height: 24),
-
-                      // Fake QR Code
-                      Container(
-                        width: 140,
-                        height: 140,
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: AppColors.primary.withValues(alpha: 0.08)),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: CustomPaint(
-                          painter: _QRPlaceholderPainter(),
-                          child: Center(
-                            child: Icon(
-                              Icons.qr_code_2_rounded,
-                              size: 40,
-                              color: AppColors.primary.withValues(alpha: 0.15),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Quét mã VietQR này bằng ứng dụng ngân hàng của bạn',
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: AppColors.primary.withValues(alpha: 0.5),
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: _confirmPayment,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                    child: const Text(
-                      'Tôi Đã Chuyển Khoản Thành Công',
-                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-              ],
-            ),
-    );
-  }
-
-  Widget _bankInfoRow(String label, String value, {bool highlight = false}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(fontSize: 12, color: AppColors.textMuted, fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: SelectableText(
-              value,
-              textAlign: TextAlign.end,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
-                color: highlight ? AppColors.error : AppColors.primary,
-                backgroundColor: highlight ? AppColors.error.withValues(alpha: 0.05) : null,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _QRPlaceholderPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = AppColors.primary.withValues(alpha: 0.2)
-      ..strokeWidth = 2
-      ..style = PaintingStyle.stroke;
-
-    final length = size.width * 0.15;
-
-    // Top-Left corner
-    canvas.drawPath(
-      Path()
-        ..moveTo(0, length)
-        ..lineTo(0, 0)
-        ..lineTo(length, 0),
-      paint,
-    );
-
-    // Top-Right corner
-    canvas.drawPath(
-      Path()
-        ..moveTo(size.width - length, 0)
-        ..lineTo(size.width, 0)
-        ..lineTo(size.width, length),
-      paint,
-    );
-
-    // Bottom-Left corner
-    canvas.drawPath(
-      Path()
-        ..moveTo(0, size.height - length)
-        ..lineTo(0, size.height)
-        ..lineTo(length, size.height),
-      paint,
-    );
-
-    // Bottom-Right corner
-    canvas.drawPath(
-      Path()
-        ..moveTo(size.width - length, size.height)
-        ..lineTo(size.width, size.height)
-        ..lineTo(size.width, size.height - length),
-      paint,
-    );
-
-    // Draw some random lines inside to simulate QR pattern
-    final innerPaint = Paint()
-      ..color = AppColors.primary.withValues(alpha: 0.06)
-      ..strokeWidth = 1.5;
-
-    final rng = Random(42);
-    for (int i = 0; i < 20; i++) {
-      double startX = rng.nextDouble() * size.width;
-      double startY = rng.nextDouble() * size.height;
-      double lengthX = (rng.nextDouble() * 20) + 5;
-      double lengthY = (rng.nextDouble() * 20) + 5;
-
-      if (rng.nextBool()) {
-        canvas.drawLine(Offset(startX, startY), Offset(startX + lengthX, startY), innerPaint);
-      } else {
-        canvas.drawLine(Offset(startX, startY), Offset(startX, startY + lengthY), innerPaint);
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class _OutOfCreditsSheet extends StatefulWidget {
@@ -1699,7 +1416,7 @@ class _OutOfCreditsSheetState extends State<_OutOfCreditsSheet> {
                   height: 4,
                   margin: const EdgeInsets.only(bottom: 20),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.1),
+                    color: AppColors.primary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -1865,7 +1582,7 @@ class _PaymentVerificationSheetState extends State<_PaymentVerificationSheet> {
             height: 4,
             margin: const EdgeInsets.only(bottom: 20),
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.1),
+              color: AppColors.primary.withOpacity(0.1),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -1881,7 +1598,7 @@ class _PaymentVerificationSheetState extends State<_PaymentVerificationSheet> {
                 ? 'Bạn có thể quét mã QR dưới bằng điện thoại khác, hoặc bấm nút mở trang thanh toán VNPay dưới đây để thanh toán trên điện thoại này cho "${widget.packageName}" ($formattedPrice đ).'
                 : 'Bạn có thể quét mã QR dưới bằng điện thoại khác, hoặc bấm nút mở ứng dụng MoMo dưới đây để thanh toán trên điện thoại này cho "${widget.packageName}" ($formattedPrice đ).',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 13, color: AppColors.primary.withValues(alpha: 0.6), height: 1.4),
+            style: TextStyle(fontSize: 13, color: AppColors.primary.withOpacity(0.6), height: 1.4),
           ),
           if (widget.paymentUrl != null && widget.paymentUrl!.isNotEmpty) ...[
             const SizedBox(height: 16),
@@ -1890,7 +1607,7 @@ class _PaymentVerificationSheetState extends State<_PaymentVerificationSheet> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.primary.withValues(alpha: 0.08)),
+                border: Border.all(color: AppColors.primary.withOpacity(0.08)),
               ),
               child: Column(
                 children: [
@@ -2013,7 +1730,7 @@ class _PaymentGatewaySelectorSheet extends StatelessWidget {
             height: 4,
             margin: const EdgeInsets.only(bottom: 20),
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.1),
+              color: AppColors.primary.withOpacity(0.1),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -2027,7 +1744,7 @@ class _PaymentGatewaySelectorSheet extends StatelessWidget {
           Text(
             'Vui lòng chọn cổng thanh toán để mua gói "$packageName" ($formattedPrice đ).',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 13, color: AppColors.primary.withValues(alpha: 0.6), height: 1.4),
+            style: TextStyle(fontSize: 13, color: AppColors.primary.withOpacity(0.6), height: 1.4),
           ),
           const SizedBox(height: 24),
           _buildGatewayCard(
@@ -2057,7 +1774,7 @@ class _PaymentGatewaySelectorSheet extends StatelessWidget {
             subtitle: 'Chuyển khoản ngân hàng 24/7 bằng mã VietQR hoặc STK',
             iconColor: AppColors.primary,
             logoText: 'Bank',
-            logoBgColor: AppColors.primary.withValues(alpha: 0.08),
+            logoBgColor: AppColors.primary.withOpacity(0.08),
           ),
           const SizedBox(height: 24),
           TextButton(
@@ -2085,7 +1802,7 @@ class _PaymentGatewaySelectorSheet extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.primary.withValues(alpha: 0.1), width: 1.5),
+          border: Border.all(color: AppColors.primary.withOpacity(0.1), width: 1.5),
         ),
         child: Row(
           children: [
@@ -2125,14 +1842,14 @@ class _PaymentGatewaySelectorSheet extends StatelessWidget {
                     subtitle,
                     style: TextStyle(
                       fontSize: 11,
-                      color: AppColors.primary.withValues(alpha: 0.5),
+                      color: AppColors.primary.withOpacity(0.5),
                       height: 1.3,
                     ),
                   ),
                 ],
               ),
             ),
-            Icon(Icons.chevron_right_rounded, color: AppColors.primary.withValues(alpha: 0.3)),
+            Icon(Icons.chevron_right_rounded, color: AppColors.primary.withOpacity(0.3)),
           ],
         ),
       ),

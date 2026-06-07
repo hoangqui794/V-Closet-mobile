@@ -234,7 +234,7 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.03),
+                        color: Colors.black.withOpacity(0.03),
                         blurRadius: 18,
                         offset: const Offset(0, 4),
                       ),
@@ -289,7 +289,7 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
                                       border: Border.all(
                                         color: isFocused
                                             ? AppColors.primaryLight
-                                            : Colors.black.withValues(alpha: 0.05),
+                                            : Colors.black.withOpacity(0.05),
                                         width: isFocused ? 2 : 1,
                                       ),
                                     ),

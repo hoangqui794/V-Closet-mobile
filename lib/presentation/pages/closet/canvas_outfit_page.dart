@@ -462,7 +462,7 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
                   Container(
                     decoration: BoxDecoration(
                       border: Border.all(
-                        color: AppColors.primary.withValues(alpha: 0.2),
+                        color: AppColors.primary.withOpacity(0.2),
                       ),
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -628,7 +628,7 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: 12,
-                      color: AppColors.primary.withValues(alpha: 0.65),
+                      color: AppColors.primary.withOpacity(0.65),
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -693,7 +693,7 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: AppColors.primary.withValues(alpha: 0.10),
+              color: AppColors.primary.withOpacity(0.10),
               blurRadius: 24,
               offset: const Offset(0, 8),
             ),
@@ -717,7 +717,7 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
                           Icon(
                             Icons.style_rounded,
                             size: 72,
-                            color: AppColors.primary.withValues(alpha: 0.12),
+                            color: AppColors.primary.withOpacity(0.12),
                           ),
                           const SizedBox(height: 12),
                           Text(
@@ -725,7 +725,7 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w700,
-                              color: AppColors.primary.withValues(alpha: 0.25),
+                              color: AppColors.primary.withOpacity(0.25),
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -733,7 +733,7 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
                             'Chọn đồ từ tủ bên dưới để thêm vào',
                             style: TextStyle(
                               fontSize: 13,
-                              color: AppColors.primary.withValues(alpha: 0.20),
+                              color: AppColors.primary.withOpacity(0.20),
                             ),
                           ),
                         ],
@@ -905,13 +905,13 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
             Icon(
               Icons.checkroom_rounded,
               size: 48,
-              color: AppColors.primary.withValues(alpha: 0.2),
+              color: AppColors.primary.withOpacity(0.2),
             ),
             const SizedBox(height: 8),
             Text(
               'Không có đồ nào',
               style: TextStyle(
-                color: AppColors.primary.withValues(alpha: 0.45),
+                color: AppColors.primary.withOpacity(0.45),
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -941,10 +941,10 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.08)),
+        border: Border.all(color: AppColors.primary.withOpacity(0.08)),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.04),
+            color: AppColors.primary.withOpacity(0.04),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),

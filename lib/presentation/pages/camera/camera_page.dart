@@ -119,7 +119,7 @@ class _CameraPageState extends State<CameraPage> {
                 width: 42,
                 height: 5,
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.12),
+                  color: AppColors.primary.withOpacity(0.12),
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
@@ -159,7 +159,7 @@ class _CameraPageState extends State<CameraPage> {
                   child: Container(
                     height: 110,
                     decoration: BoxDecoration(
-                      color: Colors.green.shade50.withValues(alpha: 0.6),
+                      color: Colors.green.shade50.withOpacity(0.6),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: Colors.green.shade200, width: 1),
                     ),
@@ -197,7 +197,7 @@ class _CameraPageState extends State<CameraPage> {
                   child: Container(
                     height: 110,
                     decoration: BoxDecoration(
-                      color: Colors.red.shade50.withValues(alpha: 0.6),
+                      color: Colors.red.shade50.withOpacity(0.6),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: Colors.red.shade200, width: 1),
                     ),
@@ -240,7 +240,7 @@ class _CameraPageState extends State<CameraPage> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppColors.accent.withValues(alpha: 0.3)),
+                border: Border.all(color: AppColors.accent.withOpacity(0.3)),
               ),
               child: Column(
                 children: [
@@ -368,9 +368,9 @@ class _CameraPageState extends State<CameraPage> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                     decoration: BoxDecoration(
-                      color: AppColors.secondary.withValues(alpha: 0.5),
+                      color: AppColors.secondary.withOpacity(0.5),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppColors.accent.withValues(alpha: 0.3)),
+                      border: Border.all(color: AppColors.accent.withOpacity(0.3)),
                     ),
                     child: const Row(
                       children: [

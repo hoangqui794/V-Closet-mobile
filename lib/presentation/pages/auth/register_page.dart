@@ -152,7 +152,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 'Tham gia V-Closet để quản lý tủ đồ thông minh hơn',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: AppColors.primary.withValues(alpha: 0.7),
+                  color: AppColors.primary.withOpacity(0.7),
                   fontSize: isSmallScreen ? 13.0 : 14.0,
                 ),
               ),
@@ -165,7 +165,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.03),
+                        color: Colors.black.withOpacity(0.03),
                         blurRadius: 18,
                         offset: const Offset(0, 4),
                       ),

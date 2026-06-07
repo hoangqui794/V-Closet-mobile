@@ -209,7 +209,7 @@ class _LoginPageState extends State<LoginPage> {
                               'Đăng nhập để tiếp tục hành trình thời trang của bạn',
                               style: TextStyle(
                                 fontSize: isSmallScreen ? 13.0 : 15.0,
-                                color: AppColors.primary.withValues(alpha: 0.7),
+                                color: AppColors.primary.withOpacity(0.7),
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -226,7 +226,7 @@ class _LoginPageState extends State<LoginPage> {
                             borderRadius: BorderRadius.circular(24),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.03),
+                                color: Colors.black.withOpacity(0.03),
                                 blurRadius: 18,
                                 offset: const Offset(0, 4),
                               ),
@@ -354,7 +354,7 @@ class _LoginPageState extends State<LoginPage> {
                         children: [
                           Expanded(
                             child: Divider(
-                              color: AppColors.secondary.withValues(alpha: 0.6),
+                              color: AppColors.secondary.withOpacity(0.6),
                             ),
                           ),
                           Padding(
@@ -371,7 +371,7 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           Expanded(
                             child: Divider(
-                              color: AppColors.secondary.withValues(alpha: 0.6),
+                              color: AppColors.secondary.withOpacity(0.6),
                             ),
                           ),
                         ],
@@ -391,7 +391,7 @@ class _LoginPageState extends State<LoginPage> {
                             'Chưa có tài khoản? ',
                             style: TextStyle(
                               fontSize: isSmallScreen ? 13.0 : 15.0,
-                              color: AppColors.primary.withValues(alpha: 0.65),
+                              color: AppColors.primary.withOpacity(0.65),
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -435,7 +435,7 @@ class _LoginPageState extends State<LoginPage> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
+        border: Border.all(color: Colors.black.withOpacity(0.05)),
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),

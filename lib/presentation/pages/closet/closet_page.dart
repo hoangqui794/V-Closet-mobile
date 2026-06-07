@@ -163,7 +163,7 @@ class _ClosetPageState extends State<ClosetPage>
                       borderRadius: BorderRadius.circular(14),
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.06),
+                          color: AppColors.primary.withOpacity(0.06),
                           blurRadius: 14,
                           offset: const Offset(0, 6),
                         ),
@@ -256,7 +256,7 @@ class _ClosetPageState extends State<ClosetPage>
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
               child: Container(
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.08),
+                  color: AppColors.primary.withOpacity(0.08),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: TabBar(
@@ -426,7 +426,7 @@ class _ClosetPageState extends State<ClosetPage>
         borderRadius: BorderRadius.circular(22),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.07),
+            color: AppColors.primary.withOpacity(0.07),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -468,7 +468,7 @@ class _ClosetPageState extends State<ClosetPage>
                         loadingBuilder: (context, child, progress) {
                           if (progress == null) return child;
                           return Container(
-                            color: AppColors.secondary.withValues(alpha: 0.5),
+                            color: AppColors.secondary.withOpacity(0.5),
                             child: const Center(
                               child: CircularProgressIndicator(strokeWidth: 2),
                             ),
@@ -484,8 +484,8 @@ class _ClosetPageState extends State<ClosetPage>
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: isPublic
-                            ? Colors.green.withValues(alpha: 0.85)
-                            : Colors.white.withValues(alpha: 0.90),
+                            ? Colors.green.withOpacity(0.85)
+                            : Colors.white.withOpacity(0.90),
                         borderRadius: BorderRadius.circular(999),
                       ),
                       child: Row(
@@ -612,8 +612,8 @@ class _ClosetPageState extends State<ClosetPage>
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                           decoration: BoxDecoration(
                             color: isPublic
-                                ? Colors.green.withValues(alpha: 0.12)
-                                : AppColors.primary.withValues(alpha: 0.08),
+                                ? Colors.green.withOpacity(0.12)
+                                : AppColors.primary.withOpacity(0.08),
                             borderRadius: BorderRadius.circular(999),
                           ),
                           child: Row(
@@ -649,7 +649,7 @@ class _ClosetPageState extends State<ClosetPage>
                           'Tạo lúc: $dateLabel',
                           style: TextStyle(
                             fontSize: 12,
-                            color: AppColors.primary.withValues(alpha: 0.5),
+                            color: AppColors.primary.withOpacity(0.5),
                           ),
                         ),
                       ),
@@ -681,7 +681,7 @@ class _ClosetPageState extends State<ClosetPage>
                             bottom: 12,
                             right: 12,
                             child: Material(
-                              color: Colors.white.withValues(alpha: 0.9),
+                              color: Colors.white.withOpacity(0.9),
                               borderRadius: BorderRadius.circular(30),
                               elevation: 2,
                               child: InkWell(
@@ -999,7 +999,7 @@ class _ClosetPageState extends State<ClosetPage>
           Icon(
             Icons.style_rounded,
             size: 76,
-            color: AppColors.primary.withValues(alpha: 0.25),
+            color: AppColors.primary.withOpacity(0.25),
           ),
           const SizedBox(height: 12),
           const Text(
@@ -1013,7 +1013,7 @@ class _ClosetPageState extends State<ClosetPage>
           const SizedBox(height: 4),
           Text(
             'Hãy phối đồ từ tab "Phòng thử đồ".',
-            style: TextStyle(color: AppColors.primary.withValues(alpha: 0.6)),
+            style: TextStyle(color: AppColors.primary.withOpacity(0.6)),
           ),
         ],
       ),
@@ -1388,9 +1388,9 @@ class _ClosetPageState extends State<ClosetPage>
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                     decoration: BoxDecoration(
-                      color: AppColors.secondary.withValues(alpha: 0.5),
+                      color: AppColors.secondary.withOpacity(0.5),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppColors.accent.withValues(alpha: 0.3)),
+                      border: Border.all(color: AppColors.accent.withOpacity(0.3)),
                     ),
                     child: const Row(
                       children: [
@@ -1486,7 +1486,7 @@ class _ClosetPageState extends State<ClosetPage>
                 width: 42,
                 height: 5,
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.12),
+                  color: AppColors.primary.withOpacity(0.12),
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
@@ -1526,7 +1526,7 @@ class _ClosetPageState extends State<ClosetPage>
                   child: Container(
                     height: 110,
                     decoration: BoxDecoration(
-                      color: Colors.green.shade50.withValues(alpha: 0.6),
+                      color: Colors.green.shade50.withOpacity(0.6),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: Colors.green.shade200, width: 1),
                     ),
@@ -1564,7 +1564,7 @@ class _ClosetPageState extends State<ClosetPage>
                   child: Container(
                     height: 110,
                     decoration: BoxDecoration(
-                      color: Colors.red.shade50.withValues(alpha: 0.6),
+                      color: Colors.red.shade50.withOpacity(0.6),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: Colors.red.shade200, width: 1),
                     ),
@@ -1607,7 +1607,7 @@ class _ClosetPageState extends State<ClosetPage>
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppColors.accent.withValues(alpha: 0.3)),
+                border: Border.all(color: AppColors.accent.withOpacity(0.3)),
               ),
               child: Column(
                 children: [
@@ -1849,7 +1849,7 @@ class _ClosetPageState extends State<ClosetPage>
           Icon(
             Icons.dry_cleaning_rounded,
             size: 76,
-            color: AppColors.primary.withValues(alpha: 0.25),
+            color: AppColors.primary.withOpacity(0.25),
           ),
           const SizedBox(height: 12),
           const Text(
@@ -1863,7 +1863,7 @@ class _ClosetPageState extends State<ClosetPage>
           const SizedBox(height: 4),
           Text(
             'Hãy chụp món đồ đầu tiên từ tab Camera.',
-            style: TextStyle(color: AppColors.primary.withValues(alpha: 0.6)),
+            style: TextStyle(color: AppColors.primary.withOpacity(0.6)),
           ),
         ],
       ),
@@ -1879,7 +1879,7 @@ class _ClosetPageState extends State<ClosetPage>
         borderRadius: BorderRadius.circular(22),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.06),
+            color: AppColors.primary.withOpacity(0.06),
             blurRadius: 18,
             offset: const Offset(0, 8),
           ),
@@ -1930,7 +1930,7 @@ class _ClosetPageState extends State<ClosetPage>
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.92),
+                        color: Colors.white.withOpacity(0.92),
                         borderRadius: BorderRadius.circular(999),
                       ),
                       child: Text(
