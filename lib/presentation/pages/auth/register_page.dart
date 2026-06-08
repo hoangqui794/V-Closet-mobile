@@ -303,7 +303,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                   style: TextStyle(fontSize: 13.0, color: AppColors.textMuted),
                                 ),
                                 GestureDetector(
-                                  onTap: () => _launchUrl('https://www.vcloset.vn/terms.html'),
+                                  onTap: () => _launchUrl('https://www.vcloset.vn/terms'),
                                   child: const Text(
                                     'Điều khoản dịch vụ',
                                     style: TextStyle(
@@ -319,7 +319,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                   style: TextStyle(fontSize: 13.0, color: AppColors.textMuted),
                                 ),
                                 GestureDetector(
-                                  onTap: () => _launchUrl('https://www.vcloset.vn/privacy.html'),
+                                  onTap: () => _launchUrl('https://www.vcloset.vn/privacy'),
                                   child: const Text(
                                     'Chính sách bảo mật',
                                     style: TextStyle(

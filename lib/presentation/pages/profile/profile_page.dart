@@ -493,12 +493,12 @@ class _ProfilePageState extends State<ProfilePage> {
                             _menuTile(
                               Icons.policy_outlined,
                               'Chính sách bảo mật',
-                              onTap: () => _launchUrl('https://www.vcloset.vn/privacy.html'),
+                              onTap: () => _launchUrl('https://www.vcloset.vn/privacy'),
                             ),
                             _menuTile(
                               Icons.description_outlined,
                               'Điều khoản dịch vụ',
-                              onTap: () => _launchUrl('https://www.vcloset.vn/terms.html'),
+                              onTap: () => _launchUrl('https://www.vcloset.vn/terms'),
                             ),
                             _menuTile(
                               Icons.no_accounts_rounded,
