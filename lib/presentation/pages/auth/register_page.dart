@@ -1,6 +1,7 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../data/datasources/auth_api_service.dart';
 import 'verify_otp_page.dart';
@@ -22,6 +23,7 @@ class _RegisterPageState extends State<RegisterPage> {
   bool _isLoading = false;
   bool _showPassword = false;
   bool _showConfirm = false;
+  bool _agreeToTerms = false;
 
   @override
   void dispose() {
@@ -37,6 +39,11 @@ class _RegisterPageState extends State<RegisterPage> {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
     final confirm = _confirmController.text.trim();
+
+    if (!_agreeToTerms) {
+      _showSnackbar('Bạn phải đồng ý với Điều khoản dịch vụ và Chính sách bảo mật.');
+      return;
+    }
 
     if (name.isEmpty) {
       _showSnackbar('Vui lòng nhập Họ và tên.');
@@ -92,6 +99,17 @@ class _RegisterPageState extends State<RegisterPage> {
         backgroundColor: isError ? AppColors.error : null,
       ),
     );
+  }
+
+  Future<void> _launchUrl(String urlString) async {
+    final Uri url = Uri.parse(urlString);
+    try {
+      if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+        throw Exception('Could not launch $urlString');
+      }
+    } catch (e) {
+      _showSnackbar('Không thể mở liên kết: $e', isError: true);
+    }
   }
 
   @override
@@ -262,6 +280,60 @@ class _RegisterPageState extends State<RegisterPage> {
                               ? const EdgeInsets.symmetric(horizontal: 16, vertical: 12)
                               : const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                         ),
+                      ),
+                      SizedBox(height: spacingSmall),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Checkbox(
+                            value: _agreeToTerms,
+                            activeColor: AppColors.primary,
+                            onChanged: (val) {
+                              setState(() {
+                                _agreeToTerms = val ?? false;
+                              });
+                            },
+                          ),
+                          Expanded(
+                            child: Wrap(
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              children: [
+                                const Text(
+                                  'Tôi đồng ý với ',
+                                  style: TextStyle(fontSize: 13.0, color: AppColors.textMuted),
+                                ),
+                                GestureDetector(
+                                  onTap: () => _launchUrl('https://www.vcloset.vn/terms.html'),
+                                  child: const Text(
+                                    'Điều khoản dịch vụ',
+                                    style: TextStyle(
+                                      fontSize: 13.0,
+                                      color: AppColors.primary,
+                                      fontWeight: FontWeight.bold,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                  ),
+                                ),
+                                const Text(
+                                  ' và ',
+                                  style: TextStyle(fontSize: 13.0, color: AppColors.textMuted),
+                                ),
+                                GestureDetector(
+                                  onTap: () => _launchUrl('https://www.vcloset.vn/privacy.html'),
+                                  child: const Text(
+                                    'Chính sách bảo mật',
+                                    style: TextStyle(
+                                      fontSize: 13.0,
+                                      color: AppColors.primary,
+                                      fontWeight: FontWeight.bold,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                       SizedBox(height: spacingMedium),
                       if (_isLoading)
