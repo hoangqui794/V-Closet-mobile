@@ -11,6 +11,7 @@ import 'edit_profile_page.dart';
 import 'subscription_page.dart';
 import 'notification_page.dart';
 import '../../../data/datasources/signalr_service.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -133,6 +134,24 @@ class _ProfilePageState extends State<ProfilePage> {
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _launchUrl(String urlString) async {
+    final Uri url = Uri.parse(urlString);
+    try {
+      if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+        throw Exception('Could not launch $urlString');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Không thể mở liên kết: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
     }
   }
 
@@ -471,8 +490,16 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                             const SizedBox(height: 10),
                             _menuTile(Icons.help_outline_rounded, 'Trung tâm trợ giúp'),
-                            _menuTile(Icons.policy_outlined, 'Chính sách bảo mật'),
-                            _menuTile(Icons.description_outlined, 'Điều khoản dịch vụ'),
+                            _menuTile(
+                              Icons.policy_outlined,
+                              'Chính sách bảo mật',
+                              onTap: () => _launchUrl('https://www.vcloset.vn/privacy.html'),
+                            ),
+                            _menuTile(
+                              Icons.description_outlined,
+                              'Điều khoản dịch vụ',
+                              onTap: () => _launchUrl('https://www.vcloset.vn/terms.html'),
+                            ),
                             _menuTile(
                               Icons.no_accounts_rounded,
                               'Vô hiệu hóa tài khoản',
