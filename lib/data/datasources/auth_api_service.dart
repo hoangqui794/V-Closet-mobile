@@ -45,6 +45,7 @@ class AuthApiService {
           'email': email,
           'password': password,
           'displayName': displayName,
+          'isAgreedToTerms': true,
         },
       );
       if (response.statusCode == 200 || response.statusCode == 201) {

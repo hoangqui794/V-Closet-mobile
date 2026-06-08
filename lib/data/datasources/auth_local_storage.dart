@@ -21,6 +21,7 @@ class AuthLocalStorage {
   static const String _kWardrobeItemCount = 'wardrobe_item_count';
   static const String _kOutfitCount = 'outfit_count';
   static const String _kOutfitLimit = 'outfit_limit';
+  static const String _kHasAcceptedTerms = 'has_accepted_terms_v2';
 
   Future<void> saveTokens(String accessToken, String refreshToken) async {
     await _prefs.setString(_kAccessToken, accessToken);
@@ -87,10 +88,17 @@ class AuthLocalStorage {
     await _prefs.remove(_kTryOnCredits);
     await _prefs.remove(_kOutfitCount);
     await _prefs.remove(_kOutfitLimit);
+    await _prefs.remove(_kHasAcceptedTerms);
   }
 
   bool hasSession() {
     return getAccessToken() != null;
+  }
+
+  bool hasAcceptedTerms() => _prefs.getBool(_kHasAcceptedTerms) ?? false;
+
+  Future<void> saveHasAcceptedTerms(bool value) async {
+    await _prefs.setBool(_kHasAcceptedTerms, value);
   }
 
   String getSubscriptionType() => _prefs.getString(_kSubscriptionType) ?? 'free';

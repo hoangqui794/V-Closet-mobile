@@ -9,6 +9,8 @@ import '../../../data/datasources/auth_api_service.dart';
 import 'forgot_password_page.dart';
 import 'register_page.dart';
 import '../profile/change_password_page.dart';
+import 'package:flutter/gestures.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -138,6 +140,24 @@ class _LoginPageState extends State<LoginPage> {
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _launchUrl(String urlString) async {
+    final Uri url = Uri.parse(urlString);
+    try {
+      if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+        throw Exception('Could not launch $urlString');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Không thể mở liên kết: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
     }
   }
 
@@ -382,6 +402,45 @@ class _LoginPageState extends State<LoginPage> {
                         icon: FontAwesomeIcons.google,
                         onTap: _googleLogin,
                         isSmallScreen: isSmallScreen,
+                      ),
+                      const SizedBox(height: 12),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: RichText(
+                          textAlign: TextAlign.center,
+                          text: TextSpan(
+                            style: TextStyle(
+                              fontSize: isSmallScreen ? 11.0 : 12.0,
+                              color: AppColors.textMuted,
+                              height: 1.4,
+                            ),
+                            children: [
+                              const TextSpan(text: 'Bằng việc tiếp tục, bạn đồng ý với '),
+                              TextSpan(
+                                text: 'Điều khoản Dịch vụ',
+                                style: const TextStyle(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.bold,
+                                  decoration: TextDecoration.underline,
+                                ),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () => _launchUrl('https://api.vcloset.vn/terms.html'),
+                              ),
+                              const TextSpan(text: ' và '),
+                              TextSpan(
+                                text: 'Chính sách bảo mật',
+                                style: const TextStyle(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.bold,
+                                  decoration: TextDecoration.underline,
+                                ),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () => _launchUrl('https://api.vcloset.vn/privacy.html'),
+                              ),
+                              const TextSpan(text: ' của V-Closet.'),
+                            ],
+                          ),
+                        ),
                       ),
                       SizedBox(height: spacingLarge),
                       Row(

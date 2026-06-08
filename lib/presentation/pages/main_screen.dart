@@ -93,6 +93,8 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
+
+
   // Nav items: index 2 là nút camera đặc biệt ở giữa
   static const List<(IconData, String)> _navItems = [
     (Icons.home_rounded, 'Trang chủ'),
