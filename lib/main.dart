@@ -34,9 +34,11 @@ void main() async {
   HttpOverrides.global = MyHttpOverrides();
   await di.init();
 
-  // Khởi tạo AdMob và tải trước rewarded ad
+  // Khởi tạo AdMob và tải trước các quảng cáo
   await AdService.initialize();
-  AdService().loadRewardedAd(); // load trước, không await để không block app
+  final adService = AdService();
+  adService.loadRewardedAd();
+  adService.loadInterstitialAd();
 
   final hasSession = GetIt.I<AuthLocalStorage>().hasSession();
   final isOnboardingCompleted = GetIt.I<AuthLocalStorage>().isOnboardingCompleted();

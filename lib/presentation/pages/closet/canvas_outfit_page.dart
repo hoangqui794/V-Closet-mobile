@@ -11,6 +11,7 @@ import '../../../../data/datasources/subscription_api_service.dart';
 import '../../../../data/datasources/wardrobe_api_service.dart';
 import '../../../../domain/entities/clothing_item.dart';
 import '../profile/subscription_page.dart';
+import '../../../../data/datasources/ad_service.dart';
 
 // ─── Data model for each item placed on canvas ────────────────────────────────
 
@@ -306,7 +307,13 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
             backgroundColor: Colors.green,
           ),
         );
-        Navigator.pop(context, true); // Signal success to parent
+        AdService().showInterstitialAd(
+          onDismissed: () {
+            if (mounted) {
+              Navigator.pop(context, true); // Signal success to parent
+            }
+          },
+        );
       }
     } catch (e) {
       if (mounted) {

@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:get_it/get_it.dart';
+import 'auth_local_storage.dart';
 
-/// Service quản lý Google AdMob Rewarded Video Ads
+/// Service quản lý Google AdMob Rewarded Video Ads và Interstitial Ads
 /// - Dùng test ID trong quá trình dev
 /// - Thay bằng ID thật khi publish lên Play Store
 class AdService {
@@ -11,17 +13,24 @@ class AdService {
   AdService._internal();
 
   // ── Ad Unit IDs ──────────────────────────────────────────────────
-  // TODO: Thay bằng ID thật từ AdMob khi publish
   static const String _testRewardedAdId =
       'ca-app-pub-3940256099942544/5224354917';
-
-  // ID thật — để trống, sẽ điền sau khi có từ AdMob console
-  static const String _realRewardedAdId = '';
+  static const String _realRewardedAdId =
+      'ca-app-pub-6907819873317169/1604323339';
 
   static String get rewardedAdUnitId {
-    // Dùng ID thật nếu đã có, không thì dùng test
     if (_realRewardedAdId.isNotEmpty) return _realRewardedAdId;
     return _testRewardedAdId;
+  }
+
+  static const String _testInterstitialAdId =
+      'ca-app-pub-3940256099942544/1033173712';
+  static const String _realInterstitialAdId =
+      'ca-app-pub-6907819873317169/7707531400';
+
+  static String get interstitialAdUnitId {
+    if (_realInterstitialAdId.isNotEmpty) return _realInterstitialAdId;
+    return _testInterstitialAdId;
   }
 
   // ── State ────────────────────────────────────────────────────────
@@ -29,7 +38,12 @@ class AdService {
   bool _isAdLoaded = false;
   bool _isLoading = false;
 
+  InterstitialAd? _interstitialAd;
+  bool _isInterstitialAdLoaded = false;
+  bool _isInterstitialLoading = false;
+
   bool get isAdLoaded => _isAdLoaded;
+  bool get isInterstitialAdLoaded => _isInterstitialAdLoaded;
 
   // ── Initialize ───────────────────────────────────────────────────
   /// Gọi trong main() trước runApp()
@@ -103,10 +117,96 @@ class AdService {
     );
   }
 
+  // ── Load Interstitial Ad ──────────────────────────────────────────
+  Future<void> loadInterstitialAd() async {
+    if (_isInterstitialLoading || _isInterstitialAdLoaded) return;
+    _isInterstitialLoading = true;
+
+    await InterstitialAd.load(
+      adUnitId: interstitialAdUnitId,
+      request: const AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (ad) {
+          _interstitialAd = ad;
+          _isInterstitialAdLoaded = true;
+          _isInterstitialLoading = false;
+          debugPrint('AdMob: Interstitial ad loaded');
+
+          _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
+            onAdDismissedFullScreenContent: (ad) {
+              ad.dispose();
+              _interstitialAd = null;
+              _isInterstitialAdLoaded = false;
+              loadInterstitialAd(); // Load again
+            },
+            onAdFailedToShowFullScreenContent: (ad, error) {
+              ad.dispose();
+              _interstitialAd = null;
+              _isInterstitialAdLoaded = false;
+              debugPrint('AdMob: Failed to show interstitial: $error');
+              loadInterstitialAd();
+            },
+          );
+        },
+        onAdFailedToLoad: (error) {
+          _isInterstitialLoading = false;
+          _isInterstitialAdLoaded = false;
+          debugPrint('AdMob: Failed to load interstitial ad: $error');
+        },
+      ),
+    );
+  }
+
+  // ── Show Interstitial Ad ──────────────────────────────────────────
+  Future<void> showInterstitialAd({
+    required VoidCallback onDismissed,
+  }) async {
+    // Chỉ hiển thị quảng cáo cho tài khoản FREE
+    if (GetIt.I.isRegistered<AuthLocalStorage>()) {
+      final localStorage = GetIt.I<AuthLocalStorage>();
+      final hasActivePremium = localStorage.getHasActivePremium();
+      if (hasActivePremium) {
+        debugPrint('AdMob: User is Premium. Skip showing interstitial ad.');
+        onDismissed();
+        return;
+      }
+    }
+
+    if (!_isInterstitialAdLoaded || _interstitialAd == null) {
+      debugPrint('AdMob: Interstitial ad not ready, loading...');
+      onDismissed();
+      await loadInterstitialAd();
+      return;
+    }
+
+    _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
+      onAdDismissedFullScreenContent: (ad) {
+        ad.dispose();
+        _interstitialAd = null;
+        _isInterstitialAdLoaded = false;
+        onDismissed();
+        loadInterstitialAd(); // Load again
+      },
+      onAdFailedToShowFullScreenContent: (ad, error) {
+        ad.dispose();
+        _interstitialAd = null;
+        _isInterstitialAdLoaded = false;
+        onDismissed();
+        loadInterstitialAd();
+      },
+    );
+
+    await _interstitialAd!.show();
+  }
+
   // ── Dispose ──────────────────────────────────────────────────────
   void dispose() {
     _rewardedAd?.dispose();
     _rewardedAd = null;
     _isAdLoaded = false;
+
+    _interstitialAd?.dispose();
+    _interstitialAd = null;
+    _isInterstitialAdLoaded = false;
   }
 }

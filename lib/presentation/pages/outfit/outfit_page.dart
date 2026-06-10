@@ -13,6 +13,7 @@ import '../../../data/datasources/outfit_api_service.dart';
 import '../../../data/datasources/tryon_api_service.dart';
 import '../../../data/datasources/wardrobe_api_service.dart';
 import '../../../data/datasources/auth_local_storage.dart';
+import '../../../data/datasources/ad_service.dart';
 import '../../../domain/entities/clothing_item.dart';
 import '../profile/subscription_page.dart';
 
@@ -775,10 +776,16 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
           timer.cancel();
           _stopTimer();
           _scanController.stop();
-          setState(() {
-            _isGenerating = false;
-            _resultUrl = outputUrl;
-          });
+          AdService().showInterstitialAd(
+            onDismissed: () {
+              if (mounted) {
+                setState(() {
+                  _isGenerating = false;
+                  _resultUrl = outputUrl;
+                });
+              }
+            },
+          );
         } else if (status == 'failed' || error != null) {
           timer.cancel();
           _stopTimer();
