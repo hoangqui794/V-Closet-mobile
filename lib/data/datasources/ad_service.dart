@@ -19,6 +19,10 @@ class AdService {
       'ca-app-pub-6907819873317169/1604323339';
 
   static String get rewardedAdUnitId {
+    if (kDebugMode) {
+      // Dùng Test ID khi dev để tránh lỗi "Account not approved" (Code 3) và tránh bị khóa tài khoản
+      return _testRewardedAdId;
+    }
     if (_realRewardedAdId.isNotEmpty) return _realRewardedAdId;
     return _testRewardedAdId;
   }
@@ -29,6 +33,10 @@ class AdService {
       'ca-app-pub-6907819873317169/7707531400';
 
   static String get interstitialAdUnitId {
+    if (kDebugMode) {
+      // Dùng Test ID khi dev để tránh lỗi "Account not approved" (Code 3) và tránh bị khóa tài khoản
+      return _testInterstitialAdId;
+    }
     if (_realInterstitialAdId.isNotEmpty) return _realInterstitialAdId;
     return _testInterstitialAdId;
   }
