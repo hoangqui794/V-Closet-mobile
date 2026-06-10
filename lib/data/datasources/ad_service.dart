@@ -49,7 +49,20 @@ class AdService {
   /// Gọi trong main() trước runApp()
   static Future<void> initialize() async {
     await MobileAds.instance.initialize();
-    debugPrint('AdMob: Initialized');
+    
+    // Đăng ký các thiết bị thử nghiệm để load quảng cáo test của Google
+    // giúp bypass lỗi "Account not approved yet" (Code 3) khi tài khoản AdMob đang chờ duyệt
+    final configuration = RequestConfiguration(
+      testDeviceIds: [
+        'B65DACFD868E84A1902AA27A9C480257',
+        '33BE2251611A5B4D2CC4E42B5684E0F4',
+        'B65DACFD-868E-84A1-902A-A27A9C480257',
+        '33BE2251-611A-5B4D-2CC4-E42B5684E0F4',
+      ],
+    );
+    await MobileAds.instance.updateRequestConfiguration(configuration);
+    
+    debugPrint('AdMob: Initialized with test devices: ${configuration.testDeviceIds}');
   }
 
   // ── Load Rewarded Ad ─────────────────────────────────────────────
