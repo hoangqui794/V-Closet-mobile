@@ -202,6 +202,13 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
     }
   }
 
+  double _calculateOriginalPrice(double currentPrice, double discountRate) {
+    if (discountRate <= 0 || discountRate >= 1) return currentPrice;
+    final rawOriginal = currentPrice / (1 - discountRate);
+    // Làm tròn lên hàng nghìn gần nhất (ví dụ: 148.750đ -> 149.000đ)
+    return (rawOriginal / 1000).ceil() * 1000.0;
+  }
+
   void _purchasePlan(SubscriptionPlan plan) async {
     showModalBottomSheet(
       context: context,
@@ -595,6 +602,11 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
                   : (currentPlan == 'yearly' || currentPlan == 'premium_yearly')
               );
               
+              final discountRate = isMonthly ? 0.20 : 0.45;
+              final discountPercent = isMonthly ? 'TIẾT KIỆM 20%' : 'TIẾT KIỆM 45%';
+              final originalPriceVal = _calculateOriginalPrice(plan.price, discountRate);
+              final formattedOriginalPrice = originalPriceVal.toStringAsFixed(0).replaceAllMapped(formatCurrency, (Match m) => '${m[1]}.');
+
               return Padding(
                 padding: const EdgeInsets.only(bottom: 16),
                 child: _planCard(
@@ -603,6 +615,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
                   period: ' / ${plan.durationDays} ngày',
                   isPremium: true,
                   isBestValue: isMonthly,
+                  originalPrice: '$formattedOriginalPrice đ',
+                  discountPercent: discountPercent,
                   features: isMonthly
                       ? [
                           'Không giới hạn tủ đồ số & canvas phối',
@@ -728,6 +742,19 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
               final unitCostValue = plan.price / credits;
               final unitCost = unitCostValue.toStringAsFixed(0).replaceAllMapped(formatCurrency, (Match m) => '${m[1]}.');
 
+              final discountRate = credits == 10
+                  ? 0.25
+                  : credits == 25
+                      ? 0.30
+                      : 0.20;
+              final discountPercentStr = credits == 10
+                  ? '-25%'
+                  : credits == 25
+                      ? '-30%'
+                      : '-20%';
+              final originalPriceVal = _calculateOriginalPrice(plan.price, discountRate);
+              final formattedOriginalPrice = originalPriceVal.toStringAsFixed(0).replaceAllMapped(formatCurrency, (Match m) => '${m[1]}.');
+
               return Padding(
                 padding: const EdgeInsets.only(bottom: 16),
                 child: _topupCard(
@@ -737,6 +764,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
                   credits: credits,
                   description: plan.description ?? 'Hỗ trợ nạp nhanh cho nhu cầu phối đồ.',
                   isPopular: credits >= 25,
+                  originalPrice: '$formattedOriginalPrice đ',
+                  discountPercent: discountPercentStr,
                   onPressed: () {
                     _purchasePlan(plan);
                   },
@@ -972,6 +1001,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
     required VoidCallback? onPressed,
     bool isBestValue = false,
     bool isActive = false,
+    String? originalPrice,
+    String? discountPercent,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -1035,6 +1066,40 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
                     ),
                   ),
                   const SizedBox(height: 12),
+                  if (originalPrice != null) ...[
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          originalPrice,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textMuted,
+                            decoration: TextDecoration.lineThrough,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        if (discountPercent != null)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFFEAEA),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              discountPercent,
+                              style: const TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800,
+                                color: Color(0xFFEB5757),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                  ],
                   Text.rich(
                     TextSpan(
                       children: [
@@ -1136,6 +1201,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
     required String description,
     required VoidCallback onPressed,
     bool isPopular = false,
+    String? originalPrice,
+    String? discountPercent,
   }) {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -1208,6 +1275,40 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
                   ),
                 ),
                 const SizedBox(height: 6),
+                if (originalPrice != null) ...[
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        originalPrice,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textMuted,
+                          decoration: TextDecoration.lineThrough,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      if (discountPercent != null)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFEAEA),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            discountPercent,
+                            style: const TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFFEB5757),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                ],
                 Text.rich(
                   TextSpan(
                     children: [
