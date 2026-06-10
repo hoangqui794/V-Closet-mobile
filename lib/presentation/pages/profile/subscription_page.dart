@@ -1576,33 +1576,34 @@ class _OutOfCreditsSheetState extends State<_OutOfCreditsSheet> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 10),
-
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: OutlinedButton(
-                    onPressed: _watchAdForCredit,
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.primary,
-                      side: const BorderSide(color: AppColors.primary, width: 1.5),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
+                if (widget.isBgRemoval) ...[
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: OutlinedButton(
+                      onPressed: _watchAdForCredit,
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.primary,
+                        side: const BorderSide(color: AppColors.primary, width: 1.5),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.ondemand_video_rounded, size: 18),
+                          SizedBox(width: 8),
+                          Text(
+                            'Xem quảng cáo tài trợ (Nhận 1 lượt)',
+                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                          ),
+                        ],
                       ),
                     ),
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.ondemand_video_rounded, size: 18),
-                        SizedBox(width: 8),
-                        Text(
-                          'Xem quảng cáo tài trợ (Nhận 1 lượt)',
-                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
                   ),
-                ),
+                ],
                 const SizedBox(height: 10),
 
                 TextButton(
