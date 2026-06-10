@@ -8,6 +8,7 @@ import 'package:dio/dio.dart';
 import '../../../data/datasources/bg_removal_service.dart';
 import '../../../data/datasources/wardrobe_api_service.dart';
 import '../../../data/datasources/auth_local_storage.dart';
+import '../../../data/datasources/ad_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../profile/subscription_page.dart';
 
@@ -518,7 +519,13 @@ class _CameraPageState extends State<CameraPage> {
             ),
             actions: [
               TextButton(
-                onPressed: () => Navigator.pop(context),
+                onPressed: () {
+                  Navigator.pop(context);
+                  AdService().showInterstitialAd(
+                    onDismissed: () {},
+                    force: false,
+                  );
+                },
                 child: const Text('Đóng'),
               ),
             ],

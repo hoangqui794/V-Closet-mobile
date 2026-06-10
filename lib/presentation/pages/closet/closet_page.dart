@@ -12,6 +12,7 @@ import '../../../../data/datasources/wardrobe_api_service.dart';
 import '../../../../data/datasources/outfit_api_service.dart';
 import '../../../../data/datasources/auth_local_storage.dart';
 import '../../../../data/datasources/subscription_api_service.dart';
+import '../../../../data/datasources/ad_service.dart';
 import '../profile/subscription_page.dart';
 import '../../../../domain/entities/clothing_item.dart';
 import 'canvas_outfit_page.dart';
@@ -1792,7 +1793,13 @@ class _ClosetPageState extends State<ClosetPage>
               ),
               actions: [
                 TextButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    AdService().showInterstitialAd(
+                      onDismissed: () {},
+                      force: false,
+                    );
+                  },
                   child: const Text('Đóng'),
                 ),
               ],

@@ -50,6 +50,10 @@ class AdService {
   bool _isInterstitialAdLoaded = false;
   bool _isInterstitialLoading = false;
 
+  // Cấu hình giãn cách hiển thị quảng cáo xen kẽ (ví dụ: tối thiểu mỗi 5 phút một lần)
+  DateTime? _lastInterstitialTime;
+  static const Duration _interstitialCooldown = Duration(minutes: 5);
+
   bool get isAdLoaded => _isAdLoaded;
   bool get isInterstitialAdLoaded => _isInterstitialAdLoaded;
 
@@ -179,8 +183,12 @@ class AdService {
   }
 
   // ── Show Interstitial Ad ──────────────────────────────────────────
+  /// Hiển thị quảng cáo xen kẽ cho tài khoản Free.
+  /// - [force] = true: bỏ qua quy tắc giãn cách 5 phút (dùng cho các sự kiện cực kỳ quan trọng).
+  /// - Mặc định sẽ tuân theo cooldown 5 phút để nâng cao trải nghiệm người dùng, tránh gây ức chế.
   Future<void> showInterstitialAd({
     required VoidCallback onDismissed,
+    bool force = false,
   }) async {
     // Chỉ hiển thị quảng cáo cho tài khoản FREE
     if (GetIt.I.isRegistered<AuthLocalStorage>()) {
@@ -188,6 +196,17 @@ class AdService {
       final hasActivePremium = localStorage.getHasActivePremium();
       if (hasActivePremium) {
         debugPrint('AdMob: User is Premium. Skip showing interstitial ad.');
+        onDismissed();
+        return;
+      }
+    }
+
+    // Kiểm tra thời gian giãn cách tối thiểu 5 phút (nếu không bắt buộc hiển thị)
+    if (!force && _lastInterstitialTime != null) {
+      final difference = DateTime.now().difference(_lastInterstitialTime!);
+      if (difference < _interstitialCooldown) {
+        final remaining = _interstitialCooldown - difference;
+        debugPrint('AdMob: Interstitial is cooling down. Skipping ad. Remaining: ${remaining.inSeconds}s');
         onDismissed();
         return;
       }
@@ -205,6 +224,7 @@ class AdService {
         ad.dispose();
         _interstitialAd = null;
         _isInterstitialAdLoaded = false;
+        _lastInterstitialTime = DateTime.now(); // Cập nhật thời điểm hiển thị thành công
         onDismissed();
         loadInterstitialAd(); // Load again
       },
