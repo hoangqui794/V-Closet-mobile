@@ -11,6 +11,8 @@ class SubscriptionPlan {
   final double price;
   final String currency;
   final int? durationDays;
+  final int grantedBgCredits;
+  final int grantedTryOnCredits;
   final bool isActive;
 
   SubscriptionPlan({
@@ -20,6 +22,8 @@ class SubscriptionPlan {
     required this.price,
     required this.currency,
     this.durationDays,
+    required this.grantedBgCredits,
+    required this.grantedTryOnCredits,
     required this.isActive,
   });
 
@@ -31,6 +35,8 @@ class SubscriptionPlan {
       price: (json['price'] as num? ?? 0.0).toDouble(),
       currency: json['currency'] as String? ?? 'VND',
       durationDays: json['durationDays'] as int?,
+      grantedBgCredits: json['grantedBgCredits'] as int? ?? 0,
+      grantedTryOnCredits: json['grantedTryOnCredits'] as int? ?? 0,
       isActive: json['isActive'] as bool? ?? true,
     );
   }

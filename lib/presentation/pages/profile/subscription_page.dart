@@ -617,21 +617,27 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
                   isBestValue: isMonthly,
                   originalPrice: '$formattedOriginalPrice đ',
                   discountPercent: discountPercent,
-                  features: isMonthly
-                      ? [
-                          'Không giới hạn tủ đồ số & canvas phối',
-                          '30 lượt xóa nền tự động / tháng',
-                          '30 lượt thử đồ AI / tháng',
-                          'Không hiển thị quảng cáo (Ad-Free)',
-                          'Ưu tiên tốc độ xử lý hàng đợi AI',
-                        ]
-                      : [
-                          'Tương đương gói Premium Tháng',
-                          'Cấp ngay 360 lượt xóa nền tự động',
-                          'Cấp ngay 360 lượt thử đồ AI',
-                          'Tiết kiệm chi phí lên đến 45%',
-                          'Trải nghiệm sớm các tính năng AI mới',
-                        ],
+                  features: plan.description != null && plan.description!.isNotEmpty
+                      ? plan.description!
+                          .split('.')
+                          .map((e) => e.trim())
+                          .where((e) => e.isNotEmpty)
+                          .toList()
+                      : isMonthly
+                          ? [
+                              'Không giới hạn tủ đồ số & canvas phối',
+                              '30 lượt xóa nền tự động / tháng',
+                              '30 lượt thử đồ AI / tháng',
+                              'Không hiển thị quảng cáo (Ad-Free)',
+                              'Ưu tiên tốc độ xử lý hàng đợi AI',
+                            ]
+                          : [
+                              'Tương đương gói Premium Tháng',
+                              'Cấp ngay 360 lượt xóa nền tự động',
+                              'Cấp ngay 360 lượt thử đồ AI',
+                              'Tiết kiệm chi phí lên đến 45%',
+                              'Trải nghiệm sớm các tính năng AI mới',
+                            ],
                   buttonText: isPlanActive ? 'Đang sử dụng' : 'Đăng ký ngay',
                   onPressed: isPlanActive
                       ? null
