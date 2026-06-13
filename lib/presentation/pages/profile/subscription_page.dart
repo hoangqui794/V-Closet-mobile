@@ -733,17 +733,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
             ...topupPlans.map((plan) {
               final formattedPrice = plan.price.toStringAsFixed(0).replaceAllMapped(formatCurrency, (Match m) => '${m[1]}.');
               
-              int credits = 10;
-              var match = RegExp(r'\d+').firstMatch(plan.name);
-              if (match != null) {
-                final matchStr = match.group(0);
-                if (matchStr != null) {
-                  credits = int.tryParse(matchStr) ?? 10;
-                }
-              }
-              if (credits <= 0) {
-                credits = 1;
-              }
+              int credits = plan.grantedTryOnCredits > 0 
+                  ? plan.grantedTryOnCredits 
+                  : (plan.grantedBgCredits > 0 ? plan.grantedBgCredits : 1);
               
               final unitCostValue = plan.price / credits;
               final unitCost = unitCostValue.toStringAsFixed(0).replaceAllMapped(formatCurrency, (Match m) => '${m[1]}.');
