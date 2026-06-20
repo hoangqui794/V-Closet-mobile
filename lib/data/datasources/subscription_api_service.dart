@@ -54,6 +54,7 @@ class MySubscription {
   final int? wardrobeItemLimit;
   final int outfitCount;
   final int? outfitLimit;
+  final bool hasCompletedSurvey;
 
   MySubscription({
     required this.hasActivePremium,
@@ -67,6 +68,7 @@ class MySubscription {
     this.wardrobeItemLimit,
     required this.outfitCount,
     this.outfitLimit,
+    required this.hasCompletedSurvey,
   });
 
   factory MySubscription.fromJson(Map<String, dynamic> json) {
@@ -84,6 +86,7 @@ class MySubscription {
       wardrobeItemLimit: json['wardrobeItemLimit'] as int?,
       outfitCount: json['outfitCount'] as int? ?? 0,
       outfitLimit: json['outfitLimit'] as int?,
+      hasCompletedSurvey: json['hasCompletedSurvey'] as bool? ?? false,
     );
   }
 }
@@ -175,6 +178,7 @@ class SubscriptionApiService {
 
     final serverPlan = mySub.planType ?? 'free';
     await localStorage.saveSubscription(serverPlan, mySub.bgRemovalCredits, mySub.tryOnCredits);
+    await localStorage.saveHasCompletedSurvey(mySub.hasCompletedSurvey);
 
     return mySub;
   }

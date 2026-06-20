@@ -10,9 +10,12 @@ import '../../../data/datasources/wardrobe_api_service.dart';
 import '../../../data/datasources/outfit_api_service.dart';
 import '../../../data/datasources/gemini_api_service.dart';
 import '../../../data/datasources/notification_api_service.dart';
+import '../../../data/datasources/user_api_service.dart';
 import '../../../domain/entities/clothing_item.dart';
 import '../profile/subscription_page.dart';
+import '../profile/survey_page.dart';
 import '../profile/notification_page.dart';
+import '../../../data/datasources/subscription_api_service.dart';
 
 class HomePage extends StatefulWidget {
   final VoidCallback? onMenuPressed;
@@ -36,9 +39,6 @@ class _HomePageState extends State<HomePage> {
   int _unreadCount = 0;
   StreamSubscription<int>? _unreadSub;
 
-  // Weather state
-  double? _latitude;
-  double? _longitude;
   double? _temperature;
   String _weatherDescription = 'Trời mát mẻ';
   IconData _weatherIcon = Icons.wb_cloudy_rounded;
@@ -109,62 +109,38 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _fetchWeatherAndLocation() async {
+    double lat = 21.0285;
+    double lon = 105.8542;
+
     try {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        if (mounted) {
-          setState(() {
-            _temperature = 28.0;
-            _weatherDescription = 'Trời nắng nhẹ';
-            _weatherIcon = Icons.wb_sunny_rounded;
-          });
-        }
-        await _fetchAiStylistAdvice();
-        return;
-      }
-
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
+      if (serviceEnabled) {
+        LocationPermission permission = await Geolocator.checkPermission();
         if (permission == LocationPermission.denied) {
-          if (mounted) {
-            setState(() {
-              _temperature = 28.0;
-              _weatherDescription = 'Quyền vị trí bị từ chối';
-              _weatherIcon = Icons.wb_sunny_rounded;
-            });
-          }
-          await _fetchAiStylistAdvice();
-          return;
+          permission = await Geolocator.requestPermission();
+        }
+
+        if (permission == LocationPermission.whileInUse || permission == LocationPermission.always) {
+          Position position = await Geolocator.getCurrentPosition(
+            desiredAccuracy: LocationAccuracy.low,
+            timeLimit: const Duration(seconds: 8),
+          );
+          lat = position.latitude;
+          lon = position.longitude;
         }
       }
+    } catch (e) {
+      debugPrint('Không lấy được GPS (sử dụng tọa độ mặc định): $e');
+    }
 
-      if (permission == LocationPermission.deniedForever) {
-        if (mounted) {
-          setState(() {
-            _temperature = 28.0;
-            _weatherDescription = 'Quyền vị trí bị khóa';
-            _weatherIcon = Icons.wb_sunny_rounded;
-          });
-        }
-        await _fetchAiStylistAdvice();
-        return;
-      }
 
-      Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.low,
-        timeLimit: const Duration(seconds: 5),
-      );
-
-      _latitude = position.latitude;
-      _longitude = position.longitude;
-
+    try {
       final dio = Dio();
       final response = await dio.get(
         'https://api.open-meteo.com/v1/forecast',
         queryParameters: {
-          'latitude': _latitude,
-          'longitude': _longitude,
+          'latitude': lat,
+          'longitude': lon,
           'current': 'temperature_2m,weather_code',
         },
       );
@@ -207,17 +183,17 @@ class _HomePageState extends State<HomePage> {
             _weatherIcon = icon;
           });
         }
-        await _fetchAiStylistAdvice();
       }
     } catch (e) {
-      debugPrint('Lỗi tải thời tiết: $e');
+      debugPrint('Lỗi tải thời tiết từ API: $e');
       if (mounted) {
         setState(() {
           _temperature = 28.0;
-          _weatherDescription = 'Lỗi kết nối thời tiết';
-          _weatherIcon = Icons.cloud_off_rounded;
+          _weatherDescription = 'Trời mát mẻ';
+          _weatherIcon = Icons.wb_sunny_rounded;
         });
       }
+    } finally {
       await _fetchAiStylistAdvice();
     }
   }
@@ -229,12 +205,23 @@ class _HomePageState extends State<HomePage> {
     final desc = _weatherDescription;
     final displayName = _localStorage.getDisplayName() ?? 'bạn';
 
+    // Lấy thông tin giới tính từ API profile của người dùng
+    String gender = 'Unisex';
+    try {
+      final userApiService = GetIt.I<UserApiService>();
+      final profile = await userApiService.getMyProfile();
+      gender = profile['Gender'] ?? profile['gender'] ?? 'Unisex';
+    } catch (e) {
+      debugPrint('Không lấy được giới tính từ profile, sử dụng Unisex: $e');
+    }
+
     try {
       final geminiService = GetIt.I<GeminiApiService>();
       final advice = await geminiService.generateAdvice(
         temperature: temp,
         weatherDescription: desc,
         userDisplayName: displayName,
+        gender: gender,
       );
 
       if (advice != null && advice.isNotEmpty && mounted) {
@@ -346,6 +333,12 @@ class _HomePageState extends State<HomePage> {
                       // ── Banner Premium (chỉ hiện khi FREE) ─────
                       if (!hasActivePremium) ...[
                         _premiumBanner(),
+                        const SizedBox(height: 24),
+                      ],
+
+                      // ── Banner Khảo Sát (Chỉ hiện khi chưa hoàn thành) ──
+                      if (!_localStorage.getHasCompletedSurvey()) ...[
+                        _surveyBanner(),
                         const SizedBox(height: 24),
                       ],
 
@@ -613,6 +606,122 @@ class _HomePageState extends State<HomePage> {
                 'Xem ngay',
                 style: TextStyle(
                   color: Color(0xFF996515),
+                  fontWeight: FontWeight.w900,
+                  fontSize: 12,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _surveyBanner() {
+    return GestureDetector(
+      onTap: () async {
+        final surveyUrl = _localStorage.getSurveyUrl();
+        final completed = await Navigator.push<bool>(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SurveyPage(surveyUrl: surveyUrl),
+          ),
+        );
+
+        if (completed == true) {
+          // Bắt đầu loading nhận thưởng
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => const Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
+            ),
+          );
+
+          try {
+            await GetIt.I<SubscriptionApiService>().claimAdReward('survey');
+            if (mounted) {
+              Navigator.pop(context); // Close loading dialog
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('🎉 Cảm ơn bạn! Đã cộng 3 lượt thử đồ AI miễn phí.'),
+                  backgroundColor: Colors.green,
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+              // Trigger load lại toàn bộ màn hình Home để ẩn banner đi
+              _refreshData();
+            }
+          } catch (e) {
+            if (mounted) {
+              Navigator.pop(context); // Close loading dialog
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Không thể nhận phần thưởng: ${e.toString().replaceAll('Exception: ', '')}'),
+                  backgroundColor: AppColors.error,
+                ),
+              );
+            }
+          }
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF8E94F2), Color(0xFFB19FFB)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(22),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF8E94F2).withOpacity(0.3),
+              blurRadius: 18,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.assignment_turned_in_rounded, color: Colors.white, size: 36),
+            const SizedBox(width: 14),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '🎁 Quà tặng 3 lượt thử đồ',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 16,
+                    ),
+                  ),
+                  SizedBox(height: 3),
+                  Text(
+                    'Làm khảo sát ý kiến nhận ngay +3 lượt thử đồ AI miễn phí!',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(30),
+              ),
+              child: const Text(
+                'Làm ngay',
+                style: TextStyle(
+                  color: Color(0xFF7462F9),
                   fontWeight: FontWeight.w900,
                   fontSize: 12,
                 ),
@@ -1104,34 +1213,41 @@ class _HomePageState extends State<HomePage> {
           ),
           const SizedBox(height: 16),
           Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              _suggestedItemBubble(
-                _getSuggestedTop(),
-                Icons.checkroom_rounded,
+              Expanded(
+                child: Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    _suggestedItemBubble(
+                      _getSuggestedTop(),
+                      Icons.checkroom_rounded,
+                    ),
+                    const Icon(Icons.add_rounded, color: Colors.white, size: 14),
+                    _suggestedItemBubble(
+                      _getSuggestedBottom(),
+                      Icons.checkroom_rounded,
+                    ),
+                  ],
+                ),
               ),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8),
-                child: Icon(Icons.add_rounded, color: Colors.white, size: 16),
-              ),
-              _suggestedItemBubble(
-                _getSuggestedBottom(),
-                Icons.checkroom_rounded,
-              ),
-              const Spacer(),
+              const SizedBox(width: 8),
               ElevatedButton(
                 onPressed: () => widget.onNavigateTo?.call(3), // Sang AI Studio
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,
                   foregroundColor: const Color(0xFF4A69BB),
                   minimumSize: const Size(0, 40),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   elevation: 0,
                 ),
                 child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('Mặc thử', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                    Text('Mặc thử', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                     SizedBox(width: 4),
                     Icon(Icons.arrow_forward_rounded, size: 14),
                   ],
@@ -1146,7 +1262,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget _suggestedItemBubble(String label, IconData icon) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.15),
         borderRadius: BorderRadius.circular(14),
@@ -1158,7 +1274,7 @@ class _HomePageState extends State<HomePage> {
           const SizedBox(width: 6),
           Text(
             label,
-            style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+            style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
           ),
         ],
       ),

@@ -22,6 +22,8 @@ class AuthLocalStorage {
   static const String _kOutfitCount = 'outfit_count';
   static const String _kOutfitLimit = 'outfit_limit';
   static const String _kHasAcceptedTerms = 'has_accepted_terms_v2';
+  static const String _kSurveyUrl = 'survey_url';
+  static const String _kHasCompletedSurvey = 'has_completed_survey';
 
   Future<void> saveTokens(String accessToken, String refreshToken) async {
     await _prefs.setString(_kAccessToken, accessToken);
@@ -62,6 +64,8 @@ class AuthLocalStorage {
   bool isOnboardingCompleted() => _prefs.getBool(_kIsOnboardingCompleted) ?? false;
   bool isPasswordSet() => _prefs.getBool(_kIsPasswordSet) ?? true;
   int getWardrobeItemCount() => _prefs.getInt(_kWardrobeItemCount) ?? 0;
+  bool getHasCompletedSurvey() => _prefs.getBool(_kHasCompletedSurvey) ?? false;
+  Future<void> saveHasCompletedSurvey(bool value) async => await _prefs.setBool(_kHasCompletedSurvey, value);
 
   Future<void> setOnboardingCompleted(bool completed) async {
     await _prefs.setBool(_kIsOnboardingCompleted, completed);
@@ -89,6 +93,7 @@ class AuthLocalStorage {
     await _prefs.remove(_kOutfitCount);
     await _prefs.remove(_kOutfitLimit);
     await _prefs.remove(_kHasAcceptedTerms);
+    await _prefs.remove(_kHasCompletedSurvey);
   }
 
   bool hasSession() {
@@ -141,5 +146,13 @@ class AuthLocalStorage {
     if (tryonCredits != null) {
       await _prefs.setInt(_kTryOnCredits, tryonCredits);
     }
+  }
+
+  String getSurveyUrl() {
+    return _prefs.getString(_kSurveyUrl) ?? 'https://forms.gle/YOUR_GOOGLE_FORM_LINK';
+  }
+
+  Future<void> saveSurveyUrl(String url) async {
+    await _prefs.setString(_kSurveyUrl, url);
   }
 }

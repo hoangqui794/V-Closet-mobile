@@ -10,6 +10,8 @@ import 'change_password_page.dart';
 import 'edit_profile_page.dart';
 import 'subscription_page.dart';
 import 'notification_page.dart';
+import 'survey_page.dart';
+import 'admin_settings_page.dart';
 import '../../../data/datasources/signalr_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -480,6 +482,72 @@ class _ProfilePageState extends State<ProfilePage> {
                                 );
                               },
                             ),
+                            if (!_localStorage.getHasCompletedSurvey())
+                              _menuTile(
+                                Icons.assignment_turned_in_outlined,
+                                'Làm khảo sát ý kiến',
+                                onTap: () async {
+                                  final completed = await Navigator.push<bool>(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => SurveyPage(
+                                        surveyUrl: _localStorage.getSurveyUrl(),
+                                      ),
+                                    ),
+                                  );
+
+                                  if (completed == true) {
+                                    try {
+                                      // Show loading dialog
+                                      showDialog(
+                                        context: context,
+                                        barrierDismissible: false,
+                                        builder: (context) => const Center(
+                                          child: CircularProgressIndicator(color: AppColors.primary),
+                                        ),
+                                      );
+
+                                      // Gọi API nhận thưởng
+                                      await GetIt.I<SubscriptionApiService>().claimAdReward('survey');
+                                      // Đồng bộ lại trạng thái gói dịch vụ để cập nhật local storage
+                                      await GetIt.I<SubscriptionApiService>().syncSubscriptionStatus();
+
+                                      if (mounted) {
+                                        Navigator.pop(context); // Close loading dialog
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(
+                                            content: Text('🎉 Cảm ơn bạn đã đóng góp ý kiến! Đã cộng 3 lượt thử đồ AI miễn phí.'),
+                                            backgroundColor: Colors.green,
+                                            behavior: SnackBarBehavior.floating,
+                                          ),
+                                        );
+                                        setState(() {});
+                                      }
+                                    } catch (e) {
+                                      if (mounted) {
+                                        Navigator.pop(context); // Close loading dialog
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: Text('Không thể nhận phần thưởng: ${e.toString().replaceAll('Exception: ', '')}'),
+                                            backgroundColor: AppColors.error,
+                                          ),
+                                        );
+                                      }
+                                    }
+                                  }
+                                },
+                              ),
+                            if (_localStorage.getUserRole()?.toLowerCase() == 'admin')
+                              _menuTile(
+                                Icons.admin_panel_settings_rounded,
+                                'Cấu hình hệ thống (Admin)',
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => const AdminSettingsPage()),
+                                  ).then((_) => setState(() {}));
+                                },
+                              ),
                             const SizedBox(height: 18),
                             const Text(
                               'Hỗ trợ & Bảo mật',

@@ -47,6 +47,10 @@
 	<true/>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Chúng tôi cần quyền truy cập thư viện ảnh để tải xuống ảnh thử đồ ảo của bạn.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Chúng tôi cần quyền vị trí để tự động lấy thông tin thời tiết và gợi ý trang phục phù hợp cho bạn.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Chúng tôi cần quyền vị trí để tự động lấy thông tin thời tiết và gợi ý trang phục phù hợp cho bạn.</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>

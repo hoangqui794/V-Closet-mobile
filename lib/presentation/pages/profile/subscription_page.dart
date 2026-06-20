@@ -9,6 +9,7 @@ import '../../../data/datasources/subscription_api_service.dart';
 import '../../../data/datasources/ad_service.dart';
 import '../../../data/datasources/signalr_service.dart';
 import 'manual_payment_sheet.dart';
+import 'survey_page.dart';
 
 class SubscriptionPage extends StatefulWidget {
   const SubscriptionPage({super.key});
@@ -1460,6 +1461,60 @@ class _OutOfCreditsSheetState extends State<_OutOfCreditsSheet> {
     );
   }
 
+  void _doSurveyForCredits() async {
+    final localStorage = GetIt.I<AuthLocalStorage>();
+    final surveyUrl = localStorage.getSurveyUrl();
+
+    // Mở trang khảo sát WebView và chờ nhận kết quả trả về
+    final completed = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SurveyPage(surveyUrl: surveyUrl),
+      ),
+    );
+
+    if (completed == true) {
+      // Gọi API nhận thưởng
+      try {
+        // Show loading dialog
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => const Center(
+            child: CircularProgressIndicator(color: AppColors.primary),
+          ),
+        );
+
+        await GetIt.I<SubscriptionApiService>().claimAdReward('survey');
+        // Đồng bộ lại trạng thái gói dịch vụ để cập nhật local storage
+        await GetIt.I<SubscriptionApiService>().syncSubscriptionStatus();
+
+        if (!mounted) return;
+        Navigator.pop(context); // Close loading dialog
+        Navigator.pop(context); // Close out-of-credits sheet
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('🎉 Cảm ơn bạn đã đóng góp ý kiến! Đã cộng 3 lượt thử đồ AI miễn phí.'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 4),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      } catch (e) {
+        if (!mounted) return;
+        Navigator.pop(context); // Close loading dialog if open
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Không thể nhận phần thưởng: ${e.toString().replaceAll('Exception: ', '')}'),
+            backgroundColor: AppColors.error,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final titleText = widget.isBgRemoval ? 'Hết lượt xóa nền!' : 'Hết lượt thử đồ AI!';
@@ -1598,6 +1653,28 @@ class _OutOfCreditsSheetState extends State<_OutOfCreditsSheet> {
                             style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
                           ),
                         ],
+                      ),
+                    ),
+                  ),
+                ],
+                if (!widget.isBgRemoval && !GetIt.I<AuthLocalStorage>().getHasCompletedSurvey()) ...[
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: OutlinedButton.icon(
+                      onPressed: _doSurveyForCredits,
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFFD4AF37),
+                        side: const BorderSide(color: Color(0xFFD4AF37), width: 1.5),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      icon: const Icon(Icons.assignment_turned_in_rounded, size: 18),
+                      label: const Text(
+                        'Làm khảo sát (Nhận 3 lượt thử miễn phí)',
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
