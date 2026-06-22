@@ -55,6 +55,7 @@ class MySubscription {
   final int outfitCount;
   final int? outfitLimit;
   final bool hasCompletedSurvey;
+  final String? surveyUrl;
 
   MySubscription({
     required this.hasActivePremium,
@@ -69,6 +70,7 @@ class MySubscription {
     required this.outfitCount,
     this.outfitLimit,
     required this.hasCompletedSurvey,
+    this.surveyUrl,
   });
 
   factory MySubscription.fromJson(Map<String, dynamic> json) {
@@ -87,6 +89,7 @@ class MySubscription {
       outfitCount: json['outfitCount'] as int? ?? 0,
       outfitLimit: json['outfitLimit'] as int?,
       hasCompletedSurvey: json['hasCompletedSurvey'] as bool? ?? false,
+      surveyUrl: json['surveyUrl'] as String?,
     );
   }
 }
@@ -179,6 +182,11 @@ class SubscriptionApiService {
     final serverPlan = mySub.planType ?? 'free';
     await localStorage.saveSubscription(serverPlan, mySub.bgRemovalCredits, mySub.tryOnCredits);
     await localStorage.saveHasCompletedSurvey(mySub.hasCompletedSurvey);
+    
+    // Lưu link khảo sát động từ BE
+    if (mySub.surveyUrl != null && mySub.surveyUrl!.isNotEmpty) {
+      await localStorage.saveSurveyUrl(mySub.surveyUrl!);
+    }
 
     return mySub;
   }
@@ -315,5 +323,20 @@ class SubscriptionApiService {
       return 'Lỗi hệ thống (${e.response?.statusCode}). Vui lòng thử lại sau.';
     }
     return 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng.';
+  }
+
+  /// Cập nhật liên kết khảo sát hệ thống (chỉ Admin)
+  Future<void> updateSurveyUrl(String surveyUrl) async {
+    try {
+      final response = await _apiService.put(
+        '/api/admin/system-settings/survey-url',
+        data: {'surveyUrl': surveyUrl},
+      );
+      if (response.statusCode != 200) {
+        throw Exception('Không thể cập nhật liên kết khảo sát hệ thống.');
+      }
+    } on DioException catch (e) {
+      throw Exception(_getDioErrorMessage(e));
+    }
   }
 }

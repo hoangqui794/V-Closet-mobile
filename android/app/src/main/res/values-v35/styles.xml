@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- API 35+ override: same as base values, windowOptInEdgeToEdge handled by Flutter engine -->
+    <style name="NormalTheme" parent="Theme.Material3.Light.NoActionBar">
+        <item name="android:windowBackground">?android:colorBackground</item>
+    </style>
+</resources>

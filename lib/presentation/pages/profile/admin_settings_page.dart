@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../data/datasources/auth_local_storage.dart';
+import '../../../data/datasources/subscription_api_service.dart';
 
 class AdminSettingsPage extends StatefulWidget {
   const AdminSettingsPage({super.key});
@@ -40,8 +41,8 @@ class _AdminSettingsPageState extends State<AdminSettingsPage> {
       // 1. Lưu cục bộ ở SharedPreferences để dùng ngay lập tức
       await _localStorage.saveSurveyUrl(newUrl);
 
-      // 2. [Lưu ý cho Production] Tại đây bạn có thể gọi API Backend để lưu lên Database:
-      // await _apiService.put('/api/system-config/survey-url', data: {'value': newUrl});
+      // 2. Gọi API Backend để lưu lên Database
+      await GetIt.I<SubscriptionApiService>().updateSurveyUrl(newUrl);
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
