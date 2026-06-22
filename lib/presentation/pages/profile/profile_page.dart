@@ -457,11 +457,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 );
                               },
                             ),
-                            _menuTile(
-                              Icons.favorite_border_rounded,
-                              'Danh sách yêu thích',
-                            ),
-                            _menuTile(Icons.shopping_bag_outlined, 'Đơn hàng của tôi'),
+
                             _menuTile(
                               Icons.workspace_premium_rounded,
                               'Gói Premium & Nạp Credits',

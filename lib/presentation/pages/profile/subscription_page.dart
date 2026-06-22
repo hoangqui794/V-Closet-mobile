@@ -10,6 +10,7 @@ import '../../../data/datasources/ad_service.dart';
 import '../../../data/datasources/signalr_service.dart';
 import 'manual_payment_sheet.dart';
 import 'survey_page.dart';
+import 'payos_payment_page.dart';
 
 class SubscriptionPage extends StatefulWidget {
   const SubscriptionPage({super.key});
@@ -221,15 +222,6 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
           price: plan.price,
           onSelected: (gateway) {
             Navigator.pop(sheetContext); // Close gateway selector
-            if (gateway == 'momo' || gateway == 'vnpay') {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Tính năng đang phát triển. Vui lòng chọn chuyển khoản thủ công.'),
-                  duration: Duration(seconds: 2),
-                ),
-              );
-              return;
-            }
             _initiatePurchase(plan, gateway);
           },
         );
@@ -255,41 +247,6 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
       return;
     }
 
-    if (gateway == 'vnpay') {
-      final confirmed = await showDialog<bool>(
-        context: context,
-        builder: (context) => AlertDialog(
-          backgroundColor: AppColors.background,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: const Text(
-            'Xác nhận thanh toán',
-            style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
-          ),
-          content: Text(
-            'Bạn có muốn thanh toán gói dịch vụ "${plan.name}" qua cổng VNPay không? Hệ thống sẽ mở trang thanh toán trên trình duyệt của bạn.',
-            style: const TextStyle(color: AppColors.primary),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Hủy bỏ', style: TextStyle(color: AppColors.textMuted, fontWeight: FontWeight.bold)),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context, true),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-              child: const Text('Xác nhận', style: TextStyle(fontWeight: FontWeight.bold)),
-            ),
-          ],
-        ),
-      );
-
-      if (confirmed != true) return;
-    }
-
     if (!mounted) return;
 
     showDialog(
@@ -305,23 +262,41 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
       if (!mounted) return;
       Navigator.pop(context); // Đóng loading dialog
 
-      // Tự động mở liên kết thanh toán VNPay nếu được chọn và kết thúc luồng
-      if (gateway == 'vnpay') {
-        final Uri url = Uri.parse(paymentUrl);
-        if (await canLaunchUrl(url)) {
-          await launchUrl(url, mode: LaunchMode.externalApplication);
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Đang mở liên kết thanh toán VNPay. Vuốt xuống để cập nhật trạng thái sau khi hoàn tất.'),
-                backgroundColor: AppColors.primary,
-              ),
-            );
-          }
+      // Điều hướng tới trang thanh toán PayOS WebView
+      if (gateway == 'payos') {
+        final statusResult = await Navigator.push<String>(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PayOSPaymentPage(
+              paymentUrl: paymentUrl,
+              planName: plan.name,
+            ),
+          ),
+        );
+
+        if (statusResult == 'success') {
+          _showPaymentResultDialog(
+            isSuccess: true,
+            title: 'Thanh toán thành công',
+            message: 'Chúc mừng! Bạn đã đăng ký thành công gói "${plan.name}". Giao diện đang được cập nhật.',
+          );
+        } else if (statusResult == 'cancelled') {
+          _showPaymentResultDialog(
+            isSuccess: false,
+            title: 'Thanh toán đã hủy',
+            message: 'Giao dịch đăng ký gói "${plan.name}" đã bị hủy.',
+          );
         } else {
-          throw Exception('Không thể mở liên kết thanh toán VNPay.');
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Đang làm mới thông tin gói dịch vụ...'),
+              backgroundColor: AppColors.primary,
+            ),
+          );
         }
-        return; // Không mở BottomSheet
+        
+        await _loadSubscriptionData();
+        return;
       }
 
       if (mounted) {
@@ -1926,22 +1901,12 @@ class _PaymentGatewaySelectorSheet extends StatelessWidget {
           const SizedBox(height: 24),
           _buildGatewayCard(
             context: context,
-            gateway: 'momo',
-            title: 'Ví Điện Tử MoMo',
-            subtitle: 'Thanh toán qua ứng dụng Ví MoMo bằng QR hoặc Deeplink',
-            iconColor: const Color(0xFFA50064),
-            logoText: 'MoMo',
-            logoBgColor: const Color(0xFFFFF0F5),
-          ),
-          const SizedBox(height: 12),
-          _buildGatewayCard(
-            context: context,
-            gateway: 'vnpay',
-            title: 'Cổng Thanh Toán VNPay',
-            subtitle: 'Thanh toán qua ứng dụng ngân hàng di động, thẻ ATM/Visa',
-            iconColor: const Color(0xFF005BAA),
-            logoText: 'VNPay',
-            logoBgColor: const Color(0xFFE6F0FA),
+            gateway: 'payos',
+            title: 'Cổng thanh toán PayOS',
+            subtitle: 'Thanh toán tự động qua mã VietQR Ngân hàng hoặc thẻ ATM/Visa',
+            iconColor: const Color(0xFFE25822),
+            logoText: 'PayOS',
+            logoBgColor: const Color(0xFFFFF5EE),
           ),
           const SizedBox(height: 12),
           _buildGatewayCard(

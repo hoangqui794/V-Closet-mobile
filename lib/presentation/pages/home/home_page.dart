@@ -474,7 +474,9 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               Text(
-                displayName.split(' ').last, // Tên ngắn
+                displayName,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w900,

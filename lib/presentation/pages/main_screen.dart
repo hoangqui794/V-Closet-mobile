@@ -125,6 +125,167 @@ class _MainScreenState extends State<MainScreen> {
     _scaffoldKey.currentState?.openDrawer();
   }
 
+  void _showCustomAboutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primaryDark.withOpacity(0.15),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+              border: Border.all(
+                color: AppColors.primary.withOpacity(0.08),
+                width: 1,
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // App Icon Container
+                  Container(
+                    width: 72,
+                    height: 72,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withOpacity(0.2),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.checkroom_rounded,
+                      color: Colors.white,
+                      size: 36,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // App Name
+                  const Text(
+                    'V-Closet',
+                    style: TextStyle(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 22,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  // Version Badge
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Text(
+                      'Phiên bản 1.0.0',
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 10,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // Description
+                  Text(
+                    'V-Closet là ứng dụng quản lý tủ đồ thông minh tích hợp công nghệ thử đồ ảo AI vượt trội.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: AppColors.primary.withOpacity(0.8),
+                      fontSize: 13.5,
+                      height: 1.5,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  const Divider(height: 1, thickness: 0.8),
+                  const SizedBox(height: 16),
+                  // Actions
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Expanded(
+                        child: TextButton(
+                          onPressed: () {
+                            showLicensePage(
+                              context: context,
+                              applicationName: 'V-Closet',
+                              applicationVersion: '1.0.0',
+                              applicationIcon: const Padding(
+                                padding: EdgeInsets.all(12.0),
+                                child: Icon(
+                                  Icons.checkroom_rounded,
+                                  color: AppColors.primary,
+                                  size: 48,
+                                ),
+                              ),
+                            );
+                          },
+                          style: TextButton.styleFrom(
+                            foregroundColor: AppColors.accent,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                          child: const Text(
+                            'Giấy phép',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                          child: const Text(
+                            'Đóng',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final hideBottomNav = _currentIndex == 2;
@@ -243,15 +404,7 @@ class _MainScreenState extends State<MainScreen> {
               title: const Text('Giới thiệu V-Closet', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
               onTap: () {
                 Navigator.pop(context);
-                showAboutDialog(
-                  context: context,
-                  applicationName: 'V-Closet',
-                  applicationVersion: '1.0.0',
-                  applicationIcon: const Icon(Icons.checkroom_rounded, color: AppColors.primary, size: 40),
-                  children: [
-                    const Text('V-Closet là ứng dụng quản lý tủ đồ thông minh tích hợp công nghệ thử đồ ảo AI vượt trội.'),
-                  ],
-                );
+                _showCustomAboutDialog(context);
               },
             ),
             ListTile(

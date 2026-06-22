@@ -154,6 +154,18 @@ class _OnboardingSurveyPageState extends State<OnboardingSurveyPage> {
       _showError('Vui lòng nhập Biệt danh.');
       return;
     }
+    if (phone.isEmpty) {
+      _showError('Vui lòng nhập Số điện thoại.');
+      return;
+    }
+    if (address.isEmpty) {
+      _showError('Vui lòng nhập Địa chỉ.');
+      return;
+    }
+    if (country.isEmpty) {
+      _showError('Vui lòng chọn Quốc gia.');
+      return;
+    }
 
     setState(() => _isLoading = true);
 
