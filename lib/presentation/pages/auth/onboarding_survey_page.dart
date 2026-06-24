@@ -172,6 +172,28 @@ class _OnboardingSurveyPageState extends State<OnboardingSurveyPage> {
     try {
       final dobStr = "${_dob.year.toString().padLeft(4, '0')}-${_dob.month.toString().padLeft(2, '0')}-${_dob.day.toString().padLeft(2, '0')}";
       
+      // Tự động map dữ liệu Style DNA dựa trên khảo sát đăng ký để tránh hỏi 2 lần
+      String stylePref = 'casual';
+      if (_lifestyle == 'Sporty') {
+        stylePref = 'sporty';
+      } else if (_lifestyle == 'Formal') {
+        stylePref = 'cong_so';
+      } else if (_lifestyle == 'Elegant') {
+        stylePref = 'thanh_lich';
+      } else if (_lifestyle == 'Streetwear') {
+        stylePref = 'streetwear';
+      }
+
+      String bodyType = 'trung_binh';
+      if (_height < 160.0) {
+        bodyType = 'nho_nhan';
+      } else if (_height > 165.0) {
+        bodyType = 'cao_rao';
+      }
+      
+      final skinTone = 'trung_binh';
+      final colorPref = 'trung_tinh';
+
       await _userApiService.updateMyProfile(
         displayName: name,
         gender: _gender,
@@ -184,7 +206,19 @@ class _OnboardingSurveyPageState extends State<OnboardingSurveyPage> {
         lifestyle: _lifestyle,
         eyeColor: _eyeColor,
         hair: _hair,
+        skinTone: skinTone,
+        bodyType: bodyType,
+        stylePref: stylePref,
+        colorPref: colorPref,
       );
+
+      await _localStorage.saveStyleDna(
+        skinTone: skinTone,
+        bodyType: bodyType,
+        stylePref: stylePref,
+        colorPref: colorPref,
+      );
+      await _localStorage.saveHasCompletedStyleQuiz(true);
 
       await _localStorage.setOnboardingCompleted(true);
       await _localStorage.saveUser(

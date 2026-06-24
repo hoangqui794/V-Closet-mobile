@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:get_it/get_it.dart';
 import 'api_service.dart';
+import 'auth_local_storage.dart';
 
 class UserApiService {
   final ApiService _apiService;
@@ -12,7 +14,25 @@ class UserApiService {
     try {
       final response = await _apiService.get('/api/users/me');
       if (response.statusCode == 200) {
-        return response.data as Map<String, dynamic>;
+        final data = response.data as Map<String, dynamic>;
+
+        // Đồng bộ Style DNA (nếu có từ BE) vào local storage
+        final skinTone = data['skinTone'] ?? data['SkinTone'];
+        final bodyType = data['bodyType'] ?? data['BodyType'];
+        final stylePref = data['stylePref'] ?? data['StylePref'];
+        final colorPref = data['colorPref'] ?? data['ColorPref'];
+
+        if (skinTone != null || bodyType != null || stylePref != null || colorPref != null) {
+          final localStorage = GetIt.I<AuthLocalStorage>();
+          await localStorage.saveStyleDna(
+            skinTone: skinTone?.toString() ?? 'trung_binh',
+            bodyType: bodyType?.toString() ?? 'trung_binh',
+            stylePref: stylePref?.toString() ?? 'casual',
+            colorPref: colorPref?.toString() ?? 'trung_tinh',
+          );
+        }
+
+        return data;
       }
       throw Exception('Không thể tải thông tin cá nhân.');
     } on DioException catch (e) {
@@ -33,6 +53,10 @@ class UserApiService {
     String? lifestyle,
     String? eyeColor,
     String? hair,
+    String? skinTone,
+    String? bodyType,
+    String? stylePref,
+    String? colorPref,
   }) async {
     try {
       final response = await _apiService.put(
@@ -49,6 +73,10 @@ class UserApiService {
           if (lifestyle != null) 'lifestyle': lifestyle,
           if (eyeColor != null) 'eyeColor': eyeColor,
           if (hair != null) 'hair': hair,
+          if (skinTone != null) 'skinTone': skinTone,
+          if (bodyType != null) 'bodyType': bodyType,
+          if (stylePref != null) 'stylePref': stylePref,
+          if (colorPref != null) 'colorPref': colorPref,
         },
       );
       if (response.statusCode == 200) {

@@ -10,6 +10,7 @@ import 'home/home_page.dart';
 import 'outfit/outfit_page.dart';
 import 'profile/profile_page.dart';
 import 'profile/subscription_page.dart';
+import 'profile/style_dna_quiz_page.dart';
 import 'dart:async';
 import 'store/store_page.dart';
 import 'profile/notification_page.dart';
@@ -36,6 +37,8 @@ class _MainScreenState extends State<MainScreen> {
     _syncSubscription();
     SignalRService().initSignalR();
     _listenNotifications();
+    // Trigger Style DNA Quiz nếu user chưa hoàn thành
+    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeShowStyleQuiz());
   }
 
   @override
@@ -91,6 +94,33 @@ class _MainScreenState extends State<MainScreen> {
     } catch (e) {
       debugPrint('Lỗi đồng bộ gói dịch vụ tại MainScreen: $e');
     }
+  }
+
+  /// Hiện Style DNA Quiz nếu user chưa làm
+  void _maybeShowStyleQuiz() {
+    if (!mounted) return;
+    if (_localStorage.getHasCompletedStyleQuiz()) return;
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, _) => StyleDnaQuizPage(
+          onCompleted: () {
+            Navigator.of(context).pop();
+            // Reload home để AI Stylist dùng data mới
+            setState(() {});
+          },
+        ),
+        transitionsBuilder: (context, animation, _, child) {
+          return SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0, 1),
+              end: Offset.zero,
+            ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic)),
+            child: child,
+          );
+        },
+        transitionDuration: const Duration(milliseconds: 500),
+      ),
+    );
   }
 
 

@@ -3,6 +3,7 @@ import 'package:animate_do/animate_do.dart';
 import 'package:get_it/get_it.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../data/datasources/affiliate_api_service.dart';
+import '../../../data/datasources/auth_local_storage.dart';
 import 'product_detail_page.dart';
 
 class StorePage extends StatefulWidget {
@@ -15,8 +16,16 @@ class StorePage extends StatefulWidget {
 
 class _StorePageState extends State<StorePage> {
   final AffiliateApiService _affiliateApiService = GetIt.I<AffiliateApiService>();
+  final AuthLocalStorage _localStorage = GetIt.I<AuthLocalStorage>();
+
   String _selectedCategory = 'Tất cả';
-  final List<String> _categories = ['Tất cả', 'Áo', 'Quần', 'Váy đầm', 'Phụ kiện'];
+  List<String> get _categories {
+    final base = ['Tất cả', 'Áo', 'Quần', 'Váy đầm', 'Phụ kiện'];
+    if (_localStorage.getHasCompletedStyleQuiz()) {
+      return ['Dành cho bạn ✨', ...base];
+    }
+    return base;
+  }
 
   List<Map<String, dynamic>> _products = [];
   bool _isLoading = true;
@@ -54,6 +63,10 @@ class _StorePageState extends State<StorePage> {
   }
 
   List<Map<String, dynamic>> get _filteredProducts {
+    // Tab “Dành cho bạn” — filter theo phong cách từ Style DNA
+    if (_selectedCategory == 'Dành cho bạn ✨') {
+      return _getPersonalizedProducts();
+    }
     if (_selectedCategory == 'Tất cả') return _products;
     return _products.where((p) {
       final cat = (p['Category'] ?? p['category'])?.toString().toLowerCase() ?? '';
@@ -70,6 +83,72 @@ class _StorePageState extends State<StorePage> {
         return cat == 'accessory' || cat == 'bag' || cat == 'shoes' || cat == 'other';
       }
       return false;
+    }).toList();
+  }
+
+  /// Lọc sản phẩm theo phong cách Style DNA của user
+  List<Map<String, dynamic>> _getPersonalizedProducts() {
+    final stylePref = _localStorage.getStylePref() ?? 'casual';
+    final colorPref = _localStorage.getColorPref() ?? 'trung_tinh';
+
+    return _products.where((p) {
+      final name = (p['Name'] ?? p['name'] ?? '').toString().toLowerCase();
+      final desc = (p['Description'] ?? p['description'] ?? '').toString().toLowerCase();
+      final cat = (p['Category'] ?? p['category'] ?? '').toString().toLowerCase();
+      final text = '$name $desc';
+
+      // Filter theo phong cách
+      bool matchStyle = true;
+      switch (stylePref) {
+        case 'casual':
+          matchStyle = text.contains('casual') ||
+              text.contains('thuờời') ||
+              cat == 'top' || cat == 'bottom';
+          break;
+        case 'cong_so':
+          matchStyle = text.contains('sơ mi') ||
+              text.contains('vest') ||
+              text.contains('công sở') ||
+              text.contains('formal');
+          break;
+        case 'streetwear':
+          matchStyle = text.contains('hoodie') ||
+              text.contains('oversized') ||
+              text.contains('street') ||
+              text.contains('bomber');
+          break;
+        case 'thanh_lich':
+          matchStyle = cat == 'dress' ||
+              text.contains('đầm') ||
+              text.contains('chân váy') ||
+              text.contains('thanh lịch');
+          break;
+        case 'sporty':
+          matchStyle = text.contains('sport') ||
+              text.contains('thể thao') ||
+              text.contains('jogger') ||
+              text.contains('legging');
+          break;
+      }
+
+      // Filter theo màu sắc (bonus)
+      bool matchColor = true;
+      switch (colorPref) {
+        case 'toi_mau':
+          matchColor = text.contains('đen') ||
+              text.contains('navy') ||
+              text.contains('dark');
+          break;
+        case 'pastel':
+          matchColor = text.contains('hồng') ||
+              text.contains('nhạt') ||
+              text.contains('pastel');
+          break;
+        default:
+          matchColor = true; // Không filter mạnh theo màu nếu không có dấu hiệu rõ ràng
+      }
+
+      return matchStyle || matchColor;
     }).toList();
   }
 

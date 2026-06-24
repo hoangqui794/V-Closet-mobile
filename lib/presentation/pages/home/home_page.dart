@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:geolocator/geolocator.dart';
@@ -203,16 +203,28 @@ class _HomePageState extends State<HomePage> {
     if (temp == null) return;
 
     final desc = _weatherDescription;
-    final displayName = _localStorage.getDisplayName() ?? 'bạn';
+    final displayName = _localStorage.getDisplayName() ?? 'ban';
 
-    // Lấy thông tin giới tính từ API profile của người dùng
+    // Style DNA Profile
+    final hasStyleDna = _localStorage.getHasCompletedStyleQuiz();
+    final skinTone = hasStyleDna ? _localStorage.getSkinToneLabel() : null;
+    final bodyType = hasStyleDna ? _localStorage.getBodyTypeLabel() : null;
+    final stylePref = hasStyleDna ? _localStorage.getStylePref() : null;
+    final suggestedColors = hasStyleDna ? _localStorage.getSuggestedColors() : null;
+
+    // Tu do thuc te (Week 3)
+    final wardrobeNames = _recentItems.isNotEmpty
+        ? _recentItems.map((item) => item.name).toList()
+        : <String>[];
+
+    // Gender from profile
     String gender = 'Unisex';
     try {
       final userApiService = GetIt.I<UserApiService>();
       final profile = await userApiService.getMyProfile();
       gender = profile['Gender'] ?? profile['gender'] ?? 'Unisex';
     } catch (e) {
-      debugPrint('Không lấy được giới tính từ profile, sử dụng Unisex: $e');
+      debugPrint('Khong lay duoc gioi tinh: $e');
     }
 
     try {
@@ -222,6 +234,11 @@ class _HomePageState extends State<HomePage> {
         weatherDescription: desc,
         userDisplayName: displayName,
         gender: gender,
+        skinTone: skinTone,
+        bodyType: bodyType,
+        stylePref: stylePref,
+        suggestedColors: suggestedColors,
+        wardrobeItemNames: wardrobeNames.isNotEmpty ? wardrobeNames : null,
       );
 
       if (advice != null && advice.isNotEmpty && mounted) {
@@ -230,7 +247,7 @@ class _HomePageState extends State<HomePage> {
         });
       }
     } catch (e) {
-      debugPrint('Lỗi khi lấy tư vấn từ Gemini API: $e');
+      debugPrint('Loi khi lay tu van Gemini: $e');
     }
   }
 

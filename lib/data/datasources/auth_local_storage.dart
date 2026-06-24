@@ -25,6 +25,13 @@ class AuthLocalStorage {
   static const String _kSurveyUrl = 'survey_url';
   static const String _kHasCompletedSurvey = 'has_completed_survey';
 
+  // ── Style DNA Quiz ───────────────────────────────────────────────
+  static const String _kHasCompletedStyleQuiz = 'has_completed_style_quiz';
+  static const String _kSkinTone = 'style_skin_tone';       // sang / trung_binh / ngam / toi
+  static const String _kBodyType = 'style_body_type';       // nho_nhan / trung_binh / cao_rao / day_dan
+  static const String _kStylePref = 'style_pref';           // casual / cong_so / streetwear / thanh_lich / sporty
+  static const String _kColorPref = 'style_color_pref';    // pastel / trung_tinh / toi_mau / mau_noi
+
   Future<void> saveTokens(String accessToken, String refreshToken) async {
     await _prefs.setString(_kAccessToken, accessToken);
     await _prefs.setString(_kRefreshToken, refreshToken);
@@ -94,6 +101,11 @@ class AuthLocalStorage {
     await _prefs.remove(_kOutfitLimit);
     await _prefs.remove(_kHasAcceptedTerms);
     await _prefs.remove(_kHasCompletedSurvey);
+    await _prefs.remove(_kHasCompletedStyleQuiz);
+    await _prefs.remove(_kSkinTone);
+    await _prefs.remove(_kBodyType);
+    await _prefs.remove(_kStylePref);
+    await _prefs.remove(_kColorPref);
   }
 
   bool hasSession() {
@@ -154,5 +166,61 @@ class AuthLocalStorage {
 
   Future<void> saveSurveyUrl(String url) async {
     await _prefs.setString(_kSurveyUrl, url);
+  }
+
+  // ── Style DNA Quiz ───────────────────────────────────────────────
+  bool getHasCompletedStyleQuiz() => _prefs.getBool(_kHasCompletedStyleQuiz) ?? false;
+  Future<void> saveHasCompletedStyleQuiz(bool value) async =>
+      await _prefs.setBool(_kHasCompletedStyleQuiz, value);
+
+  String? getSkinTone() => _prefs.getString(_kSkinTone);
+  String? getBodyType() => _prefs.getString(_kBodyType);
+  String? getStylePref() => _prefs.getString(_kStylePref);
+  String? getColorPref() => _prefs.getString(_kColorPref);
+
+  Future<void> saveStyleDna({
+    required String skinTone,
+    required String bodyType,
+    required String stylePref,
+    required String colorPref,
+  }) async {
+    await _prefs.setString(_kSkinTone, skinTone);
+    await _prefs.setString(_kBodyType, bodyType);
+    await _prefs.setString(_kStylePref, stylePref);
+    await _prefs.setString(_kColorPref, colorPref);
+    await _prefs.setBool(_kHasCompletedStyleQuiz, true);
+  }
+
+  /// Trả về mô tả màu da phù hợp để dùng trong prompt AI
+  String getSkinToneLabel() {
+    switch (getSkinTone()) {
+      case 'sang':        return 'da sáng (fair skin)';
+      case 'trung_binh':  return 'da trung bình (medium skin)';
+      case 'ngam':        return 'da ngăm (olive/tan skin)';
+      case 'toi':         return 'da tối (deep/dark skin)';
+      default:            return 'da trung bình';
+    }
+  }
+
+  /// Trả về mô tả vóc người để dùng trong prompt AI
+  String getBodyTypeLabel() {
+    switch (getBodyType()) {
+      case 'nho_nhan':  return 'vóc người nhỏ nhắn/petite';
+      case 'trung_binh': return 'vóc người trung bình';
+      case 'cao_rao':   return 'vóc người cao ráo';
+      case 'day_dan':   return 'vóc người đầy đặn/curvy';
+      default:          return 'vóc người trung bình';
+    }
+  }
+
+  /// Trả về màu sắc gợi ý tôn da dựa trên skin tone
+  String getSuggestedColors() {
+    switch (getSkinTone()) {
+      case 'sang':        return 'màu pastel nhạt, màu navy, burgundy, forest green';
+      case 'trung_binh':  return 'màu earth tone, olive, dusty rose, camel';
+      case 'ngam':        return 'màu trắng, đỏ đất, cam ấm, vàng mù tạt, cobalt blue';
+      case 'toi':         return 'màu trắng sáng, vàng kim, đỏ tươi, electric blue, màu metallic';
+      default:            return 'màu trung tính';
+    }
   }
 }

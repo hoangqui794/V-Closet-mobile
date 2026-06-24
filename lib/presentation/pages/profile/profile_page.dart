@@ -11,6 +11,7 @@ import 'edit_profile_page.dart';
 import 'subscription_page.dart';
 import 'notification_page.dart';
 import 'survey_page.dart';
+import 'style_dna_quiz_page.dart';
 import 'admin_settings_page.dart';
 import '../../../data/datasources/signalr_service.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -446,6 +447,30 @@ class _ProfilePageState extends State<ProfilePage> {
                               Icons.edit_note_rounded,
                               'Chỉnh sửa hồ sơ cá nhân',
                               onTap: _goToEditProfile,
+                            ),
+                            _menuTile(
+                              Icons.auto_awesome_rounded,
+                              'Trắc nghiệm Style DNA',
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => StyleDnaQuizPage(
+                                      onCompleted: () {
+                                        Navigator.pop(context);
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(
+                                            content: Text('🎉 Đã cập nhật Style DNA của bạn thành công!'),
+                                            backgroundColor: Colors.green,
+                                            behavior: SnackBarBehavior.floating,
+                                          ),
+                                        );
+                                        setState(() {});
+                                      },
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
                             _menuTile(
                               Icons.lock_reset_rounded,
