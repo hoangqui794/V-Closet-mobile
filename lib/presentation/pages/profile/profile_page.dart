@@ -12,7 +12,9 @@ import 'subscription_page.dart';
 import 'notification_page.dart';
 import 'survey_page.dart';
 import 'style_dna_quiz_page.dart';
+import 'personal_color_detail_page.dart';
 import 'admin_settings_page.dart';
+import '../camera/color_harmony_checker_page.dart';
 import '../../../data/datasources/signalr_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -57,7 +59,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> _goToEditProfile() async {
     if (_profileData == null) return;
-    
+
     final updated = await Navigator.push(
       context,
       MaterialPageRoute(
@@ -75,7 +77,10 @@ class _ProfilePageState extends State<ProfilePage> {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Vô hiệu hóa tài khoản?', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Vô hiệu hóa tài khoản?',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         content: const Text(
           'Hành động này sẽ vô hiệu hóa tài khoản của bạn trên hệ thống V-Closet. Bạn sẽ không thể đăng nhập bằng tài khoản này nữa.',
         ),
@@ -107,7 +112,9 @@ class _ProfilePageState extends State<ProfilePage> {
           context: context,
           barrierDismissible: false,
           builder: (context) => AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
             title: const Text('Thông báo'),
             content: Text(msg),
             actions: [
@@ -161,15 +168,24 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     // Dự phòng khi chưa tải được API thì lấy thông tin lưu cục bộ
-    final displayName = _profileData?['displayName']?.toString() ?? _localStorage.getUserName() ?? 'Người dùng';
-    final email = _profileData?['email']?.toString() ?? _localStorage.getUserEmail() ?? '';
-    final avatarUrl = _profileData?['avatarUrl']?.toString() ?? _localStorage.getUserAvatar();
+    final displayName =
+        _profileData?['displayName']?.toString() ??
+        _localStorage.getUserName() ??
+        'Người dùng';
+    final email =
+        _profileData?['email']?.toString() ??
+        _localStorage.getUserEmail() ??
+        '';
+    final avatarUrl =
+        _profileData?['avatarUrl']?.toString() ?? _localStorage.getUserAvatar();
 
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: _isLoading
-            ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+            ? const Center(
+                child: CircularProgressIndicator(color: AppColors.primary),
+              )
             : RefreshIndicator(
                 color: AppColors.primary,
                 onRefresh: _fetchProfileData,
@@ -221,14 +237,19 @@ class _ProfilePageState extends State<ProfilePage> {
                                 CircleAvatar(
                                   radius: 34,
                                   backgroundColor: AppColors.accent,
-                                  backgroundImage: avatarUrl != null && avatarUrl.startsWith('http')
+                                  backgroundImage:
+                                      avatarUrl != null &&
+                                          avatarUrl.startsWith('http')
                                       ? NetworkImage(avatarUrl) as ImageProvider
-                                      : const AssetImage('assets/images/avatar1.png'),
+                                      : const AssetImage(
+                                          'assets/images/avatar1.png',
+                                        ),
                                 ),
                                 const SizedBox(width: 14),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         displayName,
@@ -241,7 +262,9 @@ class _ProfilePageState extends State<ProfilePage> {
                                       const SizedBox(height: 2),
                                       Text(
                                         email,
-                                        style: const TextStyle(color: Colors.white70),
+                                        style: const TextStyle(
+                                          color: Colors.white70,
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -298,10 +321,14 @@ class _ProfilePageState extends State<ProfilePage> {
                                   child: Row(
                                     children: [
                                       Icon(
-                                        _localStorage.getSubscriptionType() == 'free'
+                                        _localStorage.getSubscriptionType() ==
+                                                'free'
                                             ? Icons.account_circle_outlined
                                             : Icons.stars_rounded,
-                                        color: _localStorage.getSubscriptionType() == 'free'
+                                        color:
+                                            _localStorage
+                                                    .getSubscriptionType() ==
+                                                'free'
                                             ? AppColors.primaryLight
                                             : const Color(0xFFD4AF37),
                                         size: 24,
@@ -309,7 +336,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                       const SizedBox(width: 8),
                                       Expanded(
                                         child: Text(
-                                          _localStorage.getSubscriptionType() == 'free'
+                                          _localStorage.getSubscriptionType() ==
+                                                  'free'
                                               ? 'Tài khoản miễn phí (FREE)'
                                               : 'Thành viên PREMIUM PRO',
                                           overflow: TextOverflow.ellipsis,
@@ -317,7 +345,10 @@ class _ProfilePageState extends State<ProfilePage> {
                                           style: TextStyle(
                                             fontSize: 14,
                                             fontWeight: FontWeight.w800,
-                                            color: _localStorage.getSubscriptionType() == 'free'
+                                            color:
+                                                _localStorage
+                                                        .getSubscriptionType() ==
+                                                    'free'
                                                 ? AppColors.primary
                                                 : const Color(0xFF996515),
                                           ),
@@ -331,21 +362,28 @@ class _ProfilePageState extends State<ProfilePage> {
                                   onPressed: () {
                                     Navigator.push(
                                       context,
-                                      MaterialPageRoute(builder: (context) => const SubscriptionPage()),
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const SubscriptionPage(),
+                                      ),
                                     ).then((_) => setState(() {}));
                                   },
                                   style: TextButton.styleFrom(
                                     padding: EdgeInsets.zero,
                                     minimumSize: Size.zero,
-                                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                    tapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
                                   ),
                                   child: Text(
-                                    _localStorage.getSubscriptionType() == 'free'
+                                    _localStorage.getSubscriptionType() ==
+                                            'free'
                                         ? 'Nâng cấp ngay'
                                         : 'Quản lý gói',
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      color: _localStorage.getSubscriptionType() == 'free'
+                                      color:
+                                          _localStorage.getSubscriptionType() ==
+                                              'free'
                                           ? AppColors.primaryLight
                                           : const Color(0xFF996515),
                                     ),
@@ -358,7 +396,8 @@ class _ProfilePageState extends State<ProfilePage> {
                               children: [
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       const Text(
                                         'Lượt xóa nền',
@@ -371,7 +410,11 @@ class _ProfilePageState extends State<ProfilePage> {
                                       const SizedBox(height: 4),
                                       Row(
                                         children: [
-                                          const Icon(Icons.photo_filter_rounded, size: 16, color: AppColors.primaryLight),
+                                          const Icon(
+                                            Icons.photo_filter_rounded,
+                                            size: 16,
+                                            color: AppColors.primaryLight,
+                                          ),
                                           const SizedBox(width: 4),
                                           Text(
                                             '${_localStorage.getBgRemovalCredits()} lượt',
@@ -394,7 +437,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                 const SizedBox(width: 16),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       const Text(
                                         'Thử đồ AI',
@@ -407,7 +451,11 @@ class _ProfilePageState extends State<ProfilePage> {
                                       const SizedBox(height: 4),
                                       Row(
                                         children: [
-                                          const Icon(Icons.auto_awesome_rounded, size: 16, color: AppColors.primaryLight),
+                                          const Icon(
+                                            Icons.auto_awesome_rounded,
+                                            size: 16,
+                                            color: AppColors.primaryLight,
+                                          ),
                                           const SizedBox(width: 4),
                                           Text(
                                             '${_localStorage.getTryOnCredits()} lượt',
@@ -458,9 +506,13 @@ class _ProfilePageState extends State<ProfilePage> {
                                     builder: (context) => StyleDnaQuizPage(
                                       onCompleted: () {
                                         Navigator.pop(context);
-                                        ScaffoldMessenger.of(context).showSnackBar(
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
                                           const SnackBar(
-                                            content: Text('🎉 Đã cập nhật Style DNA của bạn thành công!'),
+                                            content: Text(
+                                              '🎉 Đã cập nhật Style DNA của bạn thành công!',
+                                            ),
                                             backgroundColor: Colors.green,
                                             behavior: SnackBarBehavior.floating,
                                           ),
@@ -472,13 +524,58 @@ class _ProfilePageState extends State<ProfilePage> {
                                 );
                               },
                             ),
+                            if (_localStorage.getHasCompletedStyleQuiz())
+                              _menuTile(
+                                Icons.palette_rounded,
+                                'Màu sắc cá nhân',
+                                onTap: () async {
+                                  final result = await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const PersonalColorDetailPage(),
+                                    ),
+                                  );
+
+                                  if (result == 'retake' && context.mounted) {
+                                    final checkResult = await Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => const ColorHarmonyCheckerPage(),
+                                      ),
+                                    );
+
+                                    if (checkResult is Map && context.mounted) {
+                                      final saveResult = await Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => PersonalColorDetailPage(
+                                            isFromScan: true,
+                                            scannedSkinTone: checkResult['skinTone']?.toString(),
+                                            scannedColorPref: checkResult['colorPref']?.toString(),
+                                          ),
+                                        ),
+                                      );
+
+                                      if (saveResult == 'saved') {
+                                        _fetchProfileData();
+                                      }
+                                    }
+                                  } else {
+                                    _fetchProfileData();
+                                  }
+                                },
+                              ),
                             _menuTile(
                               Icons.lock_reset_rounded,
                               'Đổi mật khẩu',
                               onTap: () {
                                 Navigator.push(
                                   context,
-                                  MaterialPageRoute(builder: (context) => const ChangePasswordPage()),
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const ChangePasswordPage(),
+                                  ),
                                 );
                               },
                             ),
@@ -489,7 +586,10 @@ class _ProfilePageState extends State<ProfilePage> {
                               onTap: () {
                                 Navigator.push(
                                   context,
-                                  MaterialPageRoute(builder: (context) => const SubscriptionPage()),
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const SubscriptionPage(),
+                                  ),
                                 ).then((_) => setState(() {}));
                               },
                             ),
@@ -499,7 +599,10 @@ class _ProfilePageState extends State<ProfilePage> {
                               onTap: () {
                                 Navigator.push(
                                   context,
-                                  MaterialPageRoute(builder: (context) => const NotificationPage()),
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const NotificationPage(),
+                                  ),
                                 );
                               },
                             ),
@@ -524,20 +627,30 @@ class _ProfilePageState extends State<ProfilePage> {
                                         context: context,
                                         barrierDismissible: false,
                                         builder: (context) => const Center(
-                                          child: CircularProgressIndicator(color: AppColors.primary),
+                                          child: CircularProgressIndicator(
+                                            color: AppColors.primary,
+                                          ),
                                         ),
                                       );
 
                                       // Gọi API nhận thưởng
-                                      await GetIt.I<SubscriptionApiService>().claimAdReward('survey');
+                                      await GetIt.I<SubscriptionApiService>()
+                                          .claimAdReward('survey');
                                       // Đồng bộ lại trạng thái gói dịch vụ để cập nhật local storage
-                                      await GetIt.I<SubscriptionApiService>().syncSubscriptionStatus();
+                                      await GetIt.I<SubscriptionApiService>()
+                                          .syncSubscriptionStatus();
 
                                       if (mounted) {
-                                        Navigator.pop(context); // Close loading dialog
-                                        ScaffoldMessenger.of(context).showSnackBar(
+                                        Navigator.pop(
+                                          context,
+                                        ); // Close loading dialog
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
                                           const SnackBar(
-                                            content: Text('🎉 Cảm ơn bạn đã đóng góp ý kiến! Đã cộng 3 lượt thử đồ AI miễn phí.'),
+                                            content: Text(
+                                              '🎉 Cảm ơn bạn đã đóng góp ý kiến! Đã cộng 3 lượt thử đồ AI miễn phí.',
+                                            ),
                                             backgroundColor: Colors.green,
                                             behavior: SnackBarBehavior.floating,
                                           ),
@@ -546,10 +659,16 @@ class _ProfilePageState extends State<ProfilePage> {
                                       }
                                     } catch (e) {
                                       if (mounted) {
-                                        Navigator.pop(context); // Close loading dialog
-                                        ScaffoldMessenger.of(context).showSnackBar(
+                                        Navigator.pop(
+                                          context,
+                                        ); // Close loading dialog
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
                                           SnackBar(
-                                            content: Text('Không thể nhận phần thưởng: ${e.toString().replaceAll('Exception: ', '')}'),
+                                            content: Text(
+                                              'Không thể nhận phần thưởng: ${e.toString().replaceAll('Exception: ', '')}',
+                                            ),
                                             backgroundColor: AppColors.error,
                                           ),
                                         );
@@ -558,14 +677,18 @@ class _ProfilePageState extends State<ProfilePage> {
                                   }
                                 },
                               ),
-                            if (_localStorage.getUserRole()?.toLowerCase() == 'admin')
+                            if (_localStorage.getUserRole()?.toLowerCase() ==
+                                'admin')
                               _menuTile(
                                 Icons.admin_panel_settings_rounded,
                                 'Cấu hình hệ thống (Admin)',
                                 onTap: () {
                                   Navigator.push(
                                     context,
-                                    MaterialPageRoute(builder: (context) => const AdminSettingsPage()),
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const AdminSettingsPage(),
+                                    ),
                                   ).then((_) => setState(() {}));
                                 },
                               ),
@@ -573,21 +696,29 @@ class _ProfilePageState extends State<ProfilePage> {
                             const Text(
                               'Hỗ trợ & Bảo mật',
                               style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w800,
-                                  color: AppColors.primary),
+                                fontSize: 20,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.primary,
+                              ),
                             ),
                             const SizedBox(height: 10),
-                            _menuTile(Icons.help_outline_rounded, 'Trung tâm trợ giúp'),
+                            _menuTile(
+                              Icons.help_outline_rounded,
+                              'Trung tâm trợ giúp',
+                            ),
                             _menuTile(
                               Icons.policy_outlined,
                               'Chính sách bảo mật',
-                              onTap: () => _launchUrl('https://api.vcloset.vn/privacy.html'),
+                              onTap: () => _launchUrl(
+                                'https://api.vcloset.vn/privacy.html',
+                              ),
                             ),
                             _menuTile(
                               Icons.description_outlined,
                               'Điều khoản dịch vụ',
-                              onTap: () => _launchUrl('https://api.vcloset.vn/terms.html'),
+                              onTap: () => _launchUrl(
+                                'https://api.vcloset.vn/terms.html',
+                              ),
                             ),
                             _menuTile(
                               Icons.no_accounts_rounded,
@@ -602,18 +733,24 @@ class _ProfilePageState extends State<ProfilePage> {
                                   context: context,
                                   barrierDismissible: false,
                                   builder: (context) => const Center(
-                                    child: CircularProgressIndicator(color: AppColors.primary),
+                                    child: CircularProgressIndicator(
+                                      color: AppColors.primary,
+                                    ),
                                   ),
                                 );
-                                
+
                                 await SignalRService().disconnect();
                                 await GetIt.I<AuthApiService>().logout();
-                                
+
                                 if (context.mounted) {
-                                  Navigator.of(context).pop(); // Đóng loading dialog
+                                  Navigator.of(
+                                    context,
+                                  ).pop(); // Đóng loading dialog
                                   Navigator.pushAndRemoveUntil(
                                     context,
-                                    MaterialPageRoute(builder: (_) => const LoginPage()),
+                                    MaterialPageRoute(
+                                      builder: (_) => const LoginPage(),
+                                    ),
                                     (route) => false,
                                   );
                                 }

@@ -9,8 +9,11 @@ import '../../../data/datasources/bg_removal_service.dart';
 import '../../../data/datasources/wardrobe_api_service.dart';
 import '../../../data/datasources/auth_local_storage.dart';
 import '../../../data/datasources/ad_service.dart';
+import '../../../data/datasources/gemini_api_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../profile/subscription_page.dart';
+import '../profile/personal_color_detail_page.dart';
+import 'color_harmony_checker_page.dart';
 
 class CameraPage extends StatefulWidget {
   final VoidCallback? onClose;
@@ -320,19 +323,34 @@ class _CameraPageState extends State<CameraPage> {
   }
 
   Future<Map<String, String>?> _showDetailsDialog(File imageFile) async {
-    String name = 'Đồ mới thêm ${DateTime.now().second}';
+    String name = 'Đang nhận dạng...';
     String category = 'Top'; 
     String currentCatName = 'Áo';
+    String detectedColor = '';
+    bool isAnalyzing = true;
+
+    final TextEditingController nameController = TextEditingController(text: name);
 
     final Map<String, String> categoryOptions = {
       'Áo': 'Top',
       'Quần/Váy': 'Bottom',
-      'Váy/Đầm': 'Dress',
+      'Đầm': 'Dress',
       'Áo khoác': 'Outerwear',
-      'Giày dép': 'Shoes',
-      'Túi xách': 'Bag',
+      'Giày': 'Shoes',
+      'Túi': 'Bag',
       'Phụ kiện': 'Accessory',
       'Khác': 'Other'
+    };
+
+    final Map<String, String> reverseCategoryMap = {
+      'Top': 'Áo',
+      'Bottom': 'Quần/Váy',
+      'Dress': 'Đầm',
+      'Outerwear': 'Áo khoác',
+      'Shoes': 'Giày',
+      'Bag': 'Túi',
+      'Accessory': 'Phụ kiện',
+      'Other': 'Khác'
     };
 
     return await showModalBottomSheet<Map<String, String>>(
@@ -345,6 +363,28 @@ class _CameraPageState extends State<CameraPage> {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setModalState) {
+            if (isAnalyzing) {
+              isAnalyzing = false;
+              GetIt.I<GeminiApiService>().analyzeClothingImage(imageFile).then((result) {
+                if (result != null && context.mounted) {
+                  setModalState(() {
+                    name = result['name'] ?? 'Món đồ mới';
+                    category = result['category'] ?? 'Top';
+                    currentCatName = reverseCategoryMap[category] ?? 'Áo';
+                    detectedColor = result['color'] ?? '';
+                    nameController.text = name;
+                  });
+                } else if (context.mounted) {
+                  setModalState(() {
+                    name = 'Đồ mới thêm ${DateTime.now().second}';
+                    nameController.text = name;
+                  });
+                }
+              });
+            }
+
+            final bool isAiRunning = nameController.text == 'Đang nhận dạng...';
+
             return Padding(
               padding: EdgeInsets.only(
                 bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -352,88 +392,135 @@ class _CameraPageState extends State<CameraPage> {
                 right: 20,
                 top: 24,
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Phân loại đồ', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.primary)),
-                  const SizedBox(height: 20),
-                  Center(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: Image.file(imageFile, height: 120, fit: BoxFit.cover),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  // Lưu ý nhỏ ở dưới ảnh preview
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: AppColors.secondary.withOpacity(0.5),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppColors.accent.withOpacity(0.3)),
-                    ),
-                    child: const Row(
-                      children: [
-                        Icon(Icons.lightbulb_outline_rounded, color: AppColors.primaryLight, size: 18),
-                        SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'Mẹo: Ảnh quần áo phẳng phiu, nền đơn sắc sẽ tách nền sạch đẹp nhất.',
-                            style: TextStyle(fontSize: 11, color: AppColors.primary, height: 1.3),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    initialValue: name,
-                    decoration: const InputDecoration(
-                      labelText: 'Tên món đồ',
-                      border: OutlineInputBorder(),
-                    ),
-                    onChanged: (val) => name = val,
-                  ),
-                  const SizedBox(height: 16),
-                  DropdownButtonFormField<String>(
-                    value: currentCatName,
-                    decoration: const InputDecoration(
-                      labelText: 'Loại trang phục',
-                      border: OutlineInputBorder(),
-                    ),
-                    items: categoryOptions.keys.map((String key) {
-                      return DropdownMenuItem<String>(
-                        value: key,
-                        child: Text(key),
-                      );
-                    }).toList(),
-                    onChanged: (val) {
-                      if (val != null) {
-                        setModalState(() {
-                          currentCatName = val;
-                          category = categoryOptions[val]!;
-                        });
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Phân loại đồ', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.primary)),
+                    const SizedBox(height: 20),
+                    Center(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Image.file(imageFile, height: 120, fit: BoxFit.cover),
                       ),
-                      onPressed: () {
-                        Navigator.pop(context, {'name': name, 'category': category});
-                      },
-                      child: const Text('Lưu & Tách nền', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
                     ),
-                  ),
-                  const SizedBox(height: 24),
-                ],
+                    const SizedBox(height: 20),
+                    // Lưu ý nhỏ ở dưới ảnh preview
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: AppColors.secondary.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.accent.withOpacity(0.3)),
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(Icons.lightbulb_outline_rounded, color: AppColors.primaryLight, size: 18),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Mẹo: Ảnh quần áo phẳng phiu, nền đơn sắc sẽ tách nền sạch đẹp nhất.',
+                              style: TextStyle(fontSize: 11, color: AppColors.primary, height: 1.3),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    
+                    if (isAiRunning)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const SizedBox(
+                              width: 14,
+                              height: 14,
+                              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryLight),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              '🤖 AI đang phân tích ảnh & nhận diện...',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: AppColors.primary.withOpacity(0.7),
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    else if (detectedColor.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.palette_rounded, size: 14, color: AppColors.primaryLight),
+                            const SizedBox(width: 6),
+                            Text(
+                              'AI nhận diện màu sắc: $detectedColor',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.primaryLight,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                    const SizedBox(height: 4),
+                    TextFormField(
+                      controller: nameController,
+                      decoration: const InputDecoration(
+                        labelText: 'Tên món đồ',
+                        border: OutlineInputBorder(),
+                      ),
+                      onChanged: (val) => name = val,
+                    ),
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<String>(
+                      value: currentCatName,
+                      decoration: const InputDecoration(
+                        labelText: 'Loại trang phục',
+                        border: OutlineInputBorder(),
+                      ),
+                      items: categoryOptions.keys.map((String key) {
+                        return DropdownMenuItem<String>(
+                          value: key,
+                          child: Text(key),
+                        );
+                      }).toList(),
+                      onChanged: (val) {
+                        if (val != null) {
+                          setModalState(() {
+                            currentCatName = val;
+                            category = categoryOptions[val]!;
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        onPressed: () {
+                          Navigator.pop(context, {'name': name, 'category': category});
+                        },
+                        child: const Text('Lưu & Tách nền', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+                ),
               ),
             );
           },
@@ -504,31 +591,142 @@ class _CameraPageState extends State<CameraPage> {
 
         showDialog(
           context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Thêm thành công!'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Hiển thị chính cái ảnh đã tách nền
-                Image.file(fileToUpload, height: 150),
-                const SizedBox(height: 10),
-                Text('Tên: ${newItem.name}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 5),
-                const Text('Ảnh đã được tách nền và lưu vào Tủ đồ thành công.', style: TextStyle(color: Colors.green, fontSize: 12)),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  AdService().showInterstitialAd(
-                    onDismissed: () {},
-                    force: false,
-                  );
-                },
-                child: const Text('Đóng'),
+          barrierDismissible: false,
+          builder: (context) => Dialog(
+            backgroundColor: Colors.transparent,
+            insetPadding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
               ),
-            ],
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 64,
+                    height: 64,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [AppColors.primaryLight, AppColors.primary],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withOpacity(0.2),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.check_rounded,
+                      color: Colors.white,
+                      size: 32,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Thêm thành công!',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  const Text(
+                    'Món đồ đã được tách nền và lưu vào tủ đồ.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textMuted,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Container(
+                    height: 160,
+                    width: 160,
+                    decoration: BoxDecoration(
+                      color: AppColors.muted.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(
+                        color: AppColors.secondary.withOpacity(0.3),
+                        width: 1,
+                      ),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(17),
+                      child: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Image.file(
+                            fileToUpload,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.06),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      newItem.name,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        elevation: 0,
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        AdService().showInterstitialAd(
+                          onDismissed: () {},
+                          force: false,
+                        );
+                      },
+                      child: const Text(
+                        'Đóng',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         );
       } else if (mounted) {
@@ -624,6 +822,27 @@ class _CameraPageState extends State<CameraPage> {
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          IconButton(
+                            icon: const Icon(Icons.palette_rounded, color: Colors.white),
+                             onPressed: () async {
+                               final result = await Navigator.push(
+                                 context,
+                                 MaterialPageRoute(builder: (_) => const ColorHarmonyCheckerPage()),
+                               );
+                               if (result is Map && context.mounted) {
+                                 Navigator.push(
+                                   context,
+                                   MaterialPageRoute(
+                                     builder: (_) => PersonalColorDetailPage(
+                                       isFromScan: true,
+                                       scannedSkinTone: result['skinTone']?.toString(),
+                                       scannedColorPref: result['colorPref']?.toString(),
+                                     ),
+                                   ),
+                                 );
+                               }
+                             },
+                          ),
                           IconButton(
                             icon: const Icon(Icons.help_outline_rounded, color: Colors.white),
                             onPressed: _showBgRemovalGuidelines,

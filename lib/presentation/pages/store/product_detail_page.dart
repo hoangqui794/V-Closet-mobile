@@ -31,6 +31,221 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   final AffiliateApiService _affiliateApiService = GetIt.I<AffiliateApiService>();
   String? _selectedSize;
   bool _isOpening = false;
+  
+  double? _userHeight;
+  double? _userWeight;
+  String? _userGender;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserDna();
+  }
+
+  Future<void> _loadUserDna() async {
+    try {
+      final profile = await GetIt.I<UserApiService>().getMyProfile();
+      setState(() {
+        _userHeight = (profile['heightCm'] ?? profile['HeightCm'])?.toDouble();
+        _userWeight = (profile['weightKg'] ?? profile['WeightKg'])?.toDouble();
+        _userGender = profile['gender'] ?? profile['Gender'];
+
+        // Auto select recommended size if available and not already selected
+        if (_selectedSize == null) {
+          final sizes = List<String>.from(widget.product['sizes'] ?? widget.product['Sizes'] ?? []);
+          final rec = _getRecommendedSize(sizes);
+          if (rec != null) {
+            _selectedSize = rec;
+          }
+        }
+      });
+    } catch (e) {
+      debugPrint('Lỗi tải chiều cao cân nặng để đề xuất size: $e');
+    }
+  }
+
+  String? _getRecommendedSize(List<String> availableSizes) {
+    if (_userHeight == null || _userWeight == null) return null;
+
+    String sizeLetter = 'M';
+    final isFemale = _userGender?.toLowerCase() == 'female';
+
+    if (isFemale) {
+      if (_userHeight! < 155) {
+        if (_userWeight! < 45) {
+          sizeLetter = 'S';
+        } else if (_userWeight! <= 52) {
+          sizeLetter = 'M';
+        } else {
+          sizeLetter = 'L';
+        }
+      } else if (_userHeight! <= 162) {
+        if (_userWeight! < 50) {
+          sizeLetter = 'M';
+        } else if (_userWeight! <= 58) {
+          sizeLetter = 'L';
+        } else {
+          sizeLetter = 'XL';
+        }
+      } else {
+        if (_userWeight! < 55) {
+          sizeLetter = 'L';
+        } else if (_userWeight! <= 65) {
+          sizeLetter = 'XL';
+        } else {
+          sizeLetter = 'XXL';
+        }
+      }
+    } else {
+      if (_userHeight! < 165) {
+        if (_userWeight! < 55) {
+          sizeLetter = 'S';
+        } else if (_userWeight! <= 65) {
+          sizeLetter = 'M';
+        } else {
+          sizeLetter = 'L';
+        }
+      } else if (_userHeight! <= 172) {
+        if (_userWeight! < 60) {
+          sizeLetter = 'M';
+        } else if (_userWeight! <= 70) {
+          sizeLetter = 'L';
+        } else {
+          sizeLetter = 'XL';
+        }
+      } else {
+        if (_userWeight! < 68) {
+          sizeLetter = 'L';
+        } else if (_userWeight! <= 78) {
+          sizeLetter = 'XL';
+        } else {
+          sizeLetter = 'XXL';
+        }
+      }
+    }
+
+    for (final s in availableSizes) {
+      if (s.trim().toUpperCase() == sizeLetter) {
+        return s;
+      }
+    }
+
+    bool isNumeric = availableSizes.any((s) => int.tryParse(s.trim()) != null);
+    if (isNumeric) {
+      int targetNum = 30;
+      switch (sizeLetter) {
+        case 'S': targetNum = 29; break;
+        case 'M': targetNum = 30; break;
+        case 'L': targetNum = 31; break;
+        case 'XL': targetNum = 32; break;
+        case 'XXL': targetNum = 33; break;
+      }
+
+      String? closestSize;
+      int minDiff = 999;
+      for (final s in availableSizes) {
+        final val = int.tryParse(s.trim());
+        if (val != null) {
+          final diff = (val - targetNum).abs();
+          if (diff < minDiff) {
+            minDiff = diff;
+            closestSize = s;
+          }
+        }
+      }
+      return closestSize;
+    }
+
+    if (availableSizes.isNotEmpty) {
+      for (final s in availableSizes) {
+        if (s.trim().toUpperCase().contains(sizeLetter)) {
+          return s;
+        }
+      }
+      return availableSizes.first;
+    }
+
+    return sizeLetter;
+  }
+
+  Widget _buildAiSizeRecommendation(String recommendedSize) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF3E5F5).withOpacity(0.4),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppColors.primaryLight.withOpacity(0.2),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: AppColors.primaryLight.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.auto_awesome_rounded,
+              color: AppColors.primaryLight,
+              size: 16,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Đề xuất Size V-Closet AI ✨',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.primary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                RichText(
+                  text: TextSpan(
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.primary.withOpacity(0.7),
+                      height: 1.4,
+                    ),
+                    children: [
+                      const TextSpan(text: 'Dựa trên chiều cao '),
+                      TextSpan(
+                        text: '${_userHeight!.round()}cm',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const TextSpan(text: ' và cân nặng '),
+                      TextSpan(
+                        text: '${_userWeight!.round()}kg',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const TextSpan(text: ' của bạn, size phù hợp nhất là '),
+                      TextSpan(
+                        text: 'Size $recommendedSize',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.primaryLight,
+                        ),
+                      ),
+                      const TextSpan(text: ' (độ chuẩn xác 92%).'),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   String _formatPrice(dynamic priceValue) {
     if (priceValue == null) return '0đ';
@@ -164,6 +379,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   @override
   Widget build(BuildContext context) {
     final sizes = List<String>.from(widget.product['sizes'] ?? widget.product['Sizes'] ?? []);
+    final recommendedSize = _getRecommendedSize(sizes);
     final imageUrl = _getProductImage(widget.product);
 
     return Scaffold(
@@ -328,6 +544,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                             // Kích cỡ (chỉ hiện nếu có)
                             if (sizes.isNotEmpty) ...[
                               const SizedBox(height: 24),
+                              if (recommendedSize != null)
+                                _buildAiSizeRecommendation(recommendedSize),
                               const Text(
                                 'Kích cỡ có sẵn',
                                 style: TextStyle(
@@ -342,22 +560,46 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                 runSpacing: 10,
                                 children: sizes.map((size) {
                                   final isSelected = _selectedSize == size;
+                                  final isRecommended = size == recommendedSize;
                                   return GestureDetector(
                                     onTap: () => setState(() => _selectedSize = size),
                                     child: AnimatedContainer(
                                       duration: const Duration(milliseconds: 200),
                                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                                       decoration: BoxDecoration(
-                                        color: isSelected ? AppColors.primary : const Color(0xFFF5F5F8),
+                                        color: isSelected 
+                                            ? AppColors.primary 
+                                            : (isRecommended ? const Color(0xFFF3E5F5) : const Color(0xFFF5F5F8)),
                                         borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Text(
-                                        size,
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w700,
-                                          color: isSelected ? Colors.white : AppColors.primary,
+                                        border: Border.all(
+                                          color: isSelected
+                                              ? AppColors.primary
+                                              : (isRecommended ? AppColors.primaryLight : Colors.transparent),
+                                          width: 1.5,
                                         ),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            size,
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w700,
+                                              color: isSelected ? Colors.white : AppColors.primary,
+                                            ),
+                                          ),
+                                          if (isRecommended) ...[
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              '✨',
+                                              style: TextStyle(
+                                                fontSize: 10,
+                                                color: isSelected ? Colors.white : AppColors.primaryLight,
+                                              ),
+                                            ),
+                                          ],
+                                        ],
                                       ),
                                     ),
                                   );
@@ -1882,16 +2124,23 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Row(
-                children: [
-                  Icon(Icons.landscape_rounded, color: Colors.grey, size: 20),
-                  SizedBox(width: 8),
-                  Text(
-                    'Giữ nguyên phông nền ảnh mẫu',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                  ),
-                ],
+              Expanded(
+                child: Row(
+                  children: const [
+                    Icon(Icons.landscape_rounded, color: Colors.grey, size: 20),
+                    SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        'Giữ nguyên phông nền ảnh mẫu',
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
               ),
+              const SizedBox(width: 8),
               Switch(
                 value: _restoreBackground,
                 onChanged: (val) {

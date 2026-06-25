@@ -43,9 +43,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
     _weightController = TextEditingController(text: profile['weightKg']?.toString() ?? '');
     _countryController = TextEditingController(text: profile['country']?.toString() ?? '');
 
-    _gender = profile['gender']?.toString();
-    if (_gender != 'Nam' && _gender != 'Nữ' && _gender != 'Khác') {
-      _gender = null; // Standardize
+    final rawGender = (profile['gender'] ?? profile['Gender'])?.toString();
+    if (rawGender == 'Nam' || rawGender?.toLowerCase() == 'male') {
+      _gender = 'Male';
+    } else if (rawGender == 'Nữ' || rawGender?.toLowerCase() == 'female') {
+      _gender = 'Female';
+    } else if (rawGender == 'Khác' || rawGender?.toLowerCase() == 'other') {
+      _gender = 'Other';
+    } else {
+      _gender = null;
     }
 
     if (profile['dateOfBirth'] != null) {
@@ -355,9 +361,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                 ),
                               ),
                               items: const [
-                                DropdownMenuItem(value: 'Nam', child: Text('Nam')),
-                                DropdownMenuItem(value: 'Nữ', child: Text('Nữ')),
-                                DropdownMenuItem(value: 'Khác', child: Text('Khác')),
+                                DropdownMenuItem(value: 'Male', child: Text('Nam')),
+                                DropdownMenuItem(value: 'Female', child: Text('Nữ')),
+                                DropdownMenuItem(value: 'Other', child: Text('Khác')),
                               ],
                               onChanged: (val) {
                                 setState(() {

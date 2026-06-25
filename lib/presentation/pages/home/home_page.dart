@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:geolocator/geolocator.dart';
@@ -15,7 +15,10 @@ import '../../../domain/entities/clothing_item.dart';
 import '../profile/subscription_page.dart';
 import '../profile/survey_page.dart';
 import '../profile/notification_page.dart';
+import '../profile/personal_color_detail_page.dart';
 import '../../../data/datasources/subscription_api_service.dart';
+import '../camera/color_harmony_checker_page.dart';
+import '../profile/style_dna_chat_page.dart';
 
 class HomePage extends StatefulWidget {
   final VoidCallback? onMenuPressed;
@@ -758,7 +761,7 @@ class _HomePageState extends State<HomePage> {
   Widget _quickActions() {
     final actions = [
       _QuickAction(
-        icon: Icons.checkroom_rounded,
+        icon: Icons.door_sliding_rounded,
         label: 'Tủ đồ',
         color: AppColors.primary,
         onTap: () => widget.onNavigateTo?.call(1),
@@ -767,22 +770,119 @@ class _HomePageState extends State<HomePage> {
         icon: Icons.auto_awesome_rounded,
         label: 'Studio AI',
         color: const Color(0xFF7B5EA7),
-        onTap: () => widget.onNavigateTo?.call(3),
+        onTap: () => widget.onNavigateTo?.call(4),
       ),
       _QuickAction(
         icon: Icons.shopping_bag_rounded,
         label: 'Cửa hàng',
         color: const Color(0xFF2E9E6E),
-        onTap: () => widget.onNavigateTo?.call(4),
+        onTap: () => widget.onNavigateTo?.call(5),
       ),
       _QuickAction(
-        icon: Icons.workspace_premium_rounded,
-        label: 'Gói',
-        color: const Color(0xFFD4AF37),
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const SubscriptionPage()),
-        ).then((_) => setState(() {})),
+        icon: Icons.palette_rounded,
+        label: 'Hợp màu',
+        color: const Color(0xFFE5A93B),
+        onTap: () async {
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const ColorHarmonyCheckerPage()),
+          );
+          if (result is Map && context.mounted) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => PersonalColorDetailPage(
+                  isFromScan: true,
+                  scannedSkinTone: result['skinTone']?.toString(),
+                  scannedColorPref: result['colorPref']?.toString(),
+                ),
+              ),
+            );
+          }
+        },
+      ),
+      _QuickAction(
+        icon: Icons.forum_rounded,
+        label: 'Chat AI',
+        color: const Color(0xFF8E94F2),
+        onTap: () async {
+          final hasQuiz = _localStorage.getHasCompletedStyleQuiz();
+          if (!hasQuiz) {
+            showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                title: Row(
+                  children: const [
+                    Icon(Icons.forum_rounded, color: AppColors.primary),
+                    SizedBox(width: 10),
+                    Text(
+                      'Chưa có Style DNA',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                    ),
+                  ],
+                ),
+                content: const Text(
+                  'Bạn vui lòng hoàn thành trắc nghiệm Style DNA trước để AI Stylist có đầy đủ thông số hình thể và tông da để tư vấn chuẩn xác nhất nhé.',
+                  style: TextStyle(fontSize: 14, height: 1.4),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Hủy', style: TextStyle(color: Colors.grey)),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      widget.onNavigateTo?.call(3); // Chuyển sang tab Phong cách (DNA Quiz)
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: const Text('Làm ngay', style: TextStyle(color: Colors.white)),
+                  ),
+                ],
+              ),
+            );
+            return;
+          }
+
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => const Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
+            ),
+          );
+
+          try {
+            final userApiService = GetIt.I<UserApiService>();
+            final profile = await userApiService.getMyProfile();
+            if (mounted) {
+              Navigator.pop(context);
+              final result = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => StyleDnaChatPage(profileData: profile),
+                ),
+              );
+              if (result == 'go_to_studio' && mounted) {
+                widget.onNavigateTo?.call(4); // Chuyển sang tab Studio (Index 4)
+              }
+            }
+          } catch (e) {
+            if (mounted) {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Không thể tải thông tin hồ sơ để bắt đầu chat.'),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            }
+          }
+        },
       ),
     ];
 
@@ -791,28 +891,17 @@ class _HomePageState extends State<HomePage> {
         return Expanded(
           child: GestureDetector(
             onTap: a.onTap,
-            child: Column(
-              children: [
-                Container(
-                  width: 60,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    color: a.color.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: a.color.withOpacity(0.18), width: 1.2),
-                  ),
-                  child: Icon(a.icon, color: a.color, size: 26),
+            child: Center(
+              child: Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  color: a.color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: a.color.withOpacity(0.18), width: 1.2),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  a.label,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.primary,
-                  ),
-                ),
-              ],
+                child: Icon(a.icon, color: a.color, size: 26),
+              ),
             ),
           ),
         );
@@ -1254,7 +1343,7 @@ class _HomePageState extends State<HomePage> {
               ),
               const SizedBox(width: 8),
               ElevatedButton(
-                onPressed: () => widget.onNavigateTo?.call(3), // Sang AI Studio
+                onPressed: () => widget.onNavigateTo?.call(4), // Sang AI Studio
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,
                   foregroundColor: const Color(0xFF4A69BB),

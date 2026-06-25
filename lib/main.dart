@@ -8,9 +8,10 @@ import 'injection_container.dart' as di;
 import 'data/datasources/auth_local_storage.dart';
 import 'data/datasources/ad_service.dart';
 import 'presentation/pages/auth/login_page.dart';
-import 'presentation/pages/auth/onboarding_survey_page.dart';
+import 'presentation/pages/profile/style_dna_quiz_page.dart';
 import 'presentation/pages/main_screen.dart';
 import 'presentation/pages/profile/change_password_page.dart';
+import 'services/in_app_update_service.dart';
 
 import 'dart:io';
 
@@ -73,7 +74,7 @@ void main() async {
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
-class VClosetApp extends StatelessWidget {
+class VClosetApp extends StatefulWidget {
   final bool hasSession;
   final bool isOnboardingCompleted;
   final bool isPasswordSet;
@@ -85,16 +86,30 @@ class VClosetApp extends StatelessWidget {
   });
 
   @override
+  State<VClosetApp> createState() => _VClosetAppState();
+}
+
+class _VClosetAppState extends State<VClosetApp> {
+  @override
+  void initState() {
+    super.initState();
+    // Kiểm tra và bắt buộc cập nhật ngay khi app khởi động
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      InAppUpdateService.checkForUpdate();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     Widget initialScreen;
-    if (!hasSession) {
+    if (!widget.hasSession) {
       initialScreen = const LoginPage();
-    } else if (!isPasswordSet) {
+    } else if (!widget.isPasswordSet) {
       initialScreen = const ChangePasswordPage();
-    } else if (isOnboardingCompleted) {
+    } else if (widget.isOnboardingCompleted) {
       initialScreen = const MainScreen();
     } else {
-      initialScreen = const OnboardingSurveyPage();
+      initialScreen = const StyleDnaQuizPage(isOnboarding: true);
     }
 
     return MaterialApp(
@@ -106,7 +121,7 @@ class VClosetApp extends StatelessWidget {
       // Named routes — mọi trang navigate qua tên, không cần import nhau
       routes: {
         AppRoutes.login:      (_) => const LoginPage(),
-        AppRoutes.onboarding: (_) => const OnboardingSurveyPage(),
+        AppRoutes.onboarding: (_) => const StyleDnaQuizPage(isOnboarding: true),
         AppRoutes.main:       (_) => const MainScreen(),
       },
       home: initialScreen,

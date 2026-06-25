@@ -11,11 +11,14 @@ import 'outfit/outfit_page.dart';
 import 'profile/profile_page.dart';
 import 'profile/subscription_page.dart';
 import 'profile/style_dna_quiz_page.dart';
+import 'profile/style_dna_page.dart';
 import 'dart:async';
+import '../../data/datasources/user_api_service.dart';
 import 'store/store_page.dart';
 import 'profile/notification_page.dart';
 import '../../data/datasources/subscription_api_service.dart';
 import '../../data/datasources/signalr_service.dart';
+
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -97,7 +100,17 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   /// Hiện Style DNA Quiz nếu user chưa làm
-  void _maybeShowStyleQuiz() {
+  Future<void> _maybeShowStyleQuiz() async {
+    if (!mounted) return;
+
+    // Đồng bộ profile từ máy chủ để cập nhật trạng thái Style DNA mới nhất
+    try {
+      final userApiService = GetIt.I<UserApiService>();
+      await userApiService.getMyProfile();
+    } catch (e) {
+      debugPrint('Lỗi khi tự động tải thông tin cá nhân: $e');
+    }
+
     if (!mounted) return;
     if (_localStorage.getHasCompletedStyleQuiz()) return;
     Navigator.of(context).push(
@@ -128,8 +141,9 @@ class _MainScreenState extends State<MainScreen> {
   // Nav items: index 2 là nút camera đặc biệt ở giữa
   static const List<(IconData, String)> _navItems = [
     (Icons.home_rounded, 'Trang chủ'),
-    (Icons.checkroom_rounded, 'Tủ đồ'),
+    (Icons.door_sliding_rounded, 'Tủ đồ'),
     (Icons.camera_alt_rounded, 'Camera'),
+    (Icons.palette_rounded, 'Phong cách'),
     (Icons.auto_awesome_rounded, 'Studio'),
     (Icons.shopping_bag_rounded, 'Cửa hàng'),
   ];
@@ -141,6 +155,10 @@ class _MainScreenState extends State<MainScreen> {
     ),
     ClosetPage(onMenuPressed: _openDrawer),
     CameraPage(onClose: () => _onTapNav(1)),
+    StyleDnaPage(
+      onMenuPressed: _openDrawer,
+      onNavigateTo: (index) => setState(() => _currentIndex = index),
+    ),
     OutfitPage(onMenuPressed: _openDrawer),
     StorePage(onMenuPressed: _openDrawer),
   ];
@@ -201,7 +219,7 @@ class _MainScreenState extends State<MainScreen> {
                       ],
                     ),
                     child: const Icon(
-                      Icons.checkroom_rounded,
+                      Icons.door_sliding_rounded,
                       color: Colors.white,
                       size: 36,
                     ),
@@ -263,7 +281,7 @@ class _MainScreenState extends State<MainScreen> {
                               applicationIcon: const Padding(
                                 padding: EdgeInsets.all(12.0),
                                 child: Icon(
-                                  Icons.checkroom_rounded,
+                                  Icons.door_sliding_rounded,
                                   color: AppColors.primary,
                                   size: 48,
                                 ),
@@ -379,7 +397,7 @@ class _MainScreenState extends State<MainScreen> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.checkroom_rounded, color: AppColors.primary),
+              leading: const Icon(Icons.door_sliding_rounded, color: AppColors.primary),
               title: const Text('Tủ đồ cá nhân', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
               onTap: () {
                 Navigator.pop(context);
@@ -387,11 +405,19 @@ class _MainScreenState extends State<MainScreen> {
               },
             ),
             ListTile(
+              leading: const Icon(Icons.palette_rounded, color: AppColors.primary),
+              title: const Text('Phong cách cá nhân', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
+              onTap: () {
+                Navigator.pop(context);
+                setState(() => _currentIndex = 3);
+              },
+            ),
+            ListTile(
               leading: const Icon(Icons.auto_awesome_rounded, color: AppColors.primary),
               title: const Text('Studio Phối Đồ AI', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
               onTap: () {
                 Navigator.pop(context);
-                setState(() => _currentIndex = 3);
+                setState(() => _currentIndex = 4);
               },
             ),
             ListTile(
@@ -399,7 +425,7 @@ class _MainScreenState extends State<MainScreen> {
               title: const Text('Cửa hàng', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
               onTap: () {
                 Navigator.pop(context);
-                setState(() => _currentIndex = 4);
+                setState(() => _currentIndex = 5);
               },
             ),
             // Gói Premium — đặt nổi bật để dễ nhìn thấy
@@ -512,23 +538,23 @@ class _MainScreenState extends State<MainScreen> {
     return SafeArea(
       top: false,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 14),
+        padding: const EdgeInsets.fromLTRB(10, 0, 10, 14),
         child: Container(
-          height: 72,
+          height: 64,
           decoration: BoxDecoration(
             color: AppColors.primaryDark,
-            borderRadius: BorderRadius.circular(36),
+            borderRadius: BorderRadius.circular(32),
             boxShadow: [
               BoxShadow(
                 color: AppColors.primaryDark.withOpacity(0.45),
-                blurRadius: 28,
+                blurRadius: 24,
                 spreadRadius: 0,
-                offset: const Offset(0, 10),
+                offset: const Offset(0, 8),
               ),
               BoxShadow(
                 color: Colors.black.withOpacity(0.18),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
+                blurRadius: 10,
+                offset: const Offset(0, 3),
               ),
             ],
           ),
@@ -556,13 +582,13 @@ class _MainScreenState extends State<MainScreen> {
         duration: const Duration(milliseconds: 280),
         curve: Curves.easeOutCubic,
         padding: active
-            ? const EdgeInsets.symmetric(horizontal: 14, vertical: 10)
-            : const EdgeInsets.all(12),
+            ? const EdgeInsets.symmetric(horizontal: 10, vertical: 8)
+            : const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
         decoration: BoxDecoration(
           color: active
               ? AppColors.secondary.withOpacity(0.90)
               : Colors.transparent,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -572,19 +598,19 @@ class _MainScreenState extends State<MainScreen> {
               color: active
                   ? AppColors.primaryDark
                   : Colors.white.withOpacity(0.60),
-              size: active ? 20 : 22,
+              size: active ? 18 : 20,
             ),
             AnimatedSize(
               duration: const Duration(milliseconds: 260),
               curve: Curves.easeOutCubic,
               child: active
                   ? Padding(
-                      padding: const EdgeInsets.only(left: 6),
+                      padding: const EdgeInsets.only(left: 4),
                       child: Text(
                         label,
                         style: const TextStyle(
                           color: AppColors.primaryDark,
-                          fontSize: 12,
+                          fontSize: 11,
                           fontWeight: FontWeight.w700,
                           height: 1.2,
                         ),
@@ -605,12 +631,12 @@ class _MainScreenState extends State<MainScreen> {
     return GestureDetector(
       onTap: () => _onTapNav(index),
       child: Transform.translate(
-        offset: const Offset(0, -14),
+        offset: const Offset(0, -10),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 220),
           curve: Curves.easeOutCubic,
-          width: 60,
-          height: 60,
+          width: 52,
+          height: 52,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             gradient: LinearGradient(
@@ -622,25 +648,25 @@ class _MainScreenState extends State<MainScreen> {
             ),
             border: Border.all(
               color: Colors.white.withOpacity(active ? 0.35 : 0.20),
-              width: 2.5,
+              width: 2.0,
             ),
             boxShadow: [
               BoxShadow(
-                color: AppColors.primary.withOpacity(active ? 0.55 : 0.32),
-                blurRadius: active ? 24 : 14,
-                offset: const Offset(0, 8),
+                color: AppColors.primary.withOpacity(active ? 0.45 : 0.28),
+                blurRadius: active ? 20 : 12,
+                offset: const Offset(0, 6),
               ),
               BoxShadow(
                 color: Colors.black.withOpacity(0.2),
-                blurRadius: 8,
-                offset: const Offset(0, 3),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
               ),
             ],
           ),
           child: Icon(
             Icons.camera_alt_rounded,
             color: Colors.white.withOpacity(active ? 1.0 : 0.85),
-            size: 26,
+            size: 22,
           ),
         ),
       ),

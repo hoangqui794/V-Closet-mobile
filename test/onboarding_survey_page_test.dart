@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:v_closet_mobile/core/theme/app_theme.dart';
 import 'package:v_closet_mobile/data/datasources/auth_local_storage.dart';
 import 'package:v_closet_mobile/data/datasources/user_api_service.dart';
-import 'package:v_closet_mobile/presentation/pages/auth/onboarding_survey_page.dart';
+import 'package:v_closet_mobile/presentation/pages/profile/style_dna_quiz_page.dart';
 import 'package:dio/dio.dart';
 import 'package:v_closet_mobile/data/datasources/api_service.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -32,15 +32,15 @@ void main() {
     GetIt.I.registerSingleton<UserApiService>(userApiService);
   });
 
-  testWidgets('OnboardingSurveyPage renders and does not crash', (WidgetTester tester) async {
+  testWidgets('StyleDnaQuizPage onboarding renders and does not crash', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: AppTheme.lightTheme,
-        home: const OnboardingSurveyPage(),
+        home: const StyleDnaQuizPage(isOnboarding: true),
       ),
     );
     await tester.pumpAndSettle();
     
-    expect(find.text('Khảo sát cá nhân'), findsOneWidget);
+    expect(find.text('Chào mừng bạn!'), findsOneWidget);
   });
 }
