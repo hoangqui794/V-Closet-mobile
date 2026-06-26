@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:ui' as ui;
 import 'dart:io';
 import 'dart:typed_data';
@@ -1632,7 +1632,7 @@ class _ClosetPageState extends State<ClosetPage>
         padding: const EdgeInsets.symmetric(horizontal: 16),
         scrollDirection: Axis.horizontal,
         itemCount: categories.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        separatorBuilder: (context, index) => const SizedBox(width: 8),
         itemBuilder: (context, i) {
           final label = categories[i];
           final active = _selectedCategory == label;
@@ -2016,7 +2016,7 @@ class _ClosetPageState extends State<ClosetPage>
                       child: Image.network(
                         item.imageUrl,
                         fit: BoxFit.contain,
-                        errorBuilder: (_, __, ___) => const Icon(
+                        errorBuilder: (context, error, stackTrace) => const Icon(
                           Icons.broken_image_outlined,
                           color: AppColors.primaryLight,
                           size: 28,
@@ -2239,7 +2239,7 @@ class _ClosetPageState extends State<ClosetPage>
                 child: Image.network(
                   snapshotUrl,
                   fit: BoxFit.contain,
-                  errorBuilder: (_, __, ___) => const Icon(
+                  errorBuilder: (context, error, stackTrace) => const Icon(
                     Icons.broken_image_outlined, size: 60, color: AppColors.primaryLight,
                   ),
                 ),
@@ -2397,7 +2397,7 @@ class _ClosetPageState extends State<ClosetPage>
                 child: Image.network(
                   snapshotUrl,
                   fit: BoxFit.contain,
-                  errorBuilder: (_, __, ___) => const Center(
+                  errorBuilder: (context, error, stackTrace) => const Center(
                     child: Icon(Icons.broken_image_outlined, color: AppColors.primaryLight, size: 34),
                   ),
                   loadingBuilder: (context, child, progress) {
@@ -2472,7 +2472,6 @@ class _ClosetPageState extends State<ClosetPage>
     final String? snapshotUrl = outfit['CanvasSnapshotUrl']?.toString() ??
         outfit['canvasSnapshotUrl']?.toString() ??
         outfit['snapshotUrl']?.toString();
-    final bool isPublic = outfit['IsPublic'] == true || outfit['isPublic'] == true;
     final String createdAt = outfit['CreatedAt']?.toString() ??
         outfit['createdAt']?.toString() ?? '';
     String dateLabel = '';
