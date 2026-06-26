@@ -15,6 +15,7 @@ import 'data/datasources/affiliate_api_service.dart';
 import 'data/datasources/subscription_api_service.dart';
 import 'data/datasources/gemini_api_service.dart';
 import 'data/datasources/notification_api_service.dart';
+import 'data/datasources/closet_api_service.dart';
 
 final sl = GetIt.instance; // sl: Service Locator
 
@@ -37,6 +38,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => BgRemovalService(sl()));
   sl.registerLazySingleton(() => OutfitApiService(sl()));
   sl.registerLazySingleton(() => WardrobeApiService(sl()));
+  sl.registerLazySingleton(() => ClosetApiService(sl()));
   sl.registerLazySingleton(() => TryOnApiService(sl()));
   sl.registerLazySingleton(() => AffiliateApiService(sl()));
   sl.registerLazySingleton(() => SubscriptionApiService(sl()));

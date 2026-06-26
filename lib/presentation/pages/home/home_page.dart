@@ -46,6 +46,7 @@ class _HomePageState extends State<HomePage> {
   String _weatherDescription = 'Trời mát mẻ';
   IconData _weatherIcon = Icons.wb_cloudy_rounded;
   String? _aiStylistAdvice;
+  bool _isLoadingAiAdvice = false;
 
 
   @override
@@ -197,13 +198,16 @@ class _HomePageState extends State<HomePage> {
         });
       }
     } finally {
-      await _fetchAiStylistAdvice();
+      // Không tự động gọi AI - chờ user nhấn nút
     }
   }
 
   Future<void> _fetchAiStylistAdvice() async {
     final temp = _temperature;
     if (temp == null) return;
+    if (_isLoadingAiAdvice) return;
+
+    setState(() => _isLoadingAiAdvice = true);
 
     final desc = _weatherDescription;
     final displayName = _localStorage.getDisplayName() ?? 'ban';
@@ -247,26 +251,14 @@ class _HomePageState extends State<HomePage> {
       if (advice != null && advice.isNotEmpty && mounted) {
         setState(() {
           _aiStylistAdvice = advice;
+          _isLoadingAiAdvice = false;
         });
+      } else if (mounted) {
+        setState(() => _isLoadingAiAdvice = false);
       }
     } catch (e) {
       debugPrint('Loi khi lay tu van Gemini: $e');
-    }
-  }
-
-  String _getStylistAdvice() {
-    if (_aiStylistAdvice != null && _aiStylistAdvice!.isNotEmpty) {
-      return _aiStylistAdvice!;
-    }
-    if (_temperature == null) {
-      return 'Hôm nay trời mát mẻ và nắng nhẹ, một bộ trang phục thanh lịch nhưng không kém phần nổi bật sẽ rất hoàn hảo.';
-    }
-    if (_temperature! > 30) {
-      return 'Thời tiết hôm nay khá nóng bức (${_temperature!.toStringAsFixed(1)}°C). Bạn nên chọn những trang phục mỏng nhẹ, thoáng mát, thấm hút mồ hôi tốt như áo thun phông, quần shorts để năng động suốt cả ngày.';
-    } else if (_temperature! < 20) {
-      return 'Hôm nay trời trở lạnh (${_temperature!.toStringAsFixed(1)}°C). Gợi ý cho bạn là nên phối một chiếc áo khoác ấm áp (jacket/outerwear) hoặc áo len bên ngoài áo sơ mi thanh lịch để vừa giữ ấm vừa thời trang.';
-    } else {
-      return 'Thời tiết hôm nay rất dễ chịu và mát mẻ (${_temperature!.toStringAsFixed(1)}°C). Một bộ trang phục thanh lịch kết hợp áo sơ mi/polo cùng quần dài tây/jeans sẽ là sự lựa chọn hoàn hảo nhất.';
+      if (mounted) setState(() => _isLoadingAiAdvice = false);
     }
   }
 
@@ -1310,15 +1302,63 @@ class _HomePageState extends State<HomePage> {
 
             ],
           ),
-          const SizedBox(height: 16),
-          Text(
-            _getStylistAdvice(),
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 13,
-              height: 1.4,
+          const SizedBox(height: 12),
+          // ── Advice area (lazy-load) ────────────────────────────────────────
+          if (_isLoadingAiAdvice)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 8),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 16, height: 16,
+                    child: CircularProgressIndicator(
+                      color: Colors.white, strokeWidth: 2,
+                    ),
+                  ),
+                  SizedBox(width: 10),
+                  Text(
+                    'AI Stylist đang phân tích trang phục...',
+                    style: TextStyle(color: Colors.white70, fontSize: 12),
+                  ),
+                ],
+              ),
+            )
+          else if (_aiStylistAdvice != null && _aiStylistAdvice!.isNotEmpty)
+            Text(
+              _aiStylistAdvice!,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 13,
+                height: 1.4,
+              ),
+            )
+          else
+            GestureDetector(
+              onTap: _fetchAiStylistAdvice,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.18),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 16),
+                    SizedBox(width: 8),
+                    Text(
+                      'Nhận lời khuyên AI hôm nay ✨',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ),
           const SizedBox(height: 16),
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,

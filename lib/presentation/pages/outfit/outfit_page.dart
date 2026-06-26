@@ -21,6 +21,10 @@ class OutfitPage extends StatefulWidget {
   final VoidCallback? onMenuPressed;
   const OutfitPage({super.key, this.onMenuPressed});
 
+  static ClothingItem? pendingTryOnGarment;
+  static String? pendingTryOnOutfitSnapshotUrl;
+  static String? pendingTryOnOutfitTitle;
+
   @override
   State<OutfitPage> createState() => _OutfitPageState();
 }
@@ -39,6 +43,8 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
   final List<ClothingItem> _selectedGarments = [];
   String _selectedCategory = 'auto'; // auto, tops, bottoms, one-pieces
   bool _restoreBackground = true;
+  int _activeStep = 0;
+  bool _pickFromOutfits = false;
 
   // Selected saved outfit snapshot as garment
   String? _selectedOutfitSnapshotUrl;  // URL ảnh snapshot bộ phối đồ đã chọn
@@ -884,6 +890,34 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    if (OutfitPage.pendingTryOnGarment != null || OutfitPage.pendingTryOnOutfitSnapshotUrl != null) {
+      final garment = OutfitPage.pendingTryOnGarment;
+      final outfitSnapshotUrl = OutfitPage.pendingTryOnOutfitSnapshotUrl;
+      final outfitTitle = OutfitPage.pendingTryOnOutfitTitle;
+      
+      OutfitPage.pendingTryOnGarment = null;
+      OutfitPage.pendingTryOnOutfitSnapshotUrl = null;
+      OutfitPage.pendingTryOnOutfitTitle = null;
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            if (garment != null) {
+              _selectedGarments.clear();
+              _selectedGarments.add(garment);
+              _selectedOutfitSnapshotUrl = null;
+              _selectedOutfitTitle = null;
+            } else if (outfitSnapshotUrl != null) {
+              _selectedOutfitSnapshotUrl = outfitSnapshotUrl;
+              _selectedOutfitTitle = outfitTitle;
+              _selectedGarments.clear();
+            }
+            _activeStep = 2; // Jump to AI Config step
+          });
+        }
+      });
+    }
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -948,110 +982,40 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
       return _buildResultState();
     }
 
-    return RefreshIndicator(
-      onRefresh: _refreshAllData,
-      color: AppColors.primary,
-      child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 110),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+    Widget stepBody;
+    switch (_activeStep) {
+      case 0:
+        stepBody = _buildModelSelectorStep();
+        break;
+      case 1:
+        stepBody = _buildGarmentsSelectorStep();
+        break;
+      case 2:
+      default:
+        stepBody = _buildAiConfigStep();
+        break;
+    }
 
-  
-            // 1. SELECT MODEL IMAGE
-            _sectionHeader('1. Chọn người mẫu thử đồ'),
-            const SizedBox(height: 12),
-            _buildModelSelector(),
-            const SizedBox(height: 24),
-  
-            // 2. SELECT WARDROBE ITEM
-            _sectionHeader('2. Chọn quần áo từ tủ đồ hoặc trang phục'),
-            const SizedBox(height: 10),
-            _buildOutfitPicker(),
-            const SizedBox(height: 12),
-            _buildGarmentSelector(),
-            _buildSelectedGarmentsPreview(),
-            const SizedBox(height: 24),
-  
-            // 3. OPTIONS
-            _sectionHeader('3. Cấu hình AI'),
-            const SizedBox(height: 12),
-            _buildTryOnConfig(),
-            const SizedBox(height: 20),
-            _buildTryOnNotes(),
-            const SizedBox(height: 24),
-  
-            // ACTION BUTTON
-            FadeInUp(
-              child: Container(
-                width: double.infinity,
-                height: 56,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  gradient: LinearGradient(
-                    colors: (_selectedGarments.isEmpty && _selectedOutfitSnapshotUrl == null)
-                        ? [Colors.grey.shade400, Colors.grey.shade400] 
-                        : [AppColors.primary, AppColors.primaryLight],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  boxShadow: (_selectedGarments.isEmpty && _selectedOutfitSnapshotUrl == null) ? [] : [
-                    BoxShadow(
-                      color: AppColors.primary.withOpacity(0.25),
-                      blurRadius: 16,
-                      offset: const Offset(0, 8),
-                    )
-                  ],
-                ),
-                child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.transparent,
-                    shadowColor: Colors.transparent,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  ),
-                  onPressed: (_selectedGarments.isEmpty && _selectedOutfitSnapshotUrl == null) ? null : _startTryOn,
-                  icon: const Icon(Icons.auto_awesome_rounded, color: Colors.white),
-                  label: const Text(
-                    'Bắt đầu thử đồ ảo AI',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-                  ),
-                ),
-              ),
-            ),
-            if (_errorMessage != null) ...[
-              const SizedBox(height: 16),
-              Center(
-                child: Text(
-                  _errorMessage!,
-                  style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w600),
-                  textAlign: TextAlign.center,
-                ),
-              )
-            ],
-          ],
+    return Column(
+      children: [
+        _buildStepIndicator(),
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: _refreshAllData,
+            color: AppColors.primary,
+            child: stepBody,
+          ),
         ),
-      ),
+        _buildWizardNavigationButtons(),
+      ],
     );
   }
 
-  Widget _sectionHeader(String title) {
-    return FadeInLeft(
-      duration: const Duration(milliseconds: 300),
-      child: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w800,
-          color: AppColors.primary,
-        ),
-      ),
-    );
-  }
+
 
   Widget _buildModelSelector() {
     return SizedBox(
-      height: 130,
+      height: 110,
       child: ListView(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
@@ -1060,27 +1024,27 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
           GestureDetector(
             onTap: _showModelUploadGuidelines,
             child: Container(
-              width: 88,
-              margin: const EdgeInsets.only(right: 12),
+              width: 76,
+              margin: const EdgeInsets.only(right: 10),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: _selectedModelFile != null ? AppColors.primaryLight : Colors.grey.shade300,
-                  width: _selectedModelFile != null ? 2.5 : 1,
+                  width: _selectedModelFile != null ? 2.0 : 1,
                 ),
               ),
               child: _selectedModelFile != null
                   ? ClipRRect(
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(10),
                       child: Image.file(_selectedModelFile!, fit: BoxFit.cover),
                     )
                   : const Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.add_a_photo_outlined, color: AppColors.primary, size: 28),
-                        SizedBox(height: 6),
-                        Text('Tải ảnh\ncủa bạn', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.primary, height: 1.3), textAlign: TextAlign.center),
+                        Icon(Icons.add_a_photo_outlined, color: AppColors.primary, size: 24),
+                        SizedBox(height: 4),
+                        Text('Tải ảnh\ncủa bạn', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.primary, height: 1.2), textAlign: TextAlign.center),
                       ],
                     ),
             ),
@@ -1099,19 +1063,19 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
               },
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                width: 88,
-                margin: const EdgeInsets.only(right: 12),
+                width: 76,
+                margin: const EdgeInsets.only(right: 10),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: isSelected ? AppColors.primaryLight : Colors.grey.shade200,
-                    width: isSelected ? 2.5 : 1.5,
+                    width: isSelected ? 2.0 : 1.2,
                   ),
                   boxShadow: isSelected ? [
                     BoxShadow(
-                      color: AppColors.primary.withOpacity(0.18),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
+                      color: AppColors.primary.withOpacity(0.12),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
                     )
                   ] : [],
                 ),
@@ -1893,7 +1857,57 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                                 : Image.network(_selectedModelUrl!, fit: BoxFit.cover),
                           
                           // Semi-transparent overlay
-                          Container(color: Colors.black26),
+                          Container(color: Colors.black45),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // Simulated percentage progress in the center
+                  Positioned.fill(
+                    child: Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '$_scanningPercentage%',
+                            style: const TextStyle(
+                              fontSize: 54,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white,
+                              letterSpacing: 1.5,
+                              shadows: [
+                                Shadow(
+                                  color: Colors.black54,
+                                  offset: Offset(0, 4),
+                                  blurRadius: 12,
+                                )
+                              ]
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.white24,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Text(
+                              'Đang xử lý...',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                shadows: [
+                                  Shadow(
+                                    color: Colors.black38,
+                                    offset: Offset(0, 1),
+                                    blurRadius: 3,
+                                  )
+                                ]
+                              ),
+                            ),
+                          )
                         ],
                       ),
                     ),
@@ -1926,39 +1940,29 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                   ),
 
                   // Garment badge overlap (overlapping stack for multiple garments)
-                  if (_selectedGarments.isNotEmpty)
+                  if (_selectedGarments.isNotEmpty || _selectedOutfitSnapshotUrl != null)
                     Positioned(
                       bottom: 12,
                       right: 12,
-                      child: SizedBox(
-                        width: 70.0 + (_selectedGarments.length - 1) * 15.0,
-                        height: 70.0,
-                        child: Stack(
-                          children: List.generate(_selectedGarments.length, (index) {
-                            final item = _selectedGarments[index];
-                            return Positioned(
-                              left: index * 15.0,
-                              child: Container(
-                                width: 70,
-                                height: 70,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  shape: BoxShape.circle,
-                                  border: Border.all(color: AppColors.primaryLight, width: 2),
-                                  boxShadow: const [
-                                    BoxShadow(
-                                      color: Colors.black26,
-                                      blurRadius: 6,
-                                      offset: Offset(2, 2),
-                                    )
-                                  ],
-                                ),
-                                child: ClipOval(
-                                  child: Image.network(item.imageUrl, fit: BoxFit.cover),
-                                ),
-                              ),
-                            );
-                          }),
+                      child: Container(
+                        width: 70,
+                        height: 70,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: AppColors.primaryLight, width: 2),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Colors.black26,
+                              blurRadius: 6,
+                              offset: Offset(2, 2),
+                            )
+                          ],
+                        ),
+                        child: ClipOval(
+                          child: _selectedOutfitSnapshotUrl != null
+                              ? Image.network(_selectedOutfitSnapshotUrl!, fit: BoxFit.cover)
+                              : Image.network(_selectedGarments.first.imageUrl, fit: BoxFit.cover),
                         ),
                       ),
                     )
@@ -2049,18 +2053,9 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(28),
-                  child: InteractiveViewer(
-                    maxScale: 4.0,
-                    child: Image.network(
-                      _resultUrl!,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      height: double.infinity,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return const Center(child: CircularProgressIndicator(color: AppColors.primary));
-                      },
-                    ),
+                  child: BeforeAfterSlider(
+                    beforeImage: _buildBeforeImage(),
+                    afterImage: _buildAfterImage(),
                   ),
                 ),
               ),
@@ -2126,7 +2121,630 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
     );
   }
 
+  int get _scanningPercentage {
+    if (_elapsedSeconds <= 0) return 0;
+    if (_elapsedSeconds < 15) {
+      return (_elapsedSeconds * 6.3).toInt();
+    }
+    int extra = (_elapsedSeconds - 15) ~/ 3;
+    int val = 95 + extra;
+    return val > 99 ? 99 : val;
+  }
 
+  Widget _buildModelSelectorStep() {
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Chọn người mẫu thử đồ',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.primary),
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            'Chọn hình ảnh người mẫu để thử trang phục lên. Bạn có thể sử dụng các mẫu có sẵn hoặc tải lên ảnh chụp chính diện của riêng bạn.',
+            style: TextStyle(fontSize: 13, color: Colors.grey, height: 1.35),
+          ),
+          const SizedBox(height: 16),
+          _buildModelSelector(),
+          const SizedBox(height: 24),
+          const Text(
+            'Xem trước người mẫu',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.primary),
+          ),
+          const SizedBox(height: 10),
+          Center(
+            child: Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: Colors.grey.shade200),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.04),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  )
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(23),
+                child: _selectedModelFile != null
+                    ? Image.file(
+                        _selectedModelFile!,
+                        fit: BoxFit.fitWidth,
+                      )
+                    : _selectedModelUrl != null
+                        ? _selectedModelUrl!.startsWith('assets/')
+                            ? Image.asset(
+                                _selectedModelUrl!,
+                                fit: BoxFit.fitWidth,
+                              )
+                            : Image.network(
+                                _selectedModelUrl!,
+                                fit: BoxFit.fitWidth,
+                              )
+                        : const SizedBox(
+                            height: 200,
+                            child: Center(
+                              child: Icon(Icons.person, size: 72, color: Colors.grey),
+                            ),
+                          ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGarmentsSelectorStep() {
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Chọn trang phục thử đồ',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.primary),
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            'Chọn 1 hoặc nhiều quần áo từ tủ đồ của bạn hoặc một bộ phối đồ đã lưu để thử lên người mẫu.',
+            style: TextStyle(fontSize: 13, color: Colors.grey, height: 1.35),
+          ),
+          const SizedBox(height: 16),
+          
+          // Toggle Picker Type
+          Row(
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => setState(() => _pickFromOutfits = false),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    decoration: BoxDecoration(
+                      color: !_pickFromOutfits ? AppColors.primary.withOpacity(0.08) : Colors.transparent,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: !_pickFromOutfits ? AppColors.primaryLight : Colors.grey.shade300,
+                      ),
+                    ),
+                    child: Text(
+                      'Tủ đồ cá nhân',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: !_pickFromOutfits ? AppColors.primary : Colors.grey.shade600,
+                        fontSize: 13,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => setState(() => _pickFromOutfits = true),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    decoration: BoxDecoration(
+                      color: _pickFromOutfits ? AppColors.primary.withOpacity(0.08) : Colors.transparent,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: _pickFromOutfits ? AppColors.primaryLight : Colors.grey.shade300,
+                      ),
+                    ),
+                    child: Text(
+                      'Trang phục phối sẵn',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: _pickFromOutfits ? AppColors.primary : Colors.grey.shade600,
+                        fontSize: 13,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          
+          _pickFromOutfits ? _buildOutfitPicker() : _buildGarmentSelector(),
+          _buildSelectedGarmentsPreview(),
+          const SizedBox(height: 20),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAiConfigStep() {
+    final bool isOutfitSnapshot = _selectedOutfitSnapshotUrl != null;
+
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Xác nhận thông tin & Cấu hình',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.primary),
+          ),
+          const SizedBox(height: 16),
+          
+          // Selection Summary card
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: Colors.grey.shade100),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.02),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                )
+              ],
+            ),
+            child: Row(
+              children: [
+                // Model Preview
+                Expanded(
+                  child: Column(
+                    children: [
+                      const Text(
+                        'Người mẫu',
+                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        width: 72,
+                        height: 96,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.grey.shade200),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(11),
+                          child: _selectedModelFile != null
+                              ? Image.file(_selectedModelFile!, fit: BoxFit.cover, alignment: Alignment.topCenter)
+                              : _selectedModelUrl != null
+                                  ? _selectedModelUrl!.startsWith('assets/')
+                                      ? Image.asset(_selectedModelUrl!, fit: BoxFit.cover, alignment: Alignment.topCenter)
+                                      : Image.network(_selectedModelUrl!, fit: BoxFit.cover, alignment: Alignment.topCenter)
+                                  : const Icon(Icons.person, color: Colors.grey),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                
+                // Icon Arrow/Link
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8),
+                  child: Icon(Icons.add_rounded, color: Colors.grey, size: 20),
+                ),
+                
+                // Garments Preview
+                Expanded(
+                  child: Column(
+                    children: [
+                      const Text(
+                        'Trang phục',
+                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        width: 72,
+                        height: 96,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.grey.shade200),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(11),
+                          child: isOutfitSnapshot
+                              ? Image.network(_selectedOutfitSnapshotUrl!, fit: BoxFit.cover)
+                              : _selectedGarments.isNotEmpty
+                                  ? Image.network(_selectedGarments.first.imageUrl, fit: BoxFit.contain)
+                                  : const Icon(Icons.checkroom_rounded, color: Colors.grey),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          const SizedBox(height: 24),
+          const Text(
+            'Cấu hình AI',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.primary),
+          ),
+          const SizedBox(height: 10),
+          _buildTryOnConfig(),
+          const SizedBox(height: 20),
+          _buildTryOnNotes(),
+          if (_errorMessage != null) ...[
+            const SizedBox(height: 16),
+            Center(
+              child: Text(
+                _errorMessage!,
+                style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w600),
+                textAlign: TextAlign.center,
+              ),
+            )
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStepIndicator() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(bottom: BorderSide(color: Colors.grey.shade100)),
+      ),
+      child: Row(
+        children: [
+          _stepNode(0, 'Người mẫu'),
+          _stepDivider(0),
+          _stepNode(1, 'Trang phục'),
+          _stepDivider(1),
+          _stepNode(2, 'Thử đồ AI'),
+        ],
+      ),
+    );
+  }
+
+  Widget _stepNode(int stepIndex, String title) {
+    final bool isActive = _activeStep == stepIndex;
+    final bool isCompleted = _activeStep > stepIndex;
+    
+    return Expanded(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 250),
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: isCompleted
+                  ? AppColors.primary
+                  : isActive
+                      ? AppColors.primaryLight
+                      : Colors.grey.shade100,
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: isActive ? AppColors.primary : Colors.grey.shade300,
+                width: isActive ? 2 : 1,
+              ),
+              boxShadow: isActive ? [
+                BoxShadow(
+                  color: AppColors.primaryLight.withOpacity(0.3),
+                  blurRadius: 8,
+                  spreadRadius: 1,
+                )
+              ] : [],
+            ),
+            child: Center(
+              child: isCompleted
+                  ? const Icon(Icons.check_rounded, size: 16, color: Colors.white)
+                  : Text(
+                      '${stepIndex + 1}',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: isActive || isCompleted ? Colors.white : Colors.grey.shade600,
+                      ),
+                    ),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
+              color: isActive ? AppColors.primary : Colors.grey.shade500,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _stepDivider(int stepIndex) {
+    final bool isPassed = _activeStep > stepIndex;
+    return Container(
+      width: 36,
+      height: 2,
+      margin: const EdgeInsets.only(bottom: 16),
+      color: isPassed ? AppColors.primary : Colors.grey.shade200,
+    );
+  }
+
+  Widget _buildWizardNavigationButtons() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+      color: AppColors.background, // Match screen background so it blends perfectly
+      child: Row(
+        children: [
+          if (_activeStep > 0)
+            Expanded(
+              child: SizedBox(
+                height: 42,
+                child: OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    side: const BorderSide(color: AppColors.primaryLight, width: 1.5),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  onPressed: () => setState(() => _activeStep--),
+                  child: const Text(
+                    'Quay lại',
+                    style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primaryLight, fontSize: 13),
+                  ),
+                ),
+              ),
+            ),
+          if (_activeStep > 0) const SizedBox(width: 12),
+          Expanded(
+            child: _activeStep < 2
+                ? SizedBox(
+                    height: 42,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        backgroundColor: AppColors.primary,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        elevation: 0,
+                      ),
+                      onPressed: (_activeStep == 1 && _selectedGarments.isEmpty && _selectedOutfitSnapshotUrl == null)
+                          ? null
+                          : () => setState(() => _activeStep++),
+                      child: const Text(
+                        'Tiếp tục',
+                        style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 13),
+                      ),
+                    ),
+                  )
+                : Container(
+                    height: 42,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      gradient: LinearGradient(
+                        colors: (_selectedGarments.isEmpty && _selectedOutfitSnapshotUrl == null)
+                            ? [Colors.grey.shade400, Colors.grey.shade400]
+                            : [AppColors.primary, AppColors.primaryLight],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      boxShadow: (_selectedGarments.isEmpty && _selectedOutfitSnapshotUrl == null) ? [] : [
+                        BoxShadow(
+                          color: AppColors.primary.withOpacity(0.2),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        )
+                      ],
+                    ),
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        padding: EdgeInsets.zero,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      onPressed: (_selectedGarments.isEmpty && _selectedOutfitSnapshotUrl == null) ? null : _startTryOn,
+                      icon: const Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 16),
+                      label: const Text(
+                        'Bắt đầu thử đồ AI',
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
+                      ),
+                    ),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBeforeImage() {
+    if (_selectedModelFile != null) {
+      return Image.file(_selectedModelFile!, fit: BoxFit.cover, alignment: Alignment.topCenter);
+    } else if (_selectedModelUrl != null) {
+      return _selectedModelUrl!.startsWith('assets/')
+          ? Image.asset(_selectedModelUrl!, fit: BoxFit.cover, alignment: Alignment.topCenter)
+          : Image.network(_selectedModelUrl!, fit: BoxFit.cover, alignment: Alignment.topCenter);
+    }
+    return const Center(child: Icon(Icons.person, size: 72, color: Colors.grey));
+  }
+
+  Widget _buildAfterImage() {
+    return Image.network(
+      _resultUrl!,
+      fit: BoxFit.cover,
+      alignment: Alignment.topCenter,
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
+        return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+      },
+    );
+  }
+}
+
+// Before/After Split comparison slider widget
+class BeforeAfterSlider extends StatefulWidget {
+  final Widget beforeImage;
+  final Widget afterImage;
+
+  const BeforeAfterSlider({
+    super.key,
+    required this.beforeImage,
+    required this.afterImage,
+  });
+
+  @override
+  State<BeforeAfterSlider> createState() => _BeforeAfterSliderState();
+}
+
+class _BeforeAfterSliderState extends State<BeforeAfterSlider> {
+  double _clipFactor = 0.5; // Starts in the middle
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double width = constraints.maxWidth;
+        return GestureDetector(
+          onHorizontalDragUpdate: (details) {
+            setState(() {
+              _clipFactor = (details.localPosition.dx / width).clamp(0.0, 1.0);
+            });
+          },
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // Before Image (Base layer)
+              widget.beforeImage,
+
+              // After Image (Clipped layer)
+              ClipRect(
+                clipper: _SliderRectClipper(_clipFactor),
+                child: widget.afterImage,
+              ),
+
+              // Slider Handle (Line)
+              Positioned(
+                top: 0,
+                bottom: 0,
+                left: width * _clipFactor - 1.5,
+                child: Container(
+                  width: 3,
+                  color: Colors.white,
+                ),
+              ),
+
+              // Slider Handle (Thumb)
+              Positioned(
+                top: 0,
+                bottom: 0,
+                left: width * _clipFactor - 20,
+                child: Center(
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 2.5),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.25),
+                          blurRadius: 8,
+                          offset: const Offset(0, 3),
+                        )
+                      ],
+                    ),
+                    child: const Center(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.chevron_left_rounded, size: 14, color: Colors.white),
+                          Icon(Icons.chevron_right_rounded, size: 14, color: Colors.white),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              // Before Label
+              Positioned(
+                top: 12,
+                left: 12,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.6),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Text(
+                    'Trước',
+                    style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+
+              // After Label
+              Positioned(
+                top: 12,
+                right: 12,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.85),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Text(
+                    'Sau',
+                    style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _SliderRectClipper extends CustomClipper<Rect> {
+  final double clipFactor;
+  _SliderRectClipper(this.clipFactor);
+
+  @override
+  Rect getClip(Size size) {
+    return Rect.fromLTRB(size.width * clipFactor, 0.0, size.width, size.height);
+  }
+
+  @override
+  bool shouldReclip(_SliderRectClipper oldClipper) {
+    return oldClipper.clipFactor != clipFactor;
+  }
 }
 
 // Fade in scale animation helper for result state

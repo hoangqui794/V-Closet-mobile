@@ -12,6 +12,7 @@ import '../../../../data/datasources/wardrobe_api_service.dart';
 import '../../../../domain/entities/clothing_item.dart';
 import '../profile/subscription_page.dart';
 import '../../../../data/datasources/ad_service.dart';
+import '../../../../data/datasources/gemini_api_service.dart';
 
 // ─── Data model for each item placed on canvas ────────────────────────────────
 
@@ -21,6 +22,8 @@ class _CanvasItem {
   Offset position;
   double scale;
   int zIndex;
+  double rotation;
+  bool isFlipped;
 
   _CanvasItem({
     required this.uid,
@@ -28,13 +31,16 @@ class _CanvasItem {
     required this.position,
     required this.scale,
     this.zIndex = 0,
+    this.rotation = 0.0,
+    this.isFlipped = false,
   });
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 class CanvasOutfitPage extends StatefulWidget {
-  const CanvasOutfitPage({super.key});
+  final ClothingItem? initialItem;
+  const CanvasOutfitPage({super.key, this.initialItem});
 
   @override
   State<CanvasOutfitPage> createState() => _CanvasOutfitPageState();
@@ -46,6 +52,13 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
 
   // Canvas capture key
   final GlobalKey _canvasRepaintKey = GlobalKey();
+
+  // Canvas guidelines & grid state
+  double? _lastCanvasWidth;
+  double? _lastCanvasHeight;
+  bool _showVerticalGuide = false;
+  bool _showHorizontalGuide = false;
+  bool _showGrid = false;
 
   // Wardrobe
   List<ClothingItem> _wardrobeItems = [];
@@ -92,6 +105,11 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
   void initState() {
     super.initState();
     _loadWardrobe();
+    if (widget.initialItem != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _addToCanvas(widget.initialItem!);
+      });
+    }
   }
 
   // ── Wardrobe ──────────────────────────────────────────────────────────────
@@ -132,6 +150,8 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
           position: offset,
           scale: 1.0,
           zIndex: _nextZIndex,
+          rotation: 0.0,
+          isFlipped: false,
         ),
       );
       _selectedUid = uid;
@@ -253,7 +273,23 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
     }
 
     // Get title & isPublic from user
-    final result = await _showSaveDialog();
+    setState(() => _isSaving = true);
+    String? suggestedName;
+    try {
+      final geminiApi = GetIt.I<GeminiApiService>();
+      final itemNames = _canvasItems
+          .map((c) => c.clothingItem.name)
+          .where((name) => name.isNotEmpty)
+          .toList();
+      if (itemNames.isNotEmpty) {
+        suggestedName = await geminiApi.generateOutfitName(clothingNames: itemNames);
+      }
+    } catch (e) {
+      debugPrint('Lỗi tự động đặt tên outfit bằng AI: $e');
+    }
+    setState(() => _isSaving = false);
+
+    final result = await _showSaveDialog(suggestedName: suggestedName);
     if (result == null || !mounted) return;
 
     setState(() => _isSaving = true);
@@ -282,7 +318,7 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
           'PosY': (c.position.dy / activeSize.height).clamp(0.0, 1.0),
           'Scale': c.scale,
           'ZIndex': c.zIndex,
-          'Rotation': 0,
+          'Rotation': (c.rotation * 180 / 3.141592653589793).round(),
         };
       }).toList();
 
@@ -386,8 +422,8 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
     }
   }
 
-  Future<Map<String, String>?> _showSaveDialog() async {
-    String title =
+  Future<Map<String, String>?> _showSaveDialog({String? suggestedName}) async {
+    String title = suggestedName ??
         'Outfit ${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}';
     bool isPublic = false;
 
@@ -457,6 +493,8 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
                     initialValue: title,
                     decoration: InputDecoration(
                       labelText: 'Tên trang phục',
+                      helperText: suggestedName != null ? '✨ AI Stylist đề xuất tên gọi này' : null,
+                      helperStyle: const TextStyle(color: Colors.deepPurple, fontWeight: FontWeight.bold),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -551,6 +589,14 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
         actions: [
           if (_canvasItems.isNotEmpty) ...[
             IconButton(
+              icon: Icon(
+                _showGrid ? Icons.grid_on_rounded : Icons.grid_off_rounded,
+                color: _showGrid ? AppColors.primaryLight : AppColors.primary,
+              ),
+              tooltip: 'Lưới căn chỉnh',
+              onPressed: () => setState(() => _showGrid = !_showGrid),
+            ),
+            IconButton(
               icon: const Icon(
                 Icons.download_rounded,
                 color: AppColors.primary,
@@ -615,6 +661,9 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
               ),
             ),
           ),
+
+          if (_selectedUid != null)
+            _buildFloatingToolbar(),
 
           // ── Divider with hint ─────────────────────────────────────────────
           Container(
@@ -712,46 +761,85 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
             key: _canvasRepaintKey,
             child: Container(
               color: Colors.white,
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  // Grid pattern for empty state
-                  if (_canvasItems.isEmpty)
-                    Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.style_rounded,
-                            size: 72,
-                            color: AppColors.primary.withOpacity(0.12),
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'Canvas trống',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.primary.withOpacity(0.25),
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Chọn đồ từ tủ bên dưới để thêm vào',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: AppColors.primary.withOpacity(0.20),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  _lastCanvasWidth = constraints.maxWidth;
+                  _lastCanvasHeight = constraints.maxHeight;
 
-                  // Canvas items sorted by zIndex
-                  ...(_canvasItems.toList()
-                        ..sort((a, b) => a.zIndex.compareTo(b.zIndex)))
-                      .map((canvasItem) => _buildCanvasItem(canvasItem)),
-                ],
+                  return Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      // Grid background pattern
+                      if (_showGrid)
+                        const Positioned.fill(
+                          child: CustomPaint(
+                            painter: _GridPainter(),
+                          ),
+                        ),
+
+                      // Grid pattern for empty state
+                      if (_canvasItems.isEmpty)
+                        Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.style_rounded,
+                                size: 72,
+                                color: AppColors.primary.withOpacity(0.12),
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                'Canvas trống',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.primary.withOpacity(0.25),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Chọn đồ từ tủ bên dưới để thêm vào',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: AppColors.primary.withOpacity(0.20),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                      // Canvas items sorted by zIndex
+                      ...(_canvasItems.toList()
+                            ..sort((a, b) => a.zIndex.compareTo(b.zIndex)))
+                          .map((canvasItem) => _buildCanvasItem(canvasItem)),
+
+                      // Snap alignment vertical line
+                      if (_showVerticalGuide && _lastCanvasWidth != null)
+                        Positioned(
+                          left: _lastCanvasWidth! / 2.0,
+                          top: 0,
+                          bottom: 0,
+                          child: Container(
+                            width: 1.5,
+                            color: Colors.deepPurpleAccent.withOpacity(0.6),
+                          ),
+                        ),
+
+                      // Snap alignment horizontal line
+                      if (_showHorizontalGuide && _lastCanvasHeight != null)
+                        Positioned(
+                          top: _lastCanvasHeight! / 2.0,
+                          left: 0,
+                          right: 0,
+                          child: Container(
+                            height: 1.5,
+                            color: Colors.deepPurpleAccent.withOpacity(0.6),
+                          ),
+                        ),
+                    ],
+                  );
+                },
               ),
             ),
           ),
@@ -779,11 +867,37 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
         },
         onScaleUpdate: (details) {
           setState(() {
-            // Pan with one or many fingers.
-            canvasItem.position = Offset(
-              canvasItem.position.dx + details.focalPointDelta.dx,
-              canvasItem.position.dy + details.focalPointDelta.dy,
-            );
+            // Pan with alignment snap guidelines
+            double nextX = canvasItem.position.dx + details.focalPointDelta.dx;
+            double nextY = canvasItem.position.dy + details.focalPointDelta.dy;
+
+            if (_lastCanvasWidth != null && _lastCanvasHeight != null) {
+              final double centerX = _lastCanvasWidth! / 2.0;
+              final double centerY = _lastCanvasHeight! / 2.0;
+
+              final double itemWidth = baseSize * canvasItem.scale;
+              final double itemHeight = baseSize * canvasItem.scale;
+              final double itemCenterX = nextX + 12.0 + (itemWidth / 2.0);
+              final double itemCenterY = nextY + 12.0 + (itemHeight / 2.0);
+
+              // Snap Vertical Center (centerX)
+              if ((itemCenterX - centerX).abs() < 12.0) {
+                nextX = centerX - 12.0 - (itemWidth / 2.0);
+                _showVerticalGuide = true;
+              } else {
+                _showVerticalGuide = false;
+              }
+
+              // Snap Horizontal Center (centerY)
+              if ((itemCenterY - centerY).abs() < 12.0) {
+                nextY = centerY - 12.0 - (itemHeight / 2.0);
+                _showHorizontalGuide = true;
+              } else {
+                _showHorizontalGuide = false;
+              }
+            }
+
+            canvasItem.position = Offset(nextX, nextY);
 
             // Pinch scale.
             if (details.pointerCount >= 2) {
@@ -794,6 +908,12 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
             }
           });
         },
+        onScaleEnd: (details) {
+          setState(() {
+            _showVerticalGuide = false;
+            _showHorizontalGuide = false;
+          });
+        },
 
         child: Container(
           width: currentSize + 24,
@@ -801,45 +921,51 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
           color: Colors.transparent,
           child: Stack(
             children: [
-              // Item image
+              // Item image with transforms (rotation and flip)
               Positioned(
                 left: 12,
                 top: 12,
                 width: currentSize,
                 height: currentSize,
-                child: Container(
-                  decoration: isSelected
-                      ? BoxDecoration(
-                          border: Border.all(
-                            color: AppColors.primary,
-                            width: 2,
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                        )
-                      : null,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: canvasItem.clothingItem.imageUrl.isEmpty
-                        ? Container(
-                            color: AppColors.secondary,
-                            child: const Icon(
-                              Icons.checkroom_rounded,
-                              size: 48,
+                child: Transform(
+                  alignment: Alignment.center,
+                  transform: Matrix4.identity()
+                    ..rotateZ(canvasItem.rotation)
+                    ..scale(canvasItem.isFlipped ? -1.0 : 1.0, 1.0),
+                  child: Container(
+                    decoration: isSelected
+                        ? BoxDecoration(
+                            border: Border.all(
                               color: AppColors.primary,
+                              width: 2,
                             ),
+                            borderRadius: BorderRadius.circular(12),
                           )
-                        : Image.network(
-                            canvasItem.clothingItem.imageUrl,
-                            fit: BoxFit.contain,
-                            errorBuilder: (context, error, stackTrace) =>
-                                Container(
-                                  color: AppColors.secondary,
-                                  child: const Icon(
-                                    Icons.broken_image_outlined,
-                                    size: 48,
+                        : null,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: canvasItem.clothingItem.imageUrl.isEmpty
+                          ? Container(
+                              color: AppColors.secondary,
+                              child: const Icon(
+                                Icons.checkroom_rounded,
+                                size: 48,
+                                color: AppColors.primary,
+                              ),
+                            )
+                          : Image.network(
+                              canvasItem.clothingItem.imageUrl,
+                              fit: BoxFit.contain,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  Container(
+                                    color: AppColors.secondary,
+                                    child: const Icon(
+                                      Icons.broken_image_outlined,
+                                      size: 48,
+                                    ),
                                   ),
-                                ),
-                          ),
+                            ),
+                    ),
                   ),
                 ),
               ),
@@ -1034,4 +1160,145 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
       ),
     );
   }
+
+  Widget _buildFloatingToolbar() {
+    final selectedItem = _canvasItems.firstWhere((c) => c.uid == _selectedUid);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          top: BorderSide(color: AppColors.primary.withOpacity(0.08)),
+          bottom: BorderSide(color: AppColors.primary.withOpacity(0.08)),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          _toolbarButton(
+            icon: Icons.flip_rounded,
+            label: 'Lật ngang',
+            onTap: () {
+              setState(() {
+                selectedItem.isFlipped = !selectedItem.isFlipped;
+              });
+            },
+          ),
+          const SizedBox(
+            height: 24,
+            child: VerticalDivider(width: 1, thickness: 1, color: Colors.grey),
+          ),
+          _toolbarButton(
+            icon: Icons.rotate_left_rounded,
+            label: 'Xoay trái',
+            onTap: () {
+              setState(() {
+                selectedItem.rotation -= 15 * 3.141592653589793 / 180;
+              });
+            },
+          ),
+          _toolbarButton(
+            icon: Icons.rotate_right_rounded,
+            label: 'Xoay phải',
+            onTap: () {
+              setState(() {
+                selectedItem.rotation += 15 * 3.141592653589793 / 180;
+              });
+            },
+          ),
+          const SizedBox(
+            height: 24,
+            child: VerticalDivider(width: 1, thickness: 1, color: Colors.grey),
+          ),
+          _toolbarButton(
+            icon: Icons.vertical_align_top_rounded,
+            label: 'Lên trên',
+            onTap: () {
+              setState(() {
+                _nextZIndex++;
+                selectedItem.zIndex = _nextZIndex;
+              });
+            },
+          ),
+          _toolbarButton(
+            icon: Icons.vertical_align_bottom_rounded,
+            label: 'Xuống dưới',
+            onTap: () {
+              setState(() {
+                int minZ = _canvasItems.isEmpty
+                    ? 0
+                    : _canvasItems.map((e) => e.zIndex).fold(
+                        0,
+                        (prev, element) => element < prev ? element : prev,
+                      );
+                selectedItem.zIndex = minZ - 1;
+              });
+            },
+          ),
+          const SizedBox(
+            height: 24,
+            child: VerticalDivider(width: 1, thickness: 1, color: Colors.grey),
+          ),
+          _toolbarButton(
+            icon: Icons.delete_outline_rounded,
+            label: 'Xóa',
+            color: Colors.redAccent,
+            onTap: _deleteSelected,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _toolbarButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+    Color? color,
+  }) {
+    final activeColor = color ?? AppColors.primary;
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: activeColor, size: 20),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+              color: activeColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GridPainter extends CustomPainter {
+  const _GridPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = AppColors.primary.withOpacity(0.08)
+      ..strokeWidth = 0.5;
+
+    const double step = 20.0;
+
+    for (double x = 0; x < size.width; x += step) {
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+    }
+    for (double y = 0; y < size.height; y += step) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
