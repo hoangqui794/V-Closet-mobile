@@ -220,16 +220,16 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
         return _PaymentGatewaySelectorSheet(
           packageName: plan.name,
           price: plan.price,
-          onSelected: (gateway) {
+          onSelected: (gateway, couponCode) {
             Navigator.pop(sheetContext); // Close gateway selector
-            _initiatePurchase(plan, gateway);
+            _initiatePurchase(plan, gateway, couponCode: couponCode);
           },
         );
       },
     );
   }
 
-  void _initiatePurchase(SubscriptionPlan plan, String gateway) async {
+  void _initiatePurchase(SubscriptionPlan plan, String gateway, {String? couponCode}) async {
     if (gateway == 'manual_transfer') {
       showModalBottomSheet(
         context: context,
@@ -258,7 +258,11 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
     );
 
     try {
-      final paymentUrl = await _subscriptionApiService.purchase(plan.id, paymentGateway: gateway);
+      final paymentUrl = await _subscriptionApiService.purchase(
+        plan.id,
+        paymentGateway: gateway,
+        couponCode: couponCode,
+      );
       if (!mounted) return;
       Navigator.pop(context); // Đóng loading dialog
 
@@ -1849,10 +1853,10 @@ class _PaymentVerificationSheetState extends State<_PaymentVerificationSheet> {
   }
 }
 
-class _PaymentGatewaySelectorSheet extends StatelessWidget {
+class _PaymentGatewaySelectorSheet extends StatefulWidget {
   final String packageName;
   final double price;
-  final ValueChanged<String> onSelected;
+  final void Function(String gateway, String? couponCode) onSelected;
 
   const _PaymentGatewaySelectorSheet({
     required this.packageName,
@@ -1861,69 +1865,261 @@ class _PaymentGatewaySelectorSheet extends StatelessWidget {
   });
 
   @override
+  State<_PaymentGatewaySelectorSheet> createState() => _PaymentGatewaySelectorSheetState();
+}
+
+class _PaymentGatewaySelectorSheetState extends State<_PaymentGatewaySelectorSheet> {
+  final _couponController = TextEditingController();
+  final _subscriptionApiService = GetIt.I<SubscriptionApiService>();
+
+  bool _isCheckingCoupon = false;
+  Map<String, dynamic>? _couponResult;
+  String? _couponError;
+
+  @override
+  void dispose() {
+    _couponController.dispose();
+    super.dispose();
+  }
+
+  void _checkCoupon() async {
+    final code = _couponController.text.trim();
+    if (code.isEmpty) return;
+
+    // Ẩn bàn phím khi bấm Áp dụng
+    FocusScope.of(context).unfocus();
+
+    setState(() {
+      _isCheckingCoupon = true;
+      _couponResult = null;
+      _couponError = null;
+    });
+
+    try {
+      final res = await _subscriptionApiService.checkCoupon(code);
+      setState(() {
+        _isCheckingCoupon = false;
+        final isValid = res['isValid'] as bool? ?? false;
+        if (isValid) {
+          _couponResult = res;
+        } else {
+          _couponError = res['message'] as String? ?? 'Mã giảm giá không hợp lệ';
+        }
+      });
+    } catch (e) {
+      setState(() {
+        _isCheckingCoupon = false;
+        _couponError = e.toString().replaceAll('Exception: ', '');
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final formatCurrency = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
-    final formattedPrice = price.toStringAsFixed(0).replaceAllMapped(formatCurrency, (Match m) => '${m[1]}.');
+    
+    // Tính toán giá sau giảm nếu có coupon
+    double finalPrice = widget.price;
+    double discountAmount = 0.0;
+    
+    if (_couponResult != null && (_couponResult!['isValid'] as bool? ?? false) == true) {
+      final type = _couponResult!['discountType'] as String?;
+      final value = (_couponResult!['discountValue'] as num? ?? 0.0).toDouble();
+      if (type == 'percentage') {
+        discountAmount = widget.price * value / 100.0;
+      } else if (type == 'fixed_amount') {
+        discountAmount = value;
+      }
+      finalPrice = widget.price - discountAmount;
+      if (finalPrice < 0) finalPrice = 0;
+    }
 
-    return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(28),
-          topRight: Radius.circular(28),
+    final formattedOriginalPrice = widget.price.toStringAsFixed(0).replaceAllMapped(formatCurrency, (Match m) => '${m[1]}.');
+    final formattedFinalPrice = finalPrice.toStringAsFixed(0).replaceAllMapped(formatCurrency, (Match m) => '${m[1]}.');
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      child: Container(
+        decoration: const BoxDecoration(
+          color: AppColors.background,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(28),
+            topRight: Radius.circular(28),
+          ),
         ),
-      ),
-      padding: EdgeInsets.fromLTRB(24, 20, 24, MediaQuery.of(context).viewInsets.bottom + 24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 40,
-            height: 4,
-            margin: const EdgeInsets.only(bottom: 20),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(2),
-            ),
+        padding: const EdgeInsets.fromLTRB(24, 16, 24, 20),
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const Text(
+                'Chọn phương thức thanh toán',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.primary),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Vui lòng chọn cổng thanh toán để mua gói "${widget.packageName}".',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 13, color: AppColors.primary.withOpacity(0.6), height: 1.4),
+              ),
+              const SizedBox(height: 16),
+              
+              // Ô nhập mã giảm giá (Coupon Code)
+              Container(
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.03),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: _couponResult != null
+                        ? Colors.green.withOpacity(0.5)
+                        : _couponError != null
+                            ? Colors.red.withOpacity(0.5)
+                            : AppColors.primary.withOpacity(0.08),
+                    width: 1.5,
+                  ),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _couponController,
+                        decoration: const InputDecoration(
+                          hintText: 'Nhập mã giảm giá (ví dụ: WELCOME20)',
+                          hintStyle: TextStyle(fontSize: 13, color: Colors.grey),
+                          border: InputBorder.none,
+                        ),
+                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.primary),
+                      ),
+                    ),
+                    if (_isCheckingCoupon)
+                      const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+                      )
+                    else
+                      TextButton(
+                        onPressed: _checkCoupon,
+                        child: const Text(
+                          'Áp dụng',
+                          style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              if (_couponResult != null) ...[
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    const Icon(Icons.check_circle_rounded, color: Colors.green, size: 16),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        'Đã áp dụng mã ${_couponController.text.trim().toUpperCase()} thành công!',
+                        style: const TextStyle(color: Colors.green, fontSize: 12, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
+              ] else if (_couponError != null) ...[
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    const Icon(Icons.error_rounded, color: Colors.red, size: 16),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        _couponError!,
+                        style: const TextStyle(color: Colors.red, fontSize: 12, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+              
+              const SizedBox(height: 16),
+              
+              // Thẻ hiển thị giá tiền
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.04),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Tổng thanh toán:',
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.primary),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        if (discountAmount > 0)
+                          Text(
+                            '$formattedOriginalPrice đ',
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey,
+                              decoration: TextDecoration.lineThrough,
+                            ),
+                          ),
+                        Text(
+                          '$formattedFinalPrice đ',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w900,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 16),
+              
+              _buildGatewayCard(
+                context: context,
+                gateway: 'payos',
+                title: 'Cổng thanh toán PayOS',
+                subtitle: 'Thanh toán tự động qua mã VietQR Ngân hàng hoặc thẻ ATM/Visa',
+                iconColor: const Color(0xFFE25822),
+                logoText: 'PayOS',
+                logoBgColor: const Color(0xFFFFF5EE),
+              ),
+              const SizedBox(height: 12),
+              _buildGatewayCard(
+                context: context,
+                gateway: 'manual_transfer',
+                title: 'Chuyển khoản thủ công (VietQR)',
+                subtitle: 'Chuyển khoản ngân hàng 24/7 bằng mã VietQR hoặc STK',
+                iconColor: AppColors.primary,
+                logoText: 'Bank',
+                logoBgColor: AppColors.primary.withOpacity(0.08),
+              ),
+              const SizedBox(height: 16),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Hủy bỏ', style: TextStyle(color: AppColors.textMuted, fontWeight: FontWeight.bold)),
+              ),
+            ],
           ),
-          const Icon(Icons.account_balance_wallet_rounded, color: AppColors.primary, size: 48),
-          const SizedBox(height: 16),
-          const Text(
-            'Chọn phương thức thanh toán',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.primary),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Vui lòng chọn cổng thanh toán để mua gói "$packageName" ($formattedPrice đ).',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 13, color: AppColors.primary.withOpacity(0.6), height: 1.4),
-          ),
-          const SizedBox(height: 24),
-          _buildGatewayCard(
-            context: context,
-            gateway: 'payos',
-            title: 'Cổng thanh toán PayOS',
-            subtitle: 'Thanh toán tự động qua mã VietQR Ngân hàng hoặc thẻ ATM/Visa',
-            iconColor: const Color(0xFFE25822),
-            logoText: 'PayOS',
-            logoBgColor: const Color(0xFFFFF5EE),
-          ),
-          const SizedBox(height: 12),
-          _buildGatewayCard(
-            context: context,
-            gateway: 'manual_transfer',
-            title: 'Chuyển khoản thủ công (VietQR)',
-            subtitle: 'Chuyển khoản ngân hàng 24/7 bằng mã VietQR hoặc STK',
-            iconColor: AppColors.primary,
-            logoText: 'Bank',
-            logoBgColor: AppColors.primary.withOpacity(0.08),
-          ),
-          const SizedBox(height: 24),
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Hủy bỏ', style: TextStyle(color: AppColors.textMuted, fontWeight: FontWeight.bold)),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -1938,7 +2134,10 @@ class _PaymentGatewaySelectorSheet extends StatelessWidget {
     required Color logoBgColor,
   }) {
     return InkWell(
-      onTap: () => onSelected(gateway),
+      onTap: () {
+        final couponCode = _couponResult != null ? _couponController.text.trim() : null;
+        widget.onSelected(gateway, couponCode);
+      },
       borderRadius: BorderRadius.circular(16),
       child: Container(
         padding: const EdgeInsets.all(16),

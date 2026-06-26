@@ -18,6 +18,8 @@ import 'store/store_page.dart';
 import 'profile/notification_page.dart';
 import '../../data/datasources/subscription_api_service.dart';
 import '../../data/datasources/signalr_service.dart';
+import '../../data/datasources/notification_api_service.dart';
+import 'package:animate_do/animate_do.dart';
 
 
 class MainScreen extends StatefulWidget {
@@ -40,6 +42,10 @@ class _MainScreenState extends State<MainScreen> {
     _syncSubscription();
     SignalRService().initSignalR();
     _listenNotifications();
+    
+    // Kịch bản 3: Tự kiểm tra thông báo chưa đọc khi mở ứng dụng
+    _checkGiftSubscriptionFromNotifications();
+
     // Trigger Style DNA Quiz nếu user chưa hoàn thành
     WidgetsBinding.instance.addPostFrameCallback((_) => _maybeShowStyleQuiz());
   }
@@ -51,12 +57,166 @@ class _MainScreenState extends State<MainScreen> {
     super.dispose();
   }
 
+  // Kịch bản 1: Lắng nghe qua SignalR thời gian thực
   void _listenNotifications() {
     _notificationSub = SignalRService().onNewNotification.listen((notification) {
       if (!mounted) return;
       _syncSubscription(); // Đồng bộ ngay lập tức để có Premium features
-      _showFloatingNotification(notification);
+      
+      final type = notification['type']?.toString() ?? notification['Type']?.toString() ?? 'System';
+      if (type.toLowerCase() == 'subscription') {
+        final title = notification['title']?.toString() ?? notification['Title']?.toString() ?? 'Chúc mừng! Bạn đã được tặng gói';
+        final body = notification['body']?.toString() ?? notification['Body']?.toString() ?? '';
+        _showGiftSubscriptionDialog(title, body);
+      } else {
+        _showFloatingNotification(notification);
+      }
     });
+  }
+
+  // Kịch bản 2: Handler khi bấm từ thông báo đẩy ngoài app (để hệ thống gọi khi click)
+  void handlePushNotificationClicked(Map<String, dynamic> payload) {
+    if (!mounted) return;
+    final type = payload['type']?.toString() ?? payload['Type']?.toString() ?? '';
+    if (type.toLowerCase() == 'subscription') {
+      final title = payload['title']?.toString() ?? payload['Title']?.toString() ?? 'Chúc mừng! Bạn đã được tặng gói';
+      final body = payload['body']?.toString() ?? payload['Body']?.toString() ?? '';
+      _showGiftSubscriptionDialog(title, body);
+    }
+  }
+
+  // Kịch bản 3: Kiểm tra trong thông báo chưa đọc
+  Future<void> _checkGiftSubscriptionFromNotifications() async {
+    try {
+      final notificationService = GetIt.I<NotificationApiService>();
+      final unreadNotifications = await notificationService.getNotifications(isRead: false);
+      
+      NotificationModel? giftNotification;
+      for (final n in unreadNotifications) {
+        if (n.type.toLowerCase() == 'subscription') {
+          giftNotification = n;
+          break;
+        }
+      }
+
+      if (giftNotification != null) {
+        // Hiển thị Dialog chúc mừng
+        _showGiftSubscriptionDialog(giftNotification.title, giftNotification.body);
+        
+        // Đánh dấu thông báo là đã đọc
+        await notificationService.markAsRead(giftNotification.id);
+      }
+    } catch (e) {
+      debugPrint('Lỗi kiểm tra thông báo quà tặng tại MainScreen: $e');
+    }
+  }
+
+  // Giao diện Popup chúc mừng tặng gói (Confetti / Hộp quà)
+  void _showGiftSubscriptionDialog(String title, String body) {
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return ElasticIn(
+          duration: const Duration(milliseconds: 600),
+          child: Dialog(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            child: Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(28),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.15),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Hộp quà nổi bật
+                  Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Center(
+                      child: Text(
+                        '🎁',
+                        style: TextStyle(fontSize: 48),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  Text(
+                    title,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  // Nội dung thông báo / Lời nhắn
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.04),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Text(
+                      body,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: AppColors.primary.withOpacity(0.8),
+                        height: 1.5,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  // Nút hành động
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(dialogContext);
+                        _syncSubscription(); // Cập nhật lại số dư & hạn dùng tức thì
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: const Text(
+                        'Tuyệt vời',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   void _showFloatingNotification(Map<String, dynamic> notification) {

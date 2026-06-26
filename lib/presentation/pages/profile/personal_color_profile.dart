@@ -17,6 +17,55 @@ class FabricSuggestion {
     required this.note,
     required this.previewColors,
   });
+
+  String? get imagePath {
+    switch (name) {
+      case 'Cotton mềm':
+        return 'assets/images/cotton_mem.webp';
+      case 'Linen sáng':
+        return 'assets/images/linen_sang.webp';
+      case 'Lụa/voan':
+        return 'assets/images/lua_voan.webp';
+      case 'Poplin':
+        return 'assets/images/poplin.webp';
+      case 'Chiffon':
+        return 'assets/images/chiffon.webp';
+      case 'Knit mảnh':
+        return 'assets/images/knit_manh.webp';
+      case 'Suede':
+        return 'assets/images/suede.webp';
+      case 'Denim ấm':
+        return 'assets/images/denim_am.webp';
+      case 'Len tự nhiên':
+        return 'assets/images/len_tu_nhien.webp';
+      case 'Lụa mờ':
+        return 'assets/images/lua_mo.webp';
+      case 'Viscose':
+        return 'assets/images/viscose.webp';
+      case 'Knit mềm':
+        return 'assets/images/knit_mem.webp';
+      case 'Satin mờ':
+        return 'assets/images/satin_mo.webp';
+      case 'Denim sáng':
+        return 'assets/images/denim_sang.webp';
+      case 'Cotton mịn':
+        return 'assets/images/cotton_min.webp';
+      case 'Satin':
+        return 'assets/images/satin_bong.webp';
+      case 'Wool mịn':
+        return 'assets/images/wool_min.webp';
+      case 'Da bóng':
+        return 'assets/images/da_bong.webp';
+      case 'Cotton đứng':
+        return 'assets/images/cotton_dung_phom.webp';
+      case 'Satin lạnh':
+        return 'assets/images/satin_lanh.webp';
+      case 'Da/denim':
+        return 'assets/images/da_denim_dam_mau.webp';
+      default:
+        return null;
+    }
+  }
 }
 
 class PersonalColorProfile {

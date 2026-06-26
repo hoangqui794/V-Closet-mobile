@@ -342,13 +342,20 @@ class _PersonalColorDetailPageState extends State<PersonalColorDetailPage> {
                 Expanded(
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(14),
-                    child: CustomPaint(
-                      painter: _FabricPreviewPainter(
-                        fabric.previewColors,
-                        index,
-                      ),
-                      child: const SizedBox.expand(),
-                    ),
+                    child: fabric.imagePath != null
+                        ? Image.asset(
+                            fabric.imagePath!,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: double.infinity,
+                          )
+                        : CustomPaint(
+                            painter: _FabricPreviewPainter(
+                              fabric.previewColors,
+                              index,
+                            ),
+                            child: const SizedBox.expand(),
+                          ),
                   ),
                 ),
                 const SizedBox(height: 10),

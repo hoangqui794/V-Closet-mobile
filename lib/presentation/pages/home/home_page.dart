@@ -817,13 +817,13 @@ class _HomePageState extends State<HomePage> {
                     Icon(Icons.forum_rounded, color: AppColors.primary),
                     SizedBox(width: 10),
                     Text(
-                      'Chưa có Style DNA',
+                      'Chưa có Phong cách',
                       style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                     ),
                   ],
                 ),
                 content: const Text(
-                  'Bạn vui lòng hoàn thành trắc nghiệm Style DNA trước để AI Stylist có đầy đủ thông số hình thể và tông da để tư vấn chuẩn xác nhất nhé.',
+                  'Bạn vui lòng thực hiện Định hình Phong cách cá nhân trước để AI Stylist có đầy đủ thông số hình thể và tông da để tư vấn chuẩn xác nhất nhé.',
                   style: TextStyle(fontSize: 14, height: 1.4),
                 ),
                 actions: [

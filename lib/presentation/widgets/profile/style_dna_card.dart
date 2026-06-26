@@ -82,7 +82,7 @@ class StyleDnaCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 10),
                   const Text(
-                    'Hồ sơ Style DNA của bạn',
+                    'Hồ sơ Phong cách của bạn',
                     style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w900,

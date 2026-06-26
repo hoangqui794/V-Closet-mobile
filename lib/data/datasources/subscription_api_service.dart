@@ -225,14 +225,19 @@ class SubscriptionApiService {
 
   /// POST /api/subscriptions/purchase
   /// Trả về URL thanh toán PayOS/MoMo/VNPay
-  Future<String> purchase(String planId, {String paymentGateway = 'momo'}) async {
+  Future<String> purchase(String planId, {String paymentGateway = 'momo', String? couponCode}) async {
     try {
+      final payload = <String, dynamic>{
+        'planId': planId,
+        'paymentGateway': paymentGateway,
+      };
+      if (couponCode != null && couponCode.trim().isNotEmpty) {
+        payload['couponCode'] = couponCode.trim();
+      }
+
       final response = await _apiService.post(
         '/api/subscriptions/purchase',
-        data: {
-          'planId': planId,
-          'paymentGateway': paymentGateway,
-        },
+        data: payload,
       );
       if (response.statusCode == 200) {
         final data = response.data as Map<String, dynamic>;
@@ -243,6 +248,23 @@ class SubscriptionApiService {
         return paymentUrl;
       }
       throw Exception('Khởi tạo giao dịch mua gói thất bại.');
+    } on DioException catch (e) {
+      throw Exception(_getDioErrorMessage(e));
+    }
+  }
+
+  /// POST /api/subscriptions/coupons/check
+  /// Kiểm tra tính hợp lệ của mã giảm giá
+  Future<Map<String, dynamic>> checkCoupon(String code) async {
+    try {
+      final response = await _apiService.post(
+        '/api/subscriptions/coupons/check',
+        data: {'code': code},
+      );
+      if (response.statusCode == 200) {
+        return response.data as Map<String, dynamic>;
+      }
+      throw Exception('Kiểm tra mã giảm giá thất bại.');
     } on DioException catch (e) {
       throw Exception(_getDioErrorMessage(e));
     }

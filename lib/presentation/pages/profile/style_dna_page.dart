@@ -142,7 +142,7 @@ class _StyleDnaPageState extends State<StyleDnaPage> {
           const Icon(Icons.auto_awesome_rounded, color: AppColors.primaryLight, size: 64),
           const SizedBox(height: 18),
           const Text(
-            'Khám phá Style DNA của bạn',
+            'Khám phá Phong cách cá nhân của bạn',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w900,
@@ -194,7 +194,7 @@ class _StyleDnaPageState extends State<StyleDnaPage> {
             _fetchProfileData();
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('🎉 Đã cập nhật Style DNA của bạn thành công!'),
+                content: Text('🎉 Đã cập nhật Phong cách cá nhân thành công!'),
                 backgroundColor: Colors.green,
                 behavior: SnackBarBehavior.floating,
               ),

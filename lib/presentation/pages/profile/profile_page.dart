@@ -498,7 +498,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                             _menuTile(
                               Icons.auto_awesome_rounded,
-                              'Trắc nghiệm Style DNA',
+                              'Định hình Phong cách cá nhân',
                               onTap: () {
                                 Navigator.push(
                                   context,
@@ -511,7 +511,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                         ).showSnackBar(
                                           const SnackBar(
                                             content: Text(
-                                              '🎉 Đã cập nhật Style DNA của bạn thành công!',
+                                              '🎉 Đã cập nhật Phong cách cá nhân thành công!',
                                             ),
                                             backgroundColor: Colors.green,
                                             behavior: SnackBarBehavior.floating,
