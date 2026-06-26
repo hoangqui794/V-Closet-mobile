@@ -313,7 +313,10 @@ class _MainScreenState extends State<MainScreen> {
       onMenuPressed: _openDrawer,
       onNavigateTo: (index) => setState(() => _currentIndex = index),
     ),
-    ClosetPage(onMenuPressed: _openDrawer),
+    ClosetPage(
+      onMenuPressed: _openDrawer,
+      onNavigateTo: (index) => setState(() => _currentIndex = index),
+    ),
     CameraPage(onClose: () => _onTapNav(1)),
     StyleDnaPage(
       onMenuPressed: _openDrawer,

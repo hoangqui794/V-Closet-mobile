@@ -10,7 +10,7 @@ class WardrobeApiService {
   WardrobeApiService(this._apiService);
 
   /// Lấy danh sách tủ đồ từ backend
-  Future<List<ClothingItem>> getItems({String? category, String? color}) async {
+  Future<List<ClothingItem>> getItems({String? category, String? color, String? closetId}) async {
     int retries = 3;
     int delayMs = 1000;
 
@@ -19,6 +19,7 @@ class WardrobeApiService {
         final queryParams = <String, dynamic>{};
         if (category != null && category.isNotEmpty) queryParams['category'] = category;
         if (color != null && color.isNotEmpty) queryParams['color'] = color;
+        if (closetId != null && closetId.isNotEmpty) queryParams['closetId'] = closetId;
 
         final response = await _apiService.get('/api/Wardrobe', queryParameters: queryParams);
         

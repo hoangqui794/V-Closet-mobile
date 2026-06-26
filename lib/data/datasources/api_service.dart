@@ -241,9 +241,13 @@ class ApiService {
   }
 
   // PUT request
-  Future<Response> put(String path, {dynamic data}) async {
+  Future<Response> put(
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+  }) async {
     try {
-      return await _dio.put(path, data: data);
+      return await _dio.put(path, data: data, queryParameters: queryParameters);
     } catch (e) {
       rethrow;
     }

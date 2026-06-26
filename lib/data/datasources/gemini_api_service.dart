@@ -387,4 +387,80 @@ Quy tắc ứng xử và phản hồi:
     }
     return null;
   }
+
+  /// Nâng cấp tự động đặt tên cho bộ phối đồ bằng AI dựa trên danh mục của các món đồ đi kèm
+  Future<String?> generateOutfitName({
+    required List<String> clothingNames,
+  }) async {
+    final apiKeys = _getApiKeys();
+    if (apiKeys.isEmpty) return null;
+
+    final prompt = '''
+Hãy phân tích danh sách các món đồ quần áo sau đây và đề xuất 1 tên gọi chung cực kỳ ngắn gọn (chỉ từ 3 đến 5 từ), trẻ trung và mang tính thời trang bằng Tiếng Việt cho bộ phối đồ (outfit) này.
+Danh sách các món đồ:
+${clothingNames.map((name) => '- $name').join('\n')}
+
+Ví dụ tên đề xuất: 
+- Năng động dạo phố mùa hè
+- Thu đông ấm áp lịch lãm
+- Công sở thanh lịch năng động
+- Tiệc tối sang trọng quyến rũ
+- Thể thao khỏe khoắn tự tin
+
+Lưu ý: Chỉ trả về duy nhất chuỗi văn bản chứa tên bộ phối đồ được đề xuất, KHÔNG sử dụng ký tự đặc biệt, dấu ngoặc hay markdown.
+''';
+
+    final List<String> modelsToTry = [
+      'gemini-2.5-flash',
+      'gemini-3.5-flash',
+      'gemini-3.1-flash-lite',
+      'gemini-2.5-flash-lite',
+    ];
+
+    for (final apiKey in apiKeys) {
+      final keyDisplay = apiKey.length > 8 ? "${apiKey.substring(0, 8)}..." : apiKey;
+      for (final model in modelsToTry) {
+        try {
+          debugPrint('[GeminiApiService] Đang sinh tên outfit với model $model...');
+          final response = await _dio.post(
+            'https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent?key=$apiKey',
+            options: Options(
+              headers: {'Content-Type': 'application/json'},
+              sendTimeout: const Duration(seconds: 8),
+              receiveTimeout: const Duration(seconds: 8),
+            ),
+            data: {
+              'contents': [
+                {
+                  'parts': [
+                    {'text': prompt}
+                  ]
+                }
+              ]
+            },
+          );
+
+          if (response.statusCode == 200 && response.data != null) {
+            final candidates = response.data['candidates'] as List<dynamic>;
+            if (candidates.isNotEmpty) {
+              final content = candidates[0]['content'];
+              if (content != null) {
+                final parts = content['parts'] as List<dynamic>;
+                if (parts.isNotEmpty) {
+                  final text = parts[0]['text'] as String?;
+                  if (text != null && text.trim().isNotEmpty) {
+                    debugPrint('[GeminiApiService] Tên outfit được sinh ra: ${text.trim()}');
+                    return text.trim();
+                  }
+                }
+              }
+            }
+          }
+        } catch (e) {
+          debugPrint('[GeminiApiService] Lỗi sinh tên outfit với key $keyDisplay và model $model: $e');
+        }
+      }
+    }
+    return null;
+  }
 }

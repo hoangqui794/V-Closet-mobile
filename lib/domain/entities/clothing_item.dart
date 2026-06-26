@@ -8,6 +8,7 @@ class ClothingItem {
   final double? price; // Optional for compatibility with old mock
   final List<String> colorTags;
   final String? brand;
+  final String? closetId;
 
   ClothingItem({
     required this.id,
@@ -19,6 +20,7 @@ class ClothingItem {
     this.price,
     this.colorTags = const [],
     this.brand,
+    this.closetId,
   });
 
   factory ClothingItem.fromJson(Map<String, dynamic> json) {
@@ -33,6 +35,7 @@ class ClothingItem {
       colorTags: (json['colorTags'] as List?)?.map((e) => e.toString()).toList() ?? [],
       brand: json['brand'],
       price: json['price'] != null ? double.tryParse(json['price'].toString()) : null,
+      closetId: json['closetId']?.toString(),
     );
   }
 
@@ -46,6 +49,7 @@ class ClothingItem {
       'colorTags': colorTags,
       'brand': brand,
       'price': price,
+      'closetId': closetId,
     };
   }
 }
