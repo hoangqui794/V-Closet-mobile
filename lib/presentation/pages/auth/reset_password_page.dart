@@ -72,7 +72,10 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       }
     } catch (e) {
       if (mounted) {
-        _showSnackbar(e.toString().replaceAll('Exception: ', ''), isError: true);
+        _showSnackbar(
+          e.toString().replaceAll('Exception: ', ''),
+          isError: true,
+        );
       }
     } finally {
       if (mounted) setState(() => _isResending = false);
@@ -358,26 +361,26 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                                     ),
                                   )
                                 : _isResending
-                                    ? SizedBox(
-                                        width: 14,
-                                        height: 14,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          color: AppColors.primary,
-                                        ),
-                                      )
-                                    : GestureDetector(
-                                        onTap: _resendOtp,
-                                        child: Text(
-                                          'Gửi lại ngay',
-                                          style: TextStyle(
-                                            color: AppColors.primary,
-                                            fontWeight: FontWeight.bold,
-                                            decoration: TextDecoration.underline,
-                                            fontSize: isSmallScreen ? 13.0 : 14.0,
-                                          ),
-                                        ),
+                                ? SizedBox(
+                                    width: 14,
+                                    height: 14,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: AppColors.primary,
+                                    ),
+                                  )
+                                : GestureDetector(
+                                    onTap: _resendOtp,
+                                    child: Text(
+                                      'Gửi lại ngay',
+                                      style: TextStyle(
+                                        color: AppColors.primary,
+                                        fontWeight: FontWeight.bold,
+                                        decoration: TextDecoration.underline,
+                                        fontSize: isSmallScreen ? 13.0 : 14.0,
                                       ),
+                                    ),
+                                  ),
                           ],
                         ),
                       ],

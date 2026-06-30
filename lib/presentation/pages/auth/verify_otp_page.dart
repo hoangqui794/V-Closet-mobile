@@ -381,25 +381,25 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
                   ),
                   _canResend
                       ? (_isLoading
-                          ? Text(
-                              'Đang gửi...',
-                              style: TextStyle(
-                                color: AppColors.textMuted,
-                                fontSize: isSmallScreen ? 13.0 : 15.0,
-                              ),
-                            )
-                          : GestureDetector(
-                              onTap: _resendOtp,
-                              child: Text(
-                                'Gửi lại ngay',
+                            ? Text(
+                                'Đang gửi...',
                                 style: TextStyle(
-                                  color: AppColors.primary,
-                                  fontWeight: FontWeight.bold,
-                                  decoration: TextDecoration.underline,
+                                  color: AppColors.textMuted,
                                   fontSize: isSmallScreen ? 13.0 : 15.0,
                                 ),
-                              ),
-                            ))
+                              )
+                            : GestureDetector(
+                                onTap: _resendOtp,
+                                child: Text(
+                                  'Gửi lại ngay',
+                                  style: TextStyle(
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.bold,
+                                    decoration: TextDecoration.underline,
+                                    fontSize: isSmallScreen ? 13.0 : 15.0,
+                                  ),
+                                ),
+                              ))
                       : Text(
                           'Gửi lại sau (${_countdown}s)',
                           style: TextStyle(

@@ -337,7 +337,14 @@ class AuthApiService {
 
         if (data is Map) {
           // Kiểm tra các trường chứa thông báo lỗi thông dụng của C# API
-          final possibleMessageKeys = ['message', 'Message', 'error', 'Error', 'detail', 'Detail'];
+          final possibleMessageKeys = [
+            'message',
+            'Message',
+            'error',
+            'Error',
+            'detail',
+            'Detail',
+          ];
           for (final key in possibleMessageKeys) {
             if (data[key] != null && data[key].toString().isNotEmpty) {
               return data[key].toString();

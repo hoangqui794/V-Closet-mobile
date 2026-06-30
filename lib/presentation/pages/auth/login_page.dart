@@ -78,10 +78,7 @@ class _LoginPageState extends State<LoginPage> {
           _showReactivationDialog(email);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(errorStr),
-              backgroundColor: AppColors.error,
-            ),
+            SnackBar(content: Text(errorStr), backgroundColor: AppColors.error),
           );
         }
       }
@@ -163,7 +160,9 @@ class _LoginPageState extends State<LoginPage> {
                       child: ElevatedButton(
                         onPressed: () {
                           Navigator.pop(context); // Đóng popup xác nhận
-                          _showEmailInputForReactivation(initialEmail); // Hiện popup nhập email
+                          _showEmailInputForReactivation(
+                            initialEmail,
+                          ); // Hiện popup nhập email
                         },
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 14),
@@ -193,8 +192,9 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _showEmailInputForReactivation(String initialEmail) {
-    final emailForReactivationController =
-        TextEditingController(text: initialEmail);
+    final emailForReactivationController = TextEditingController(
+      text: initialEmail,
+    );
     final formKey = GlobalKey<FormState>();
 
     showDialog(
@@ -309,7 +309,9 @@ class _LoginPageState extends State<LoginPage> {
                                   ? null
                                   : () => Navigator.pop(context),
                               style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
                                 side: const BorderSide(color: AppColors.accent),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(16),
@@ -331,36 +333,45 @@ class _LoginPageState extends State<LoginPage> {
                                   ? null
                                   : () async {
                                       if (formKey.currentState!.validate()) {
-                                        setDialogState(() => dialogLoading = true);
+                                        setDialogState(
+                                          () => dialogLoading = true,
+                                        );
                                         try {
-                                          final msg =
-                                              await _authService.requestReactivation(
-                                            emailForReactivationController.text
-                                                .trim(),
-                                          );
+                                          final msg = await _authService
+                                              .requestReactivation(
+                                                emailForReactivationController
+                                                    .text
+                                                    .trim(),
+                                              );
                                           if (context.mounted) {
-                                            Navigator.pop(context); // Đóng Dialog
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
+                                            Navigator.pop(
+                                              context,
+                                            ); // Đóng Dialog
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
                                               SnackBar(
                                                 content: Text(msg),
-                                                backgroundColor:
-                                                    const Color(0xFF27AE60),
+                                                backgroundColor: const Color(
+                                                  0xFF27AE60,
+                                                ),
                                               ),
                                             );
                                           }
                                         } catch (err) {
                                           if (context.mounted) {
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
                                               SnackBar(
                                                 content: Text(
                                                   err.toString().replaceAll(
-                                                        'Exception: ',
-                                                        '',
-                                                      ),
+                                                    'Exception: ',
+                                                    '',
+                                                  ),
                                                 ),
-                                                backgroundColor: AppColors.error,
+                                                backgroundColor:
+                                                    AppColors.error,
                                               ),
                                             );
                                           }
@@ -372,7 +383,9 @@ class _LoginPageState extends State<LoginPage> {
                                       }
                                     },
                               style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
                                 backgroundColor: AppColors.primary,
                                 elevation: 0,
                                 shape: RoundedRectangleBorder(

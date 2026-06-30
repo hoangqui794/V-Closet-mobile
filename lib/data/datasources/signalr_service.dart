@@ -121,11 +121,11 @@ class SignalRService {
       if (_hubConnection != null &&
           _hubConnection!.state != HubConnectionState.Disconnected) {
         await _hubConnection!.stop().timeout(
-              const Duration(milliseconds: 1500),
-              onTimeout: () {
-                debugPrint("SignalR: Ngắt kết nối Hub quá hạn (timeout).");
-              },
-            );
+          const Duration(milliseconds: 1500),
+          onTimeout: () {
+            debugPrint("SignalR: Ngắt kết nối Hub quá hạn (timeout).");
+          },
+        );
         debugPrint("SignalR: Đã ngắt kết nối Hub.");
       }
     } catch (e) {
