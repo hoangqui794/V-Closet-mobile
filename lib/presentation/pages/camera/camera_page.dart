@@ -77,8 +77,9 @@ class _CameraPageState extends State<CameraPage> {
   }
 
   Future<void> _toggleFlash() async {
-    if (_cameraController == null || !_cameraController!.value.isInitialized)
+    if (_cameraController == null || !_cameraController!.value.isInitialized) {
       return;
+    }
 
     FlashMode nextMode;
     if (_flashMode == FlashMode.off) {
@@ -665,8 +666,9 @@ class _CameraPageState extends State<CameraPage> {
         image = await _picker.pickImage(source: ImageSource.gallery);
       } else {
         if (_cameraController == null ||
-            !_cameraController!.value.isInitialized)
+            !_cameraController!.value.isInitialized) {
           return;
+        }
         image = await _cameraController!.takePicture();
       }
 

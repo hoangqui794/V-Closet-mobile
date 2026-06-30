@@ -21,11 +21,15 @@ class WardrobeApiService {
     for (int attempt = 1; attempt <= retries; attempt++) {
       try {
         final queryParams = <String, dynamic>{};
-        if (category != null && category.isNotEmpty)
+        if (category != null && category.isNotEmpty) {
           queryParams['category'] = category;
-        if (color != null && color.isNotEmpty) queryParams['color'] = color;
-        if (closetId != null && closetId.isNotEmpty)
+        }
+        if (color != null && color.isNotEmpty) {
+          queryParams['color'] = color;
+        }
+        if (closetId != null && closetId.isNotEmpty) {
           queryParams['closetId'] = closetId;
+        }
 
         final response = await _apiService.get(
           '/api/Wardrobe',

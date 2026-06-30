@@ -335,8 +335,9 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
       }
 
       final activeSize = canvasSize ?? _canvasRepaintKey.currentContext?.size;
-      if (activeSize == null)
+      if (activeSize == null) {
         throw Exception('Không thể xác định kích thước canvas');
+      }
 
       // Build items list for API
       final apiItems = _canvasItems.map((c) {

@@ -89,8 +89,9 @@ class _ColorHarmonyCheckerPageState extends State<ColorHarmonyCheckerPage>
   }
 
   Future<void> _takePhoto() async {
-    if (_cameraController == null || !_cameraController!.value.isInitialized)
+    if (_cameraController == null || !_cameraController!.value.isInitialized) {
       return;
+    }
     try {
       final file = await _cameraController!.takePicture();
       setState(() {
