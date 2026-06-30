@@ -32,9 +32,12 @@ class ClothingItem {
       // Ưu tiên dùng ảnh đã tách nền, nếu chưa có thì dùng ảnh gốc
       imageUrl: json['removedBgUrl'] ?? json['originalImageUrl'] ?? '',
       category: json['category']?.toString() ?? 'Uncategorized',
-      colorTags: (json['colorTags'] as List?)?.map((e) => e.toString()).toList() ?? [],
+      colorTags:
+          (json['colorTags'] as List?)?.map((e) => e.toString()).toList() ?? [],
       brand: json['brand'],
-      price: json['price'] != null ? double.tryParse(json['price'].toString()) : null,
+      price: json['price'] != null
+          ? double.tryParse(json['price'].toString())
+          : null,
       closetId: json['closetId']?.toString(),
     );
   }

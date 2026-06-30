@@ -15,9 +15,9 @@ class GeminiApiService {
     required String userDisplayName,
     required String gender,
     // ── Style DNA Profile ──
-    String? skinTone,        // e.g. 'da ngăm (olive/tan skin)'
-    String? bodyType,        // e.g. 'vóc người nhỏ nhắn/petite'
-    String? stylePref,       // e.g. 'casual'
+    String? skinTone, // e.g. 'da ngăm (olive/tan skin)'
+    String? bodyType, // e.g. 'vóc người nhỏ nhắn/petite'
+    String? stylePref, // e.g. 'casual'
     String? suggestedColors, // e.g. 'màu trắng, đỏ đất, cam ấm'
     // ── Tủ đồ thực tế ──
     List<String>? wardrobeItemNames, // Tên các món đồ trong tủ
@@ -58,7 +58,8 @@ YÊU CẦU: Nếu có thể, hãy gợi ý cụ thể TÊN MÓN ĐỒ từ danh 
 '''
         : '';
 
-    final prompt = '''
+    final prompt =
+        '''
 Bạn là một chuyên gia tư vấn thời trang (AI Stylist) của ứng dụng tủ đồ thông minh V-Closet.
 Hãy viết một câu tư vấn, khuyên dùng phối đồ thời trang hôm nay cho khách hàng tên là "$userDisplayName".
 Khách hàng này có giới tính là: $gender. Bạn phải đưa ra các gợi ý trang phục phù hợp với giới tính này (Ví dụ: đối với Nữ, gợi ý đầm, chân váy, croptop, quần shorts nữ; đối với Nam, gợi ý quần dài tây/kaki, quần short nam, áo polo, sơ mi nam).
@@ -85,10 +86,14 @@ Yêu cầu câu trả lời:
     ];
 
     for (final apiKey in apiKeys) {
-      final keyDisplay = apiKey.length > 8 ? "${apiKey.substring(0, 8)}..." : apiKey;
+      final keyDisplay = apiKey.length > 8
+          ? "${apiKey.substring(0, 8)}..."
+          : apiKey;
       for (final model in modelsToTry) {
         try {
-          debugPrint('[GeminiApiService] Đang gọi Gemini API (personalized) với key: $keyDisplay và model: $model...');
+          debugPrint(
+            '[GeminiApiService] Đang gọi Gemini API (personalized) với key: $keyDisplay và model: $model...',
+          );
           final response = await _dio.post(
             'https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent?key=$apiKey',
             options: Options(
@@ -100,14 +105,16 @@ Yêu cầu câu trả lời:
               'contents': [
                 {
                   'parts': [
-                    {'text': prompt}
-                  ]
-                }
-              ]
+                    {'text': prompt},
+                  ],
+                },
+              ],
             },
           );
 
-          debugPrint('[GeminiApiService] Phản hồi nhận được từ $model, code: ${response.statusCode}');
+          debugPrint(
+            '[GeminiApiService] Phản hồi nhận được từ $model, code: ${response.statusCode}',
+          );
 
           if (response.statusCode == 200 && response.data != null) {
             final candidates = response.data['candidates'] as List<dynamic>;
@@ -118,24 +125,34 @@ Yêu cầu câu trả lời:
                 if (parts.isNotEmpty) {
                   final text = parts[0]['text'] as String?;
                   if (text != null && text.trim().isNotEmpty) {
-                    debugPrint('[GeminiApiService] Lời khuyên cá nhân hóa từ $model: ${text.trim()}');
+                    debugPrint(
+                      '[GeminiApiService] Lời khuyên cá nhân hóa từ $model: ${text.trim()}',
+                    );
                     return text.trim();
                   }
                 }
               }
             }
           }
-          debugPrint('[GeminiApiService] Phản hồi API của model $model không chứa dữ liệu mong muốn.');
+          debugPrint(
+            '[GeminiApiService] Phản hồi API của model $model không chứa dữ liệu mong muốn.',
+          );
         } catch (e) {
-          debugPrint('[GeminiApiService] Lỗi khi gọi Gemini API với key $keyDisplay và model $model: $e');
+          debugPrint(
+            '[GeminiApiService] Lỗi khi gọi Gemini API với key $keyDisplay và model $model: $e',
+          );
           if (e is DioException) {
-            debugPrint('[GeminiApiService] Chi tiết lỗi mạng: ${e.response?.statusCode} - ${e.response?.data}');
+            debugPrint(
+              '[GeminiApiService] Chi tiết lỗi mạng: ${e.response?.statusCode} - ${e.response?.data}',
+            );
           }
         }
       }
     }
 
-    debugPrint('[GeminiApiService] Tất cả các model đều thất bại khi gọi generateAdvice.');
+    debugPrint(
+      '[GeminiApiService] Tất cả các model đều thất bại khi gọi generateAdvice.',
+    );
     return null;
   }
 
@@ -173,7 +190,9 @@ Yêu cầu câu trả lời:
   Future<Map<String, String>?> analyzeClothingImage(File imageFile) async {
     final apiKeys = _getApiKeys();
     if (apiKeys.isEmpty) {
-      debugPrint('[GeminiApiService] Chưa cấu hình bất kỳ Gemini API Key nào cho Vision API.');
+      debugPrint(
+        '[GeminiApiService] Chưa cấu hình bất kỳ Gemini API Key nào cho Vision API.',
+      );
       return null;
     }
 
@@ -201,10 +220,14 @@ Lưu ý: Chỉ trả về duy nhất chuỗi JSON sạch, không có ký tự ma
       ];
 
       for (final apiKey in apiKeys) {
-        final keyDisplay = apiKey.length > 8 ? "${apiKey.substring(0, 8)}..." : apiKey;
+        final keyDisplay = apiKey.length > 8
+            ? "${apiKey.substring(0, 8)}..."
+            : apiKey;
         for (final model in modelsToTry) {
           try {
-            debugPrint('[GeminiApiService] Đang phân tích ảnh quần áo qua key: $keyDisplay và model: $model...');
+            debugPrint(
+              '[GeminiApiService] Đang phân tích ảnh quần áo qua key: $keyDisplay và model: $model...',
+            );
             final response = await _dio.post(
               'https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent?key=$apiKey',
               options: Options(
@@ -221,11 +244,11 @@ Lưu ý: Chỉ trả về duy nhất chuỗi JSON sạch, không có ký tự ma
                         'inlineData': {
                           'mimeType': mimeType,
                           'data': base64Image,
-                        }
-                      }
-                    ]
-                  }
-                ]
+                        },
+                      },
+                    ],
+                  },
+                ],
               },
             );
 
@@ -240,11 +263,15 @@ Lưu ý: Chỉ trả về duy nhất chuỗi JSON sạch, không có ký tự ma
                     if (text != null && text.trim().isNotEmpty) {
                       String cleanJson = text.trim();
                       if (cleanJson.startsWith('```')) {
-                        cleanJson = cleanJson.replaceFirst(RegExp(r'^```(json)?'), '');
+                        cleanJson = cleanJson.replaceFirst(
+                          RegExp(r'^```(json)?'),
+                          '',
+                        );
                         cleanJson = cleanJson.replaceFirst(RegExp(r'```$'), '');
                         cleanJson = cleanJson.trim();
                       }
-                      final decoded = jsonDecode(cleanJson) as Map<String, dynamic>;
+                      final decoded =
+                          jsonDecode(cleanJson) as Map<String, dynamic>;
                       return {
                         'name': decoded['name']?.toString() ?? 'Món đồ mới',
                         'category': decoded['category']?.toString() ?? 'Other',
@@ -256,7 +283,9 @@ Lưu ý: Chỉ trả về duy nhất chuỗi JSON sạch, không có ký tự ma
               }
             }
           } catch (e) {
-            debugPrint('[GeminiApiService] Lỗi phân tích ảnh với key $keyDisplay và model $model: $e');
+            debugPrint(
+              '[GeminiApiService] Lỗi phân tích ảnh với key $keyDisplay và model $model: $e',
+            );
           }
         }
       }
@@ -269,7 +298,8 @@ Lưu ý: Chỉ trả về duy nhất chuỗi JSON sạch, không có ký tự ma
 
   /// Trò chuyện và tư vấn phong cách thời trang cá nhân hóa với Gemini
   Future<String?> chatStyle({
-    required List<Map<String, String>> messages, // Danh sách [{role: 'user'|'model', text: '...'}]
+    required List<Map<String, String>>
+    messages, // Danh sách [{role: 'user'|'model', text: '...'}]
     required String userDisplayName,
     required String gender,
     String? skinTone,
@@ -283,13 +313,16 @@ Lưu ý: Chỉ trả về duy nhất chuỗi JSON sạch, không có ký tự ma
   }) async {
     final apiKeys = _getApiKeys();
     if (apiKeys.isEmpty) {
-      debugPrint('[GeminiApiService] Chưa cấu hình bất kỳ Gemini API Key nào cho chatStyle.');
+      debugPrint(
+        '[GeminiApiService] Chưa cấu hình bất kỳ Gemini API Key nào cho chatStyle.',
+      );
       return null;
     }
 
     final stylePrefLabel = _stylePrefLabel(stylePref);
 
-    final systemInstruction = '''
+    final systemInstruction =
+        '''
 Bạn là một Chuyên Gia Tư Vấn Thời Trang & Phong Cách (AI Stylist) thông minh, thân thiện của ứng dụng V-Closet.
 Nhiệm vụ của bạn là hỗ trợ và tư vấn trang phục, màu sắc, phong cách cho khách hàng dựa trên thông tin cá nhân của họ.
 
@@ -326,8 +359,8 @@ Quy tắc ứng xử và phản hồi:
       return {
         'role': msg['role'] == 'user' ? 'user' : 'model',
         'parts': [
-          {'text': msg['text']}
-        ]
+          {'text': msg['text']},
+        ],
       };
     }).toList();
 
@@ -339,10 +372,14 @@ Quy tắc ứng xử và phản hồi:
     ];
 
     for (final apiKey in apiKeys) {
-      final keyDisplay = apiKey.length > 8 ? "${apiKey.substring(0, 8)}..." : apiKey;
+      final keyDisplay = apiKey.length > 8
+          ? "${apiKey.substring(0, 8)}..."
+          : apiKey;
       for (final model in modelsToTry) {
         try {
-          debugPrint('[GeminiApiService] Đang gọi Gemini Chat API với key: $keyDisplay và model: $model...');
+          debugPrint(
+            '[GeminiApiService] Đang gọi Gemini Chat API với key: $keyDisplay và model: $model...',
+          );
           final response = await _dio.post(
             'https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent?key=$apiKey',
             options: Options(
@@ -354,13 +391,10 @@ Quy tắc ứng xử và phản hồi:
               'contents': contents,
               'systemInstruction': {
                 'parts': [
-                  {'text': systemInstruction}
-                ]
+                  {'text': systemInstruction},
+                ],
               },
-              'generationConfig': {
-                'temperature': 0.7,
-                'maxOutputTokens': 800,
-              }
+              'generationConfig': {'temperature': 0.7, 'maxOutputTokens': 800},
             },
           );
 
@@ -373,7 +407,9 @@ Quy tắc ứng xử và phản hồi:
                 if (parts.isNotEmpty) {
                   final text = parts[0]['text'] as String?;
                   if (text != null && text.trim().isNotEmpty) {
-                    debugPrint('[GeminiApiService] Phản hồi từ model $model thành công với key $keyDisplay.');
+                    debugPrint(
+                      '[GeminiApiService] Phản hồi từ model $model thành công với key $keyDisplay.',
+                    );
                     return text.trim();
                   }
                 }
@@ -381,7 +417,9 @@ Quy tắc ứng xử và phản hồi:
             }
           }
         } catch (e) {
-          debugPrint('[GeminiApiService] Lỗi gọi Gemini Chat API với key $keyDisplay và model $model: $e');
+          debugPrint(
+            '[GeminiApiService] Lỗi gọi Gemini Chat API với key $keyDisplay và model $model: $e',
+          );
         }
       }
     }
@@ -395,7 +433,8 @@ Quy tắc ứng xử và phản hồi:
     final apiKeys = _getApiKeys();
     if (apiKeys.isEmpty) return null;
 
-    final prompt = '''
+    final prompt =
+        '''
 Hãy phân tích danh sách các món đồ quần áo sau đây và đề xuất 1 tên gọi chung cực kỳ ngắn gọn (chỉ từ 3 đến 5 từ), trẻ trung và mang tính thời trang bằng Tiếng Việt cho bộ phối đồ (outfit) này.
 Danh sách các món đồ:
 ${clothingNames.map((name) => '- $name').join('\n')}
@@ -418,10 +457,14 @@ Lưu ý: Chỉ trả về duy nhất chuỗi văn bản chứa tên bộ phối 
     ];
 
     for (final apiKey in apiKeys) {
-      final keyDisplay = apiKey.length > 8 ? "${apiKey.substring(0, 8)}..." : apiKey;
+      final keyDisplay = apiKey.length > 8
+          ? "${apiKey.substring(0, 8)}..."
+          : apiKey;
       for (final model in modelsToTry) {
         try {
-          debugPrint('[GeminiApiService] Đang sinh tên outfit với model $model...');
+          debugPrint(
+            '[GeminiApiService] Đang sinh tên outfit với model $model...',
+          );
           final response = await _dio.post(
             'https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent?key=$apiKey',
             options: Options(
@@ -433,10 +476,10 @@ Lưu ý: Chỉ trả về duy nhất chuỗi văn bản chứa tên bộ phối 
               'contents': [
                 {
                   'parts': [
-                    {'text': prompt}
-                  ]
-                }
-              ]
+                    {'text': prompt},
+                  ],
+                },
+              ],
             },
           );
 
@@ -449,7 +492,9 @@ Lưu ý: Chỉ trả về duy nhất chuỗi văn bản chứa tên bộ phối 
                 if (parts.isNotEmpty) {
                   final text = parts[0]['text'] as String?;
                   if (text != null && text.trim().isNotEmpty) {
-                    debugPrint('[GeminiApiService] Tên outfit được sinh ra: ${text.trim()}');
+                    debugPrint(
+                      '[GeminiApiService] Tên outfit được sinh ra: ${text.trim()}',
+                    );
                     return text.trim();
                   }
                 }
@@ -457,7 +502,9 @@ Lưu ý: Chỉ trả về duy nhất chuỗi văn bản chứa tên bộ phối 
             }
           }
         } catch (e) {
-          debugPrint('[GeminiApiService] Lỗi sinh tên outfit với key $keyDisplay và model $model: $e');
+          debugPrint(
+            '[GeminiApiService] Lỗi sinh tên outfit với key $keyDisplay và model $model: $e',
+          );
         }
       }
     }

@@ -61,7 +61,7 @@ class AdService {
   /// Gọi trong main() trước runApp()
   static Future<void> initialize() async {
     await MobileAds.instance.initialize();
-    
+
     // Đăng ký các thiết bị thử nghiệm để load quảng cáo test của Google
     // giúp bypass lỗi "Account not approved yet" (Code 3) khi tài khoản AdMob đang chờ duyệt
     final configuration = RequestConfiguration(
@@ -73,8 +73,10 @@ class AdService {
       ],
     );
     await MobileAds.instance.updateRequestConfiguration(configuration);
-    
-    debugPrint('AdMob: Initialized with test devices: ${configuration.testDeviceIds}');
+
+    debugPrint(
+      'AdMob: Initialized with test devices: ${configuration.testDeviceIds}',
+    );
   }
 
   // ── Load Rewarded Ad ─────────────────────────────────────────────
@@ -136,7 +138,9 @@ class AdService {
 
     await _rewardedAd!.show(
       onUserEarnedReward: (_, reward) {
-        debugPrint('AdMob: User earned reward — ${reward.amount} ${reward.type}');
+        debugPrint(
+          'AdMob: User earned reward — ${reward.amount} ${reward.type}',
+        );
         onRewarded(reward);
       },
     );
@@ -157,21 +161,22 @@ class AdService {
           _isInterstitialLoading = false;
           debugPrint('AdMob: Interstitial ad loaded');
 
-          _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
-            onAdDismissedFullScreenContent: (ad) {
-              ad.dispose();
-              _interstitialAd = null;
-              _isInterstitialAdLoaded = false;
-              loadInterstitialAd(); // Load again
-            },
-            onAdFailedToShowFullScreenContent: (ad, error) {
-              ad.dispose();
-              _interstitialAd = null;
-              _isInterstitialAdLoaded = false;
-              debugPrint('AdMob: Failed to show interstitial: $error');
-              loadInterstitialAd();
-            },
-          );
+          _interstitialAd!.fullScreenContentCallback =
+              FullScreenContentCallback(
+                onAdDismissedFullScreenContent: (ad) {
+                  ad.dispose();
+                  _interstitialAd = null;
+                  _isInterstitialAdLoaded = false;
+                  loadInterstitialAd(); // Load again
+                },
+                onAdFailedToShowFullScreenContent: (ad, error) {
+                  ad.dispose();
+                  _interstitialAd = null;
+                  _isInterstitialAdLoaded = false;
+                  debugPrint('AdMob: Failed to show interstitial: $error');
+                  loadInterstitialAd();
+                },
+              );
         },
         onAdFailedToLoad: (error) {
           _isInterstitialLoading = false;
@@ -206,7 +211,9 @@ class AdService {
       final difference = DateTime.now().difference(_lastInterstitialTime!);
       if (difference < _interstitialCooldown) {
         final remaining = _interstitialCooldown - difference;
-        debugPrint('AdMob: Interstitial is cooling down. Skipping ad. Remaining: ${remaining.inSeconds}s');
+        debugPrint(
+          'AdMob: Interstitial is cooling down. Skipping ad. Remaining: ${remaining.inSeconds}s',
+        );
         onDismissed();
         return;
       }
@@ -224,7 +231,8 @@ class AdService {
         ad.dispose();
         _interstitialAd = null;
         _isInterstitialAdLoaded = false;
-        _lastInterstitialTime = DateTime.now(); // Cập nhật thời điểm hiển thị thành công
+        _lastInterstitialTime =
+            DateTime.now(); // Cập nhật thời điểm hiển thị thành công
         onDismissed();
         loadInterstitialAd(); // Load again
       },

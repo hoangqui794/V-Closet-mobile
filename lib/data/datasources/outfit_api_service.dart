@@ -43,11 +43,14 @@ class OutfitApiService {
 
       final response = await _apiService.post('/api/outfits', data: formData);
       final data = response.data;
-      if ((response.statusCode == 200 || response.statusCode == 201) && data is Map) {
+      if ((response.statusCode == 200 || response.statusCode == 201) &&
+          data is Map) {
         return Map<String, dynamic>.from(data);
       }
 
-      throw Exception('Create outfit failed with status ${response.statusCode}.');
+      throw Exception(
+        'Create outfit failed with status ${response.statusCode}.',
+      );
     } on DioException catch (e) {
       final errorData = e.response?.data;
       if (errorData is Map && errorData['message'] != null) {
@@ -67,10 +70,7 @@ class OutfitApiService {
 
   Future<void> updateOutfitTitle(String id, String title) async {
     try {
-      await _apiService.put(
-        '/api/outfits/$id/title',
-        data: {'title': title},
-      );
+      await _apiService.put('/api/outfits/$id/title', data: {'title': title});
     } on DioException {
       rethrow;
     }

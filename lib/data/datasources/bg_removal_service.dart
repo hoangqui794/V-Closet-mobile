@@ -17,7 +17,7 @@ class BgRemovalService {
       File fileToUse = await ImageCompressionHelper.compressIfNeeded(imageFile);
 
       String fileName = fileToUse.path.split(Platform.pathSeparator).last;
-      
+
       FormData formData = FormData.fromMap({
         "file": await MultipartFile.fromFile(
           fileToUse.path,
@@ -32,7 +32,9 @@ class BgRemovalService {
         data: formData,
         options: Options(
           responseType: ResponseType.bytes, // Get raw bytes for the image
-          receiveTimeout: const Duration(seconds: 60), // Processing may take time
+          receiveTimeout: const Duration(
+            seconds: 60,
+          ), // Processing may take time
         ),
       );
 
@@ -48,7 +50,9 @@ class BgRemovalService {
       if (response.statusCode == 200) {
         return response.data as Uint8List;
       } else {
-        print('Failed to remove background. Status Code: ${response.statusCode}');
+        print(
+          'Failed to remove background. Status Code: ${response.statusCode}',
+        );
         return null;
       }
     } catch (e) {

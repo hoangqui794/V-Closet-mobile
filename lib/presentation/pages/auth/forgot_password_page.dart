@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -16,16 +17,40 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   final _emailController = TextEditingController();
   final _authService = GetIt.I<AuthApiService>();
   bool _isLoading = false;
+  Timer? _timer;
+  int _countdown = 0;
 
   @override
   void dispose() {
     _emailController.dispose();
+    _timer?.cancel();
     super.dispose();
   }
 
+  void _startTimer() {
+    setState(() {
+      _countdown = 60;
+    });
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_countdown == 0) {
+        setState(() {
+          _timer?.cancel();
+        });
+      } else {
+        setState(() {
+          _countdown--;
+        });
+      }
+    });
+  }
+
   Future<void> _submitEmail() async {
+    if (_countdown > 0) return;
+
     final email = _emailController.text.trim();
-    if (email.isEmpty || !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
+    if (email.isEmpty ||
+        !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Vui lòng nhập định dạng Email hợp lệ.')),
       );
@@ -36,6 +61,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
     try {
       final msg = await _authService.forgotPassword(email);
+      _startTimer(); // Bắt đầu đếm ngược 60s sau khi gửi thành công
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(msg.replaceAll('Exception: ', ''))),
@@ -65,7 +91,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
-    final bool isSmallScreen = screenSize.height < 740 || screenSize.width < 360;
+    final bool isSmallScreen =
+        screenSize.height < 740 || screenSize.width < 360;
 
     final double logoSize = isSmallScreen ? 70.0 : 90.0;
     final double spacingTiny = isSmallScreen ? 4.0 : 8.0;
@@ -170,28 +197,43 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                             borderRadius: BorderRadius.circular(16),
                             borderSide: BorderSide.none,
                           ),
-                          contentPadding: isSmallScreen 
-                              ? const EdgeInsets.symmetric(horizontal: 16, vertical: 12)
-                              : const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                          contentPadding: isSmallScreen
+                              ? const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
+                                )
+                              : const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 16,
+                                ),
                         ),
                       ),
                       SizedBox(height: spacingLarge),
                       if (_isLoading)
                         const Center(
-                          child: CircularProgressIndicator(color: AppColors.primary),
+                          child: CircularProgressIndicator(
+                            color: AppColors.primary,
+                          ),
                         )
                       else
                         ElevatedButton(
-                          onPressed: _submitEmail,
+                          onPressed: _countdown > 0 ? null : _submitEmail,
                           style: ElevatedButton.styleFrom(
-                            padding: isSmallScreen 
+                            padding: isSmallScreen
                                 ? const EdgeInsets.symmetric(vertical: 12)
                                 : const EdgeInsets.symmetric(vertical: 16),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text('Gửi mã OTP', style: TextStyle(fontSize: isSmallScreen ? 15.0 : 16.0)),
+                              Text(
+                                _countdown > 0
+                                    ? 'Gửi lại mã (${_countdown}s)'
+                                    : 'Gửi mã OTP',
+                                style: TextStyle(
+                                  fontSize: isSmallScreen ? 15.0 : 16.0,
+                                ),
+                              ),
                               const SizedBox(width: 8),
                               const Icon(Icons.arrow_forward_rounded, size: 18),
                             ],

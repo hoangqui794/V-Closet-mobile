@@ -22,7 +22,10 @@ class UserApiService {
         final stylePref = data['stylePref'] ?? data['StylePref'];
         final colorPref = data['colorPref'] ?? data['ColorPref'];
 
-        if (skinTone != null || bodyType != null || stylePref != null || colorPref != null) {
+        if (skinTone != null ||
+            bodyType != null ||
+            stylePref != null ||
+            colorPref != null) {
           final localStorage = GetIt.I<AuthLocalStorage>();
           await localStorage.saveStyleDna(
             skinTone: skinTone?.toString() ?? 'trung_binh',
@@ -121,7 +124,8 @@ class UserApiService {
       final response = await _apiService.delete('/api/users/me');
       if (response.statusCode == 200) {
         final data = response.data as Map<String, dynamic>;
-        return data['message'] as String? ?? 'Vô hiệu hóa tài khoản thành công.';
+        return data['message'] as String? ??
+            'Vô hiệu hóa tài khoản thành công.';
       }
       throw Exception('Vô hiệu hóa tài khoản thất bại.');
     } on DioException catch (e) {

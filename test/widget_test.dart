@@ -14,19 +14,25 @@ void main() {
     SharedPreferences.setMockInitialValues({});
     final prefs = await SharedPreferences.getInstance();
     dotenv.testLoad(fileInput: 'API_URL=http://localhost\nDEBUG_MODE=true');
-    
+
     final dio = Dio();
     final apiService = ApiService(dio);
     final localStorage = AuthLocalStorage(prefs);
     final authApiService = AuthApiService(apiService, localStorage);
-    
+
     GetIt.I.registerSingleton<AuthLocalStorage>(localStorage);
     GetIt.I.registerSingleton<AuthApiService>(authApiService);
   });
 
   testWidgets('App load smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const VClosetApp(hasSession: false, isOnboardingCompleted: false, isPasswordSet: true));
+    await tester.pumpWidget(
+      const VClosetApp(
+        hasSession: false,
+        isOnboardingCompleted: false,
+        isPasswordSet: true,
+      ),
+    );
     await tester.pumpAndSettle();
 
     // Verify that our app shows the welcome text

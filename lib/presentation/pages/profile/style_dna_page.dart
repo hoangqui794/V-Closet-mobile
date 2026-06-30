@@ -47,7 +47,9 @@ class _StyleDnaPageState extends State<StyleDnaPage> {
   @override
   Widget build(BuildContext context) {
     final hasQuiz = _localStorage.getHasCompletedStyleQuiz();
-    final gender = _profileData?['gender']?.toString() ?? _profileData?['Gender']?.toString();
+    final gender =
+        _profileData?['gender']?.toString() ??
+        _profileData?['Gender']?.toString();
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -71,7 +73,9 @@ class _StyleDnaPageState extends State<StyleDnaPage> {
         centerTitle: true,
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
+            )
           : RefreshIndicator(
               color: AppColors.primary,
               onRefresh: _fetchProfileData,
@@ -100,11 +104,17 @@ class _StyleDnaPageState extends State<StyleDnaPage> {
                             icon: const Icon(Icons.refresh_rounded, size: 20),
                             label: const Text(
                               'Làm lại trắc nghiệm DNA',
-                              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+                              style: TextStyle(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 14,
+                              ),
                             ),
                             style: OutlinedButton.styleFrom(
                               foregroundColor: AppColors.primary,
-                              side: const BorderSide(color: AppColors.primary, width: 1.5),
+                              side: const BorderSide(
+                                color: AppColors.primary,
+                                width: 1.5,
+                              ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
                               ),
@@ -127,7 +137,10 @@ class _StyleDnaPageState extends State<StyleDnaPage> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(26),
-        border: Border.all(color: AppColors.primary.withOpacity(0.08), width: 1.5),
+        border: Border.all(
+          color: AppColors.primary.withOpacity(0.08),
+          width: 1.5,
+        ),
         boxShadow: [
           BoxShadow(
             color: AppColors.primary.withOpacity(0.04),
@@ -139,7 +152,11 @@ class _StyleDnaPageState extends State<StyleDnaPage> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.auto_awesome_rounded, color: AppColors.primaryLight, size: 64),
+          const Icon(
+            Icons.auto_awesome_rounded,
+            color: AppColors.primaryLight,
+            size: 64,
+          ),
           const SizedBox(height: 18),
           const Text(
             'Khám phá Phong cách cá nhân của bạn',
@@ -165,10 +182,18 @@ class _StyleDnaPageState extends State<StyleDnaPage> {
             height: 52,
             child: ElevatedButton.icon(
               onPressed: _retakeQuiz,
-              icon: const Icon(Icons.rocket_launch_rounded, color: Colors.white, size: 20),
+              icon: const Icon(
+                Icons.rocket_launch_rounded,
+                color: Colors.white,
+                size: 20,
+              ),
               label: const Text(
                 'Bắt đầu Trắc nghiệm',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
@@ -210,10 +235,7 @@ class _StyleDnaPageState extends State<StyleDnaPage> {
       margin: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [
-            AppColors.primary,
-            AppColors.primaryLight,
-          ],
+          colors: [AppColors.primary, AppColors.primaryLight],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -233,7 +255,9 @@ class _StyleDnaPageState extends State<StyleDnaPage> {
             if (_profileData == null) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Đang tải dữ liệu hồ sơ của bạn... Hãy thử lại sau giây lát.'),
+                  content: Text(
+                    'Đang tải dữ liệu hồ sơ của bạn... Hãy thử lại sau giây lát.',
+                  ),
                   behavior: SnackBarBehavior.floating,
                 ),
               );
@@ -242,7 +266,8 @@ class _StyleDnaPageState extends State<StyleDnaPage> {
             final result = await Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => StyleDnaChatPage(profileData: _profileData!),
+                builder: (context) =>
+                    StyleDnaChatPage(profileData: _profileData!),
               ),
             );
             if (result == 'go_to_studio' && mounted) {
@@ -259,15 +284,25 @@ class _StyleDnaPageState extends State<StyleDnaPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 5,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.greenAccent.withOpacity(0.15),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.greenAccent.withOpacity(0.3), width: 1),
+                        border: Border.all(
+                          color: Colors.greenAccent.withOpacity(0.3),
+                          width: 1,
+                        ),
                       ),
                       child: Row(
                         children: const [
-                          Icon(Icons.circle, color: Colors.greenAccent, size: 8),
+                          Icon(
+                            Icons.circle,
+                            color: Colors.greenAccent,
+                            size: 8,
+                          ),
                           SizedBox(width: 6),
                           Text(
                             'ONLINE',
@@ -312,7 +347,10 @@ class _StyleDnaPageState extends State<StyleDnaPage> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 10,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(14),

@@ -41,7 +41,9 @@ class _RegisterPageState extends State<RegisterPage> {
     final confirm = _confirmController.text.trim();
 
     if (!_agreeToTerms) {
-      _showSnackbar('Bạn phải đồng ý với Điều khoản dịch vụ và Chính sách bảo mật.');
+      _showSnackbar(
+        'Bạn phải đồng ý với Điều khoản dịch vụ và Chính sách bảo mật.',
+      );
       return;
     }
 
@@ -49,7 +51,8 @@ class _RegisterPageState extends State<RegisterPage> {
       _showSnackbar('Vui lòng nhập Họ và tên.');
       return;
     }
-    if (email.isEmpty || !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
+    if (email.isEmpty ||
+        !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
       _showSnackbar('Vui lòng nhập định dạng Email hợp lệ.');
       return;
     }
@@ -78,14 +81,15 @@ class _RegisterPageState extends State<RegisterPage> {
         // Đi tới trang xác thực OTP và truyền email đi cùng
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (context) => VerifyOtpPage(email: email),
-          ),
+          MaterialPageRoute(builder: (context) => VerifyOtpPage(email: email)),
         );
       }
     } catch (e) {
       if (mounted) {
-        _showSnackbar(e.toString().replaceAll('Exception: ', ''), isError: true);
+        _showSnackbar(
+          e.toString().replaceAll('Exception: ', ''),
+          isError: true,
+        );
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -115,7 +119,8 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
-    final bool isSmallScreen = screenSize.height < 740 || screenSize.width < 360;
+    final bool isSmallScreen =
+        screenSize.height < 740 || screenSize.width < 360;
 
     final double logoSize = isSmallScreen ? 70.0 : 90.0;
     final double spacingTiny = isSmallScreen ? 4.0 : 8.0;
@@ -151,7 +156,11 @@ class _RegisterPageState extends State<RegisterPage> {
                     width: logoSize,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
-                      return Icon(Icons.checkroom_rounded, size: logoSize, color: AppColors.primary);
+                      return Icon(
+                        Icons.checkroom_rounded,
+                        size: logoSize,
+                        color: AppColors.primary,
+                      );
                     },
                   ),
                 ),
@@ -202,9 +211,15 @@ class _RegisterPageState extends State<RegisterPage> {
                             borderRadius: BorderRadius.circular(16),
                             borderSide: BorderSide.none,
                           ),
-                          contentPadding: isSmallScreen 
-                              ? const EdgeInsets.symmetric(horizontal: 16, vertical: 12)
-                              : const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                          contentPadding: isSmallScreen
+                              ? const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
+                                )
+                              : const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 16,
+                                ),
                         ),
                       ),
                       SizedBox(height: spacingTiny),
@@ -220,9 +235,15 @@ class _RegisterPageState extends State<RegisterPage> {
                             borderRadius: BorderRadius.circular(16),
                             borderSide: BorderSide.none,
                           ),
-                          contentPadding: isSmallScreen 
-                              ? const EdgeInsets.symmetric(horizontal: 16, vertical: 12)
-                              : const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                          contentPadding: isSmallScreen
+                              ? const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
+                                )
+                              : const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 16,
+                                ),
                         ),
                       ),
                       SizedBox(height: spacingTiny),
@@ -248,9 +269,15 @@ class _RegisterPageState extends State<RegisterPage> {
                             borderRadius: BorderRadius.circular(16),
                             borderSide: BorderSide.none,
                           ),
-                          contentPadding: isSmallScreen 
-                              ? const EdgeInsets.symmetric(horizontal: 16, vertical: 12)
-                              : const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                          contentPadding: isSmallScreen
+                              ? const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
+                                )
+                              : const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 16,
+                                ),
                         ),
                       ),
                       SizedBox(height: spacingTiny),
@@ -276,9 +303,15 @@ class _RegisterPageState extends State<RegisterPage> {
                             borderRadius: BorderRadius.circular(16),
                             borderSide: BorderSide.none,
                           ),
-                          contentPadding: isSmallScreen 
-                              ? const EdgeInsets.symmetric(horizontal: 16, vertical: 12)
-                              : const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                          contentPadding: isSmallScreen
+                              ? const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
+                                )
+                              : const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 16,
+                                ),
                         ),
                       ),
                       SizedBox(height: spacingSmall),
@@ -300,10 +333,15 @@ class _RegisterPageState extends State<RegisterPage> {
                               children: [
                                 const Text(
                                   'Tôi đồng ý với ',
-                                  style: TextStyle(fontSize: 13.0, color: AppColors.textMuted),
+                                  style: TextStyle(
+                                    fontSize: 13.0,
+                                    color: AppColors.textMuted,
+                                  ),
                                 ),
                                 GestureDetector(
-                                  onTap: () => _launchUrl('https://api.vcloset.vn/terms.html'),
+                                  onTap: () => _launchUrl(
+                                    'https://api.vcloset.vn/terms.html',
+                                  ),
                                   child: const Text(
                                     'Điều khoản dịch vụ',
                                     style: TextStyle(
@@ -316,10 +354,15 @@ class _RegisterPageState extends State<RegisterPage> {
                                 ),
                                 const Text(
                                   ' và ',
-                                  style: TextStyle(fontSize: 13.0, color: AppColors.textMuted),
+                                  style: TextStyle(
+                                    fontSize: 13.0,
+                                    color: AppColors.textMuted,
+                                  ),
                                 ),
                                 GestureDetector(
-                                  onTap: () => _launchUrl('https://api.vcloset.vn/privacy.html'),
+                                  onTap: () => _launchUrl(
+                                    'https://api.vcloset.vn/privacy.html',
+                                  ),
                                   child: const Text(
                                     'Chính sách bảo mật',
                                     style: TextStyle(
@@ -338,17 +381,24 @@ class _RegisterPageState extends State<RegisterPage> {
                       SizedBox(height: spacingMedium),
                       if (_isLoading)
                         const Center(
-                          child: CircularProgressIndicator(color: AppColors.primary),
+                          child: CircularProgressIndicator(
+                            color: AppColors.primary,
+                          ),
                         )
                       else
                         ElevatedButton(
                           onPressed: _register,
                           style: ElevatedButton.styleFrom(
-                            padding: isSmallScreen 
+                            padding: isSmallScreen
                                 ? const EdgeInsets.symmetric(vertical: 12)
                                 : const EdgeInsets.symmetric(vertical: 16),
                           ),
-                          child: Text('Tạo tài khoản', style: TextStyle(fontSize: isSmallScreen ? 15.0 : 16.0)),
+                          child: Text(
+                            'Tạo tài khoản',
+                            style: TextStyle(
+                              fontSize: isSmallScreen ? 15.0 : 16.0,
+                            ),
+                          ),
                         ),
                     ],
                   ),

@@ -27,7 +27,7 @@ Future<void> init() async {
   sl.registerSingleton<SharedPreferences>(sharedPreferences);
 
   sl.registerLazySingleton(() => Dio());
-  
+
   //! Core
   sl.registerLazySingleton(() => AuthLocalStorage(sl()));
   sl.registerLazySingleton(() => ApiService(sl()));

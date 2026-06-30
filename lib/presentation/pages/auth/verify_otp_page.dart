@@ -20,7 +20,7 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
   final FocusNode _focusNode = FocusNode();
   final _authService = GetIt.I<AuthApiService>();
   bool _isLoading = false;
-  
+
   // Timer resend OTP
   Timer? _timer;
   int _countdown = 60;
@@ -76,18 +76,29 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
 
     try {
       final response = await _authService.verifyOtp(widget.email, code);
-      final role = (response['Role'] ?? response['role']) as String? ?? 'Customer';
+      final role =
+          (response['Role'] ?? response['role']) as String? ?? 'Customer';
       final isOnboarding =
-          (response['IsOnboardingCompleted'] ?? response['isOnboardingCompleted']) as bool? ?? false;
+          (response['IsOnboardingCompleted'] ??
+                  response['isOnboardingCompleted'])
+              as bool? ??
+          false;
       if (mounted) {
         // Hiển thị thông báo thành công
         showDialog(
           context: context,
           barrierDismissible: false,
           builder: (context) => AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            title: const Text('Xác thực thành công', style: TextStyle(fontWeight: FontWeight.bold)),
-            content: const Text('Chào mừng bạn đến với V-Closet! Tài khoản của bạn đã được kích hoạt.'),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            title: const Text(
+              'Xác thực thành công',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            content: const Text(
+              'Chào mừng bạn đến với V-Closet! Tài khoản của bạn đã được kích hoạt.',
+            ),
             actions: [
               TextButton(
                 onPressed: () {
@@ -119,7 +130,7 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
   }
 
   Future<void> _resendOtp() async {
-    if (!_canResend) return;
+    if (!_canResend || _isLoading) return;
 
     setState(() => _isLoading = true);
     try {
@@ -147,7 +158,8 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
-    final bool isSmallScreen = screenSize.height < 740 || screenSize.width < 360;
+    final bool isSmallScreen =
+        screenSize.height < 740 || screenSize.width < 360;
 
     final double logoSize = isSmallScreen ? 70.0 : 90.0;
     final double spacingTiny = isSmallScreen ? 4.0 : 8.0;
@@ -158,8 +170,12 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
     final double cardPadding = isSmallScreen ? 14.0 : 20.0;
 
     // Tính toán kích thước của từng ô nhập OTP để không bao giờ bị tràn chiều ngang
-    final double totalPadding = (isSmallScreen ? 16.0 : 24.0) * 2 + (isSmallScreen ? 16.0 : 24.0) * 2;
-    final double cellWidth = ((screenSize.width - totalPadding - 16) / 6).clamp(32.0, 48.0);
+    final double totalPadding =
+        (isSmallScreen ? 16.0 : 24.0) * 2 + (isSmallScreen ? 16.0 : 24.0) * 2;
+    final double cellWidth = ((screenSize.width - totalPadding - 16) / 6).clamp(
+      32.0,
+      48.0,
+    );
     final double cellHeight = isSmallScreen ? 44.0 : 52.0;
 
     return Scaffold(
@@ -207,17 +223,25 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
                       textAlign: TextAlign.center,
                       text: TextSpan(
                         style: TextStyle(
-                          fontSize: isSmallScreen ? 13.0 : 15.0, 
-                          color: AppColors.textMuted, 
-                          height: 1.4
+                          fontSize: isSmallScreen ? 13.0 : 15.0,
+                          color: AppColors.textMuted,
+                          height: 1.4,
                         ),
                         children: [
-                          const TextSpan(text: 'Chúng tôi đã gửi mã OTP gồm 6 chữ số đến email của bạn tại '),
+                          const TextSpan(
+                            text:
+                                'Chúng tôi đã gửi mã OTP gồm 6 chữ số đến email của bạn tại ',
+                          ),
                           TextSpan(
                             text: widget.email,
-                            style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primary,
+                            ),
                           ),
-                          const TextSpan(text: '. Vui lòng nhập mã để kích hoạt tài khoản.'),
+                          const TextSpan(
+                            text: '. Vui lòng nhập mã để kích hoạt tài khoản.',
+                          ),
                         ],
                       ),
                     ),
@@ -271,7 +295,8 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
                             ),
                             IgnorePointer(
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: List.generate(6, (index) {
                                   final text = _otpController.text;
                                   String char = "";
@@ -313,20 +338,27 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
                       SizedBox(height: isSmallScreen ? 20.0 : 30.0),
                       if (_isLoading)
                         const Center(
-                          child: CircularProgressIndicator(color: AppColors.primary),
+                          child: CircularProgressIndicator(
+                            color: AppColors.primary,
+                          ),
                         )
                       else
                         ElevatedButton(
                           onPressed: _verifyOtp,
                           style: ElevatedButton.styleFrom(
-                            padding: isSmallScreen 
+                            padding: isSmallScreen
                                 ? const EdgeInsets.symmetric(vertical: 12)
                                 : const EdgeInsets.symmetric(vertical: 16),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text('Xác thực tài khoản', style: TextStyle(fontSize: isSmallScreen ? 15.0 : 16.0)),
+                              Text(
+                                'Xác thực tài khoản',
+                                style: TextStyle(
+                                  fontSize: isSmallScreen ? 15.0 : 16.0,
+                                ),
+                              ),
                               const SizedBox(width: 8),
                               const Icon(Icons.verified_rounded, size: 18),
                             ],
@@ -342,21 +374,32 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
                 children: [
                   Text(
                     'Không nhận được mã? ',
-                    style: TextStyle(color: AppColors.textMuted, fontSize: isSmallScreen ? 13.0 : 15.0),
+                    style: TextStyle(
+                      color: AppColors.textMuted,
+                      fontSize: isSmallScreen ? 13.0 : 15.0,
+                    ),
                   ),
                   _canResend
-                      ? GestureDetector(
-                          onTap: _resendOtp,
-                          child: Text(
-                            'Gửi lại ngay',
-                            style: TextStyle(
-                              color: AppColors.primary,
-                              fontWeight: FontWeight.bold,
-                              decoration: TextDecoration.underline,
-                              fontSize: isSmallScreen ? 13.0 : 15.0,
-                            ),
-                          ),
-                        )
+                      ? (_isLoading
+                          ? Text(
+                              'Đang gửi...',
+                              style: TextStyle(
+                                color: AppColors.textMuted,
+                                fontSize: isSmallScreen ? 13.0 : 15.0,
+                              ),
+                            )
+                          : GestureDetector(
+                              onTap: _resendOtp,
+                              child: Text(
+                                'Gửi lại ngay',
+                                style: TextStyle(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.bold,
+                                  decoration: TextDecoration.underline,
+                                  fontSize: isSmallScreen ? 13.0 : 15.0,
+                                ),
+                              ),
+                            ))
                       : Text(
                           'Gửi lại sau (${_countdown}s)',
                           style: TextStyle(

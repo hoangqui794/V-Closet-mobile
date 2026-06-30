@@ -138,8 +138,10 @@ class StyleDnaCard extends StatelessWidget {
                             MaterialPageRoute(
                               builder: (_) => PersonalColorDetailPage(
                                 isFromScan: true,
-                                scannedSkinTone: checkResult['skinTone']?.toString(),
-                                scannedColorPref: checkResult['colorPref']?.toString(),
+                                scannedSkinTone: checkResult['skinTone']
+                                    ?.toString(),
+                                scannedColorPref: checkResult['colorPref']
+                                    ?.toString(),
                               ),
                             ),
                           );

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart';
 import 'package:in_app_update/in_app_update.dart';
 
 /// Service kiem tra va bat buoc cap nhat app qua Google Play Store.
@@ -24,7 +24,8 @@ class InAppUpdateService {
         // IMMEDIATE MODE – Bat buoc cap nhat, khong the bo qua
         // Play Store se tu tai ban moi va cai dat.
         // App se tu restart sau khi cai xong.
-        final AppUpdateResult result = await InAppUpdate.performImmediateUpdate();
+        final AppUpdateResult result =
+            await InAppUpdate.performImmediateUpdate();
 
         if (result != AppUpdateResult.success) {
           debugPrint('[InAppUpdate] Cap nhat khong hoan thanh: $result');

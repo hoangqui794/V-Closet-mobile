@@ -36,7 +36,7 @@ jobs:
         run: cp .env.example .env
 
       - name: Check Formatting
-        run: flutter format --set-exit-if-changed lib/ test/
+        run: dart format --set-exit-if-changed lib/ test/
         continue-on-error: true # Allow small formatting issues to not block development
 
       - name: Static Analysis

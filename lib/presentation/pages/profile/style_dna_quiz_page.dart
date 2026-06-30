@@ -8,6 +8,7 @@ import '../../../data/datasources/user_api_service.dart';
 class StyleDnaQuizPage extends StatefulWidget {
   /// True if shown during registration onboarding, false if manually triggered from profile settings.
   final bool isOnboarding;
+
   /// Callback when quiz completes (optional in onboarding).
   final VoidCallback? onCompleted;
 
@@ -319,16 +320,19 @@ class _StyleDnaQuizPageState extends State<StyleDnaQuizPage>
       duration: const Duration(milliseconds: 400),
       vsync: this,
     );
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(1.0, 0.0),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic));
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(1.0, 0.0), end: Offset.zero).animate(
+          CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
+        );
 
     _fadeController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    _fadeAnimation = CurvedAnimation(parent: _fadeController, curve: Curves.easeIn);
+    _fadeAnimation = CurvedAnimation(
+      parent: _fadeController,
+      curve: Curves.easeIn,
+    );
 
     _slideController.forward();
     _fadeController.forward();
@@ -476,7 +480,8 @@ class _StyleDnaQuizPageState extends State<StyleDnaQuizPage>
     final name = _displayNameController.text.trim();
 
     try {
-      final dobStr = "${_dob.year.toString().padLeft(4, '0')}-${_dob.month.toString().padLeft(2, '0')}-${_dob.day.toString().padLeft(2, '0')}";
+      final dobStr =
+          "${_dob.year.toString().padLeft(4, '0')}-${_dob.month.toString().padLeft(2, '0')}-${_dob.day.toString().padLeft(2, '0')}";
       final skinToneVal = _skinTone ?? 'trung_binh';
       final bodyTypeVal = _bodyType ?? 'trung_binh';
       final stylePrefVal = _stylePref ?? 'casual';
@@ -539,7 +544,8 @@ class _StyleDnaQuizPageState extends State<StyleDnaQuizPage>
         final errorMsg = e.toString().replaceAll('Exception: ', '');
         _showError(errorMsg);
 
-        if (errorMsg.contains('401') || errorMsg.toLowerCase().contains('unauthorized')) {
+        if (errorMsg.contains('401') ||
+            errorMsg.toLowerCase().contains('unauthorized')) {
           await _localStorage.clearSession();
           Future.delayed(const Duration(seconds: 2), () {
             if (mounted) AppRoutes.goToLogin(context);
@@ -556,19 +562,29 @@ class _StyleDnaQuizPageState extends State<StyleDnaQuizPage>
       if (_currentStep < 4) return null;
       final dnaIndex = _currentStep - 4;
       switch (dnaIndex) {
-        case 0: return _skinTone;
-        case 1: return _bodyType;
-        case 2: return _stylePref;
-        case 3: return _colorPref;
-        default: return null;
+        case 0:
+          return _skinTone;
+        case 1:
+          return _bodyType;
+        case 2:
+          return _stylePref;
+        case 3:
+          return _colorPref;
+        default:
+          return null;
       }
     } else {
       switch (_currentStep) {
-        case 0: return _skinTone;
-        case 1: return _bodyType;
-        case 2: return _stylePref;
-        case 3: return _colorPref;
-        default: return null;
+        case 0:
+          return _skinTone;
+        case 1:
+          return _bodyType;
+        case 2:
+          return _stylePref;
+        case 3:
+          return _colorPref;
+        default:
+          return null;
       }
     }
   }
@@ -577,10 +593,18 @@ class _StyleDnaQuizPageState extends State<StyleDnaQuizPage>
     setState(() {
       final stepIndex = widget.isOnboarding ? _currentStep - 4 : _currentStep;
       switch (stepIndex) {
-        case 0: _skinTone = value; break;
-        case 1: _bodyType = value; break;
-        case 2: _stylePref = value; break;
-        case 3: _colorPref = value; break;
+        case 0:
+          _skinTone = value;
+          break;
+        case 1:
+          _bodyType = value;
+          break;
+        case 2:
+          _stylePref = value;
+          break;
+        case 3:
+          _colorPref = value;
+          break;
       }
     });
   }
@@ -592,8 +616,8 @@ class _StyleDnaQuizPageState extends State<StyleDnaQuizPage>
       if (_currentStep == 2) return true;
       if (_currentStep == 3) {
         return _displayNameController.text.trim().isNotEmpty &&
-               _phoneController.text.trim().isNotEmpty &&
-               _addressController.text.trim().isNotEmpty;
+            _phoneController.text.trim().isNotEmpty &&
+            _addressController.text.trim().isNotEmpty;
       }
       final dnaIndex = _currentStep - 4;
       if (dnaIndex == 0) return _skinTone != null;
@@ -612,10 +636,7 @@ class _StyleDnaQuizPageState extends State<StyleDnaQuizPage>
 
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: AppColors.error,
-      ),
+      SnackBar(content: Text(message), backgroundColor: AppColors.error),
     );
   }
 
@@ -650,8 +671,11 @@ class _StyleDnaQuizPageState extends State<StyleDnaQuizPage>
                             ),
                           ],
                         ),
-                        child: const Icon(Icons.arrow_back_rounded,
-                            color: AppColors.primary, size: 20),
+                        child: const Icon(
+                          Icons.arrow_back_rounded,
+                          color: AppColors.primary,
+                          size: 20,
+                        ),
                       ),
                     )
                   else
@@ -700,8 +724,9 @@ class _StyleDnaQuizPageState extends State<StyleDnaQuizPage>
                 child: LinearProgressIndicator(
                   value: (_currentStep + 1) / totalSteps,
                   backgroundColor: AppColors.primary.withOpacity(0.08),
-                  valueColor:
-                      const AlwaysStoppedAnimation<Color>(AppColors.primary),
+                  valueColor: const AlwaysStoppedAnimation<Color>(
+                    AppColors.primary,
+                  ),
                   minHeight: 6,
                 ),
               ),
@@ -731,7 +756,9 @@ class _StyleDnaQuizPageState extends State<StyleDnaQuizPage>
                   onPressed: _canProceed && !_isSaving ? _nextStep : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
-                    disabledBackgroundColor: AppColors.primary.withOpacity(0.25),
+                    disabledBackgroundColor: AppColors.primary.withOpacity(
+                      0.25,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(18),
                     ),
@@ -760,8 +787,11 @@ class _StyleDnaQuizPageState extends State<StyleDnaQuizPage>
                             ),
                             if (!isLastStep) ...[
                               const SizedBox(width: 8),
-                              const Icon(Icons.arrow_forward_rounded,
-                                  color: Colors.white, size: 18),
+                              const Icon(
+                                Icons.arrow_forward_rounded,
+                                color: Colors.white,
+                                size: 18,
+                              ),
                             ],
                           ],
                         ),
@@ -777,10 +807,14 @@ class _StyleDnaQuizPageState extends State<StyleDnaQuizPage>
   Widget _buildCurrentStepContent() {
     if (widget.isOnboarding) {
       switch (_currentStep) {
-        case 0: return _buildGenderStep();
-        case 1: return _buildBodySizeStep();
-        case 2: return _buildDobStep();
-        case 3: return _buildContactStep();
+        case 0:
+          return _buildGenderStep();
+        case 1:
+          return _buildBodySizeStep();
+        case 2:
+          return _buildDobStep();
+        case 3:
+          return _buildContactStep();
         default:
           final dnaIndex = _currentStep - 4;
           final step = _dnaSteps[dnaIndex];
@@ -794,17 +828,35 @@ class _StyleDnaQuizPageState extends State<StyleDnaQuizPage>
 
   Widget _buildGenderStep() {
     final genderOptions = [
-      _QuizOption(value: 'Male', label: 'Nam', desc: 'Gợi ý các mẫu trang phục nam', color: const Color(0xFFE3F2FD), textColor: const Color(0xFF1565C0), emoji: '👨'),
-      _QuizOption(value: 'Female', label: 'Nữ', desc: 'Gợi ý các mẫu trang phục nữ', color: const Color(0xFFFCE4EC), textColor: const Color(0xFFAD1457), emoji: '👩'),
-      _QuizOption(value: 'Other', label: 'Khác', desc: 'Gợi ý các mẫu trang phục phi giới tính', color: const Color(0xFFE8EAF6), textColor: const Color(0xFF283593), emoji: '🧑'),
+      _QuizOption(
+        value: 'Male',
+        label: 'Nam',
+        desc: 'Gợi ý các mẫu trang phục nam',
+        color: const Color(0xFFE3F2FD),
+        textColor: const Color(0xFF1565C0),
+        emoji: '👨',
+      ),
+      _QuizOption(
+        value: 'Female',
+        label: 'Nữ',
+        desc: 'Gợi ý các mẫu trang phục nữ',
+        color: const Color(0xFFFCE4EC),
+        textColor: const Color(0xFFAD1457),
+        emoji: '👩',
+      ),
+      _QuizOption(
+        value: 'Other',
+        label: 'Khác',
+        desc: 'Gợi ý các mẫu trang phục phi giới tính',
+        color: const Color(0xFFE8EAF6),
+        textColor: const Color(0xFF283593),
+        emoji: '🧑',
+      ),
     ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          '👋',
-          style: TextStyle(fontSize: 52),
-        ),
+        const Text('👋', style: TextStyle(fontSize: 52)),
         const SizedBox(height: 12),
         const Text(
           'Chào mừng bạn!',
@@ -844,10 +896,7 @@ class _StyleDnaQuizPageState extends State<StyleDnaQuizPage>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          '📏',
-          style: TextStyle(fontSize: 52),
-        ),
+        const Text('📏', style: TextStyle(fontSize: 52)),
         const SizedBox(height: 12),
         const Text(
           'Thể hình & Chỉ số',
@@ -868,7 +917,7 @@ class _StyleDnaQuizPageState extends State<StyleDnaQuizPage>
           ),
         ),
         const SizedBox(height: 28),
-        
+
         // Height Card
         Container(
           padding: const EdgeInsets.all(20),
@@ -894,13 +943,21 @@ class _StyleDnaQuizPageState extends State<StyleDnaQuizPage>
                       SizedBox(width: 8),
                       Text(
                         'Chiều cao',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.primary),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primary,
+                        ),
                       ),
                     ],
                   ),
                   Text(
                     '${_height.round()} cm',
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.primary),
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.primary,
+                    ),
                   ),
                 ],
               ),
@@ -948,13 +1005,21 @@ class _StyleDnaQuizPageState extends State<StyleDnaQuizPage>
                       SizedBox(width: 8),
                       Text(
                         'Cân nặng',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.primary),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primary,
+                        ),
                       ),
                     ],
                   ),
                   Text(
                     '${_weight.round()} kg',
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.primary),
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.primary,
+                    ),
                   ),
                 ],
               ),
@@ -983,10 +1048,7 @@ class _StyleDnaQuizPageState extends State<StyleDnaQuizPage>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          '🎂',
-          style: TextStyle(fontSize: 52),
-        ),
+        const Text('🎂', style: TextStyle(fontSize: 52)),
         const SizedBox(height: 12),
         const Text(
           'Ngày sinh của bạn',
@@ -1088,10 +1150,7 @@ class _StyleDnaQuizPageState extends State<StyleDnaQuizPage>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          '📝',
-          style: TextStyle(fontSize: 52),
-        ),
+        const Text('📝', style: TextStyle(fontSize: 52)),
         const SizedBox(height: 12),
         const Text(
           'Thông tin cá nhân',
@@ -1176,7 +1235,11 @@ class _StyleDnaQuizPageState extends State<StyleDnaQuizPage>
                   padding: const EdgeInsets.only(bottom: 12, left: 4),
                   child: Row(
                     children: [
-                      Icon(Icons.public_rounded, color: AppColors.primary.withOpacity(0.7), size: 20),
+                      Icon(
+                        Icons.public_rounded,
+                        color: AppColors.primary.withOpacity(0.7),
+                        size: 20,
+                      ),
                       const SizedBox(width: 8),
                       const Text(
                         'Quốc gia',
@@ -1213,12 +1276,16 @@ class _StyleDnaQuizPageState extends State<StyleDnaQuizPage>
                       selectedColor: AppColors.primary,
                       labelStyle: TextStyle(
                         color: isSelected ? Colors.white : AppColors.primary,
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.normal,
                       ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                         side: BorderSide(
-                          color: isSelected ? Colors.transparent : const Color(0x1A4A3728),
+                          color: isSelected
+                              ? Colors.transparent
+                              : const Color(0x1A4A3728),
                         ),
                       ),
                       showCheckmark: false,
@@ -1237,10 +1304,7 @@ class _StyleDnaQuizPageState extends State<StyleDnaQuizPage>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          step.emoji,
-          style: const TextStyle(fontSize: 52),
-        ),
+        Text(step.emoji, style: const TextStyle(fontSize: 52)),
         const SizedBox(height: 12),
         Text(
           step.title,
@@ -1319,10 +1383,7 @@ class _StyleDnaQuizPageState extends State<StyleDnaQuizPage>
               borderRadius: BorderRadius.circular(14),
             ),
             child: Center(
-              child: Text(
-                opt.emoji,
-                style: const TextStyle(fontSize: 22),
-              ),
+              child: Text(opt.emoji, style: const TextStyle(fontSize: 22)),
             ),
           ),
           const SizedBox(width: 14),
@@ -1366,8 +1427,11 @@ class _StyleDnaQuizPageState extends State<StyleDnaQuizPage>
               ),
             ),
             child: isSelected
-                ? const Icon(Icons.check_rounded,
-                    size: 14, color: AppColors.primary)
+                ? const Icon(
+                    Icons.check_rounded,
+                    size: 14,
+                    color: AppColors.primary,
+                  )
                 : null,
           ),
         ],

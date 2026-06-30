@@ -54,7 +54,9 @@ class _NotificationPageState extends State<NotificationPage> {
       // Cập nhật state cục bộ
       if (mounted) {
         setState(() {
-          final index = _notifications.indexWhere((n) => n.id == notification.id);
+          final index = _notifications.indexWhere(
+            (n) => n.id == notification.id,
+          );
           if (index != -1) {
             final old = _notifications[index];
             _notifications[index] = NotificationModel(
@@ -77,7 +79,7 @@ class _NotificationPageState extends State<NotificationPage> {
 
   Future<void> _markAllAsRead() async {
     if (_notifications.isEmpty || _notifications.every((n) => n.isRead)) return;
-    
+
     // Hiển thị loading nhanh
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -113,7 +115,9 @@ class _NotificationPageState extends State<NotificationPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Không thể xóa thông báo: ${e.toString().replaceAll('Exception: ', '')}'),
+            content: Text(
+              'Không thể xóa thông báo: ${e.toString().replaceAll('Exception: ', '')}',
+            ),
             backgroundColor: AppColors.error,
           ),
         );
@@ -193,7 +197,11 @@ class _NotificationPageState extends State<NotificationPage> {
           if (_notifications.isNotEmpty && _notifications.any((n) => !n.isRead))
             TextButton.icon(
               onPressed: _markAllAsRead,
-              icon: const Icon(Icons.done_all_rounded, size: 18, color: AppColors.primaryLight),
+              icon: const Icon(
+                Icons.done_all_rounded,
+                size: 18,
+                color: AppColors.primaryLight,
+              ),
               label: const Text(
                 'Đọc tất cả',
                 style: TextStyle(
@@ -206,99 +214,117 @@ class _NotificationPageState extends State<NotificationPage> {
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
+            )
           : _errorMessage != null
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.error_outline_rounded, size: 48, color: AppColors.error),
-                        const SizedBox(height: 12),
-                        Text(
-                          _errorMessage!,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: _fetchNotifications,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          ),
-                          child: const Text('Thử lại', style: TextStyle(color: Colors.white)),
-                        ),
-                      ],
+          ? Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.error_outline_rounded,
+                      size: 48,
+                      color: AppColors.error,
                     ),
-                  ),
-                )
-              : _notifications.isEmpty
-                  ? Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(32),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(24),
-                              decoration: BoxDecoration(
-                                color: AppColors.primary.withOpacity(0.04),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                Icons.notifications_none_rounded,
-                                size: 64,
-                                color: AppColors.primary.withOpacity(0.25),
-                              ),
-                            ),
-                            const SizedBox(height: 18),
-                            const Text(
-                              'Không có thông báo mới',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w800,
-                                color: AppColors.primary,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              'Mọi cập nhật về trạng thái nạp VIP, gợi ý phối đồ hoặc ưu đãi sẽ hiển thị tại đây.',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: AppColors.primary.withOpacity(0.55),
-                                height: 1.4,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                  : RefreshIndicator(
-                      onRefresh: _fetchNotifications,
-                      color: AppColors.primary,
-                      child: ListView.builder(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        itemCount: _notifications.length,
-                        itemBuilder: (context, index) {
-                          final item = _notifications[index];
-                          return Dismissible(
-                            key: Key(item.id),
-                            direction: DismissDirection.endToStart,
-                            background: Container(
-                              alignment: Alignment.centerRight,
-                              padding: const EdgeInsets.symmetric(horizontal: 20),
-                              color: AppColors.error,
-                              child: const Icon(Icons.delete_sweep_rounded, color: Colors.white, size: 26),
-                            ),
-                            onDismissed: (direction) => _deleteNotification(item.id),
-                            child: _buildNotificationItem(item),
-                          );
-                        },
+                    const SizedBox(height: 12),
+                    Text(
+                      _errorMessage!,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: _fetchNotifications,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text(
+                        'Thử lại',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : _notifications.isEmpty
+          ? Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withOpacity(0.04),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.notifications_none_rounded,
+                        size: 64,
+                        color: AppColors.primary.withOpacity(0.25),
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+                    const Text(
+                      'Không có thông báo mới',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Mọi cập nhật về trạng thái nạp VIP, gợi ý phối đồ hoặc ưu đãi sẽ hiển thị tại đây.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: AppColors.primary.withOpacity(0.55),
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : RefreshIndicator(
+              onRefresh: _fetchNotifications,
+              color: AppColors.primary,
+              child: ListView.builder(
+                physics: const AlwaysScrollableScrollPhysics(),
+                itemCount: _notifications.length,
+                itemBuilder: (context, index) {
+                  final item = _notifications[index];
+                  return Dismissible(
+                    key: Key(item.id),
+                    direction: DismissDirection.endToStart,
+                    background: Container(
+                      alignment: Alignment.centerRight,
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      color: AppColors.error,
+                      child: const Icon(
+                        Icons.delete_sweep_rounded,
+                        color: Colors.white,
+                        size: 26,
+                      ),
+                    ),
+                    onDismissed: (direction) => _deleteNotification(item.id),
+                    child: _buildNotificationItem(item),
+                  );
+                },
+              ),
+            ),
     );
   }
 
@@ -310,7 +336,9 @@ class _NotificationPageState extends State<NotificationPage> {
       },
       child: Container(
         decoration: BoxDecoration(
-          color: item.isRead ? Colors.transparent : AppColors.primary.withOpacity(0.02),
+          color: item.isRead
+              ? Colors.transparent
+              : AppColors.primary.withOpacity(0.02),
           border: Border(
             bottom: BorderSide(
               color: AppColors.primary.withOpacity(0.05),
@@ -352,7 +380,9 @@ class _NotificationPageState extends State<NotificationPage> {
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: 14,
-                            fontWeight: item.isRead ? FontWeight.w700 : FontWeight.w900,
+                            fontWeight: item.isRead
+                                ? FontWeight.w700
+                                : FontWeight.w900,
                             color: AppColors.primary,
                           ),
                         ),
@@ -376,7 +406,9 @@ class _NotificationPageState extends State<NotificationPage> {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: 12.5,
-                      color: item.isRead ? AppColors.primary.withOpacity(0.65) : AppColors.primary,
+                      color: item.isRead
+                          ? AppColors.primary.withOpacity(0.65)
+                          : AppColors.primary,
                       height: 1.35,
                     ),
                   ),
@@ -404,7 +436,9 @@ class _NotificationPageState extends State<NotificationPage> {
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: AppColors.background,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
           title: Row(
             children: [
               Container(
@@ -461,8 +495,13 @@ class _NotificationPageState extends State<NotificationPage> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
+                ),
               ),
               child: const Text('Đóng'),
             ),

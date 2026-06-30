@@ -31,8 +31,12 @@ class _PersonalColorDetailPageState extends State<PersonalColorDetailPage> {
   bool _isSaving = false;
 
   PersonalColorProfile get _profile => PersonalColorProfile.resolve(
-    skinTone: widget.isFromScan ? widget.scannedSkinTone : _localStorage.getSkinTone(),
-    colorPref: widget.isFromScan ? widget.scannedColorPref : _localStorage.getColorPref(),
+    skinTone: widget.isFromScan
+        ? widget.scannedSkinTone
+        : _localStorage.getSkinTone(),
+    colorPref: widget.isFromScan
+        ? widget.scannedColorPref
+        : _localStorage.getColorPref(),
     stylePref: _localStorage.getStylePref(),
   );
 
@@ -148,10 +152,15 @@ class _PersonalColorDetailPageState extends State<PersonalColorDetailPage> {
                       child: SizedBox(
                         height: 54,
                         child: OutlinedButton(
-                          onPressed: _isSaving ? null : () => Navigator.pop(context),
+                          onPressed: _isSaving
+                              ? null
+                              : () => Navigator.pop(context),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: const Color(0xFF9A9AA2),
-                            side: const BorderSide(color: Color(0xFFDCDCE0), width: 1.5),
+                            side: const BorderSide(
+                              color: Color(0xFFDCDCE0),
+                              width: 1.5,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),
                             ),
@@ -184,7 +193,9 @@ class _PersonalColorDetailPageState extends State<PersonalColorDetailPage> {
                                   height: 20,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2.5,
-                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white,
+                                    ),
                                   ),
                                 )
                               : const Text(
@@ -392,7 +403,8 @@ class _PersonalColorDetailPageState extends State<PersonalColorDetailPage> {
   }
 
   Future<void> _saveScanResult() async {
-    if (widget.scannedSkinTone == null || widget.scannedColorPref == null) return;
+    if (widget.scannedSkinTone == null || widget.scannedColorPref == null)
+      return;
     setState(() => _isSaving = true);
 
     await _localStorage.saveStyleDna(

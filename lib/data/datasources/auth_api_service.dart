@@ -14,10 +14,7 @@ class AuthApiService {
     try {
       final response = await _apiService.post(
         '/api/auth/login',
-        data: {
-          'email': email,
-          'password': password,
-        },
+        data: {'email': email, 'password': password},
       );
 
       if (response.statusCode == 200) {
@@ -63,10 +60,7 @@ class AuthApiService {
     try {
       final response = await _apiService.post(
         '/api/auth/verify-otp',
-        data: {
-          'email': email,
-          'otpCode': otpCode,
-        },
+        data: {'email': email, 'otpCode': otpCode},
       );
 
       if (response.statusCode == 200) {
@@ -86,9 +80,7 @@ class AuthApiService {
     try {
       final response = await _apiService.post(
         '/api/auth/resend-otp',
-        data: {
-          'email': email,
-        },
+        data: {'email': email},
       );
       if (response.statusCode == 200) {
         return response.data.toString();
@@ -105,11 +97,13 @@ class AuthApiService {
     try {
       final response = await _apiService.post(
         '/api/auth/forgot-password',
-        data: {
-          'email': email,
-        },
+        data: {'email': email},
       );
       if (response.statusCode == 200) {
+        final data = response.data;
+        if (data is Map && data['message'] != null) {
+          return data['message'].toString();
+        }
         return response.data.toString();
       }
       throw Exception('Không thể yêu cầu khôi phục mật khẩu.');
@@ -128,11 +122,7 @@ class AuthApiService {
     try {
       final response = await _apiService.post(
         '/api/auth/reset-password',
-        data: {
-          'email': email,
-          'otpCode': otpCode,
-          'newPassword': newPassword,
-        },
+        data: {'email': email, 'otpCode': otpCode, 'newPassword': newPassword},
       );
       if (response.statusCode == 200) {
         return response.data.toString();
@@ -149,9 +139,7 @@ class AuthApiService {
     try {
       final response = await _apiService.post(
         '/api/auth/google-login',
-        data: {
-          'idToken': idToken,
-        },
+        data: {'idToken': idToken},
       );
 
       if (response.statusCode == 200) {
@@ -173,10 +161,7 @@ class AuthApiService {
     try {
       final response = await _apiService.post(
         '/api/auth/change-password',
-        data: {
-          'oldPassword': oldPassword,
-          'newPassword': newPassword,
-        },
+        data: {'oldPassword': oldPassword, 'newPassword': newPassword},
       );
       if (response.statusCode == 200) {
         return response.data.toString();
@@ -189,14 +174,14 @@ class AuthApiService {
   }
 
   /// Làm mới token (Refresh Token)
-  Future<Map<String, dynamic>> refreshTokens(String accessToken, String refreshToken) async {
+  Future<Map<String, dynamic>> refreshTokens(
+    String accessToken,
+    String refreshToken,
+  ) async {
     try {
       final response = await _apiService.post(
         '/api/auth/refresh-token',
-        data: {
-          'accessToken': accessToken,
-          'refreshToken': refreshToken,
-        },
+        data: {'accessToken': accessToken, 'refreshToken': refreshToken},
       );
 
       if (response.statusCode == 200) {
@@ -218,9 +203,7 @@ class AuthApiService {
       if (refreshToken != null) {
         await _apiService.post(
           '/api/auth/logout',
-          data: {
-            'refreshToken': refreshToken,
-          },
+          data: {'refreshToken': refreshToken},
         );
       }
     } catch (e) {
@@ -230,6 +213,26 @@ class AuthApiService {
       await _localStorage.clearSession();
     }
     return 'Đăng xuất thành công.';
+  }
+
+  /// Gửi yêu cầu mở lại tài khoản
+  Future<String> requestReactivation(String email) async {
+    try {
+      final response = await _apiService.post(
+        '/api/auth/request-reactivation',
+        data: {'email': email},
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data as Map<String, dynamic>;
+        return (data['Message'] ?? data['message']) as String? ??
+            'Yêu cầu mở lại tài khoản thành công.';
+      }
+      throw Exception('Không thể gửi yêu cầu mở lại tài khoản.');
+    } on DioException catch (e) {
+      final errorMsg = _getDioErrorMessage(e);
+      throw Exception(errorMsg);
+    }
   }
 
   /// Giải mã JWT payload để lấy thông tin claim
@@ -252,9 +255,11 @@ class AuthApiService {
   /// → đọc cả PascalCase lẫn camelCase để tương thích
   Future<void> _saveAuthResponse(Map<String, dynamic> data) async {
     // Đọc PascalCase trước (thực tế BE), fallback camelCase
-    final accessToken  = (data['AccessToken']  ?? data['accessToken'])  as String? ?? '';
-    final refreshToken = (data['RefreshToken'] ?? data['refreshToken']) as String? ?? '';
-    
+    final accessToken =
+        (data['AccessToken'] ?? data['accessToken']) as String? ?? '';
+    final refreshToken =
+        (data['RefreshToken'] ?? data['refreshToken']) as String? ?? '';
+
     // Parse userId linh hoạt (hỗ trợ cả int và String Guid từ JWT)
     int userId = 0;
     final rawUserId = data['UserId'] ?? data['userId'];
@@ -268,18 +273,22 @@ class AuthApiService {
       }
     }
 
-    final email        = (data['Email']         ?? data['email'])         as String? ?? '';
-    final displayName  = (data['DisplayName']   ?? data['displayName'])   as String? ?? '';
-    final role         = (data['Role']          ?? data['role'])          as String? ?? 'Customer';
-    final avatarUrl    = (data['AvatarUrl']      ?? data['avatarUrl'])     as String?;
+    final email = (data['Email'] ?? data['email']) as String? ?? '';
+    final displayName =
+        (data['DisplayName'] ?? data['displayName']) as String? ?? '';
+    final role = (data['Role'] ?? data['role']) as String? ?? 'Customer';
+    final avatarUrl = (data['AvatarUrl'] ?? data['avatarUrl']) as String?;
     final isOnboardingCompleted =
-        (data['IsOnboardingCompleted'] ?? data['isOnboardingCompleted']) as bool? ?? false;
+        (data['IsOnboardingCompleted'] ?? data['isOnboardingCompleted'])
+            as bool? ??
+        false;
     final isPasswordSet =
         (data['IsPasswordSet'] ?? data['isPasswordSet']) as bool? ?? true;
 
     // Đọc thông tin subscription từ login response để lưu ngay
     final hasActivePremium =
-        (data['HasActivePremium'] ?? data['hasActivePremium']) as bool? ?? false;
+        (data['HasActivePremium'] ?? data['hasActivePremium']) as bool? ??
+        false;
     final planType =
         (data['PlanType'] ?? data['planType']) as String? ?? 'free';
 
@@ -295,12 +304,14 @@ class AuthApiService {
     );
     // Lưu premium status ngay sau login — dùng hasActivePremium (bool) cho badge, planType cho credits
     await _localStorage.saveHasActivePremium(hasActivePremium);
-    
+
     int initialBg = 1;
     int initialTryOn = 1;
     final planLower = planType.toLowerCase();
-    if (planLower == 'premium_monthly' || planLower == 'monthly' ||
-        planLower == 'premium_yearly' || planLower == 'yearly') {
+    if (planLower == 'premium_monthly' ||
+        planLower == 'monthly' ||
+        planLower == 'premium_yearly' ||
+        planLower == 'yearly') {
       initialBg = 2;
       initialTryOn = 2;
     }
@@ -310,16 +321,33 @@ class AuthApiService {
   /// Chuyển đổi lỗi Dio thành thông báo thân thiện bằng tiếng Việt
   String _getDioErrorMessage(DioException e) {
     if (e.response != null) {
-      final data = e.response?.data;
+      var data = e.response?.data;
       if (data != null) {
-        if (data is Map) {
-          if (data['message'] != null) {
-            return data['message'].toString();
+        // Nếu data là một chuỗi JSON thô, hãy thử giải mã nó thành Map
+        if (data is String && data.isNotEmpty) {
+          final trimmed = data.trim();
+          if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+            try {
+              data = json.decode(trimmed);
+            } catch (_) {
+              // Bỏ qua lỗi giải mã và giữ nguyên dạng String ban đầu
+            }
           }
-          if (data['errors'] != null && data['errors'] is Map) {
-            final errorsMap = data['errors'] as Map;
+        }
+
+        if (data is Map) {
+          // Kiểm tra các trường chứa thông báo lỗi thông dụng của C# API
+          final possibleMessageKeys = ['message', 'Message', 'error', 'Error', 'detail', 'Detail'];
+          for (final key in possibleMessageKeys) {
+            if (data[key] != null && data[key].toString().isNotEmpty) {
+              return data[key].toString();
+            }
+          }
+
+          final errorsObj = data['errors'] ?? data['Errors'];
+          if (errorsObj is Map) {
             final buffer = StringBuffer();
-            errorsMap.forEach((key, value) {
+            errorsObj.forEach((key, value) {
               if (value is List) {
                 buffer.writeln(value.join(', '));
               } else {
@@ -328,12 +356,18 @@ class AuthApiService {
             });
             if (buffer.isNotEmpty) return buffer.toString().trim();
           }
-          if (data['title'] != null) {
-            return data['title'].toString();
+
+          final titleObj = data['title'] ?? data['Title'];
+          if (titleObj != null) {
+            return titleObj.toString();
           }
         }
+
         if (data is String && data.isNotEmpty) {
-          return data;
+          // Tránh hiển thị trang lỗi HTML thô của IIS/Server
+          if (!data.contains('<html') && !data.contains('<!DOCTYPE html>')) {
+            return data;
+          }
         }
       }
       if (e.response?.statusCode == 400) {
@@ -347,7 +381,8 @@ class AuthApiService {
       }
       return 'Lỗi hệ thống (${e.response?.statusCode}). Vui lòng thử lại sau.';
     }
-    if (e.type == DioExceptionType.connectionTimeout || e.type == DioExceptionType.receiveTimeout) {
+    if (e.type == DioExceptionType.connectionTimeout ||
+        e.type == DioExceptionType.receiveTimeout) {
       return 'Kết nối mạng quá hạn. Vui lòng kiểm tra lại kết nối.';
     }
     return 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra lại mạng.';

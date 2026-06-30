@@ -66,8 +66,13 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
           context: context,
           barrierDismissible: false,
           builder: (context) => AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            title: const Text('Thành công', style: TextStyle(fontWeight: FontWeight.bold)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            title: const Text(
+              'Thành công',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
             content: Text(msg.replaceAll('Exception: ', '')),
             actions: [
               TextButton(
@@ -75,7 +80,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                   Navigator.of(context).pop(); // Đóng dialog
                   final role = _localStorage.getUserRole() ?? 'Customer';
                   final isOnboarding = _localStorage.isOnboardingCompleted();
-                  
+
                   if (!hasPassword) {
                     if (role.toLowerCase() != 'customer' || isOnboarding) {
                       AppRoutes.goToMain(context);
@@ -94,7 +99,10 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       }
     } catch (e) {
       if (mounted) {
-        _showSnackbar(e.toString().replaceAll('Exception: ', ''), isError: true);
+        _showSnackbar(
+          e.toString().replaceAll('Exception: ', ''),
+          isError: true,
+        );
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -180,7 +188,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                             prefixIcon: const Icon(Icons.lock_rounded),
                             suffixIcon: IconButton(
                               onPressed: () {
-                                setState(() => _showOldPassword = !_showOldPassword);
+                                setState(
+                                  () => _showOldPassword = !_showOldPassword,
+                                );
                               },
                               icon: Icon(
                                 _showOldPassword
@@ -206,7 +216,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                           prefixIcon: const Icon(Icons.lock_outline_rounded),
                           suffixIcon: IconButton(
                             onPressed: () {
-                              setState(() => _showNewPassword = !_showNewPassword);
+                              setState(
+                                () => _showNewPassword = !_showNewPassword,
+                              );
                             },
                             icon: Icon(
                               _showNewPassword
@@ -249,7 +261,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                       const SizedBox(height: 24),
                       if (_isLoading)
                         const Center(
-                          child: CircularProgressIndicator(color: AppColors.primary),
+                          child: CircularProgressIndicator(
+                            color: AppColors.primary,
+                          ),
                         )
                       else
                         ElevatedButton(

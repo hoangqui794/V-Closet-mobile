@@ -197,10 +197,16 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
           context: context,
           builder: (context) => AlertDialog(
             backgroundColor: Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
             title: const Row(
               children: [
-                Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 28),
+                Icon(
+                  Icons.warning_amber_rounded,
+                  color: Colors.orange,
+                  size: 28,
+                ),
                 SizedBox(width: 8),
                 Text(
                   'Giới hạn tủ phối đồ',
@@ -215,24 +221,37 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('Đóng', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
+                child: const Text(
+                  'Đóng',
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
                 onPressed: () {
                   Navigator.pop(context); // Close dialog
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const SubscriptionPage()),
+                    MaterialPageRoute(
+                      builder: (context) => const SubscriptionPage(),
+                    ),
                   ).then((_) {
                     GetIt.I<SubscriptionApiService>().syncSubscriptionStatus();
                   });
                 },
-                child: const Text('Nâng cấp ngay', style: TextStyle(fontWeight: FontWeight.bold)),
+                child: const Text(
+                  'Nâng cấp ngay',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
             ],
           ),
@@ -260,12 +279,15 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
     Uint8List? preCapturedBytes;
     Size? canvasSize;
     try {
-      final boundary = _canvasRepaintKey.currentContext?.findRenderObject()
-          as RenderRepaintBoundary?;
+      final boundary =
+          _canvasRepaintKey.currentContext?.findRenderObject()
+              as RenderRepaintBoundary?;
       if (boundary != null) {
         canvasSize = _canvasRepaintKey.currentContext!.size;
         final uiImage = await boundary.toImage(pixelRatio: 2.5);
-        final byteData = await uiImage.toByteData(format: ui.ImageByteFormat.png);
+        final byteData = await uiImage.toByteData(
+          format: ui.ImageByteFormat.png,
+        );
         preCapturedBytes = byteData!.buffer.asUint8List();
       }
     } catch (e) {
@@ -282,7 +304,9 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
           .where((name) => name.isNotEmpty)
           .toList();
       if (itemNames.isNotEmpty) {
-        suggestedName = await geminiApi.generateOutfitName(clothingNames: itemNames);
+        suggestedName = await geminiApi.generateOutfitName(
+          clothingNames: itemNames,
+        );
       }
     } catch (e) {
       debugPrint('Lỗi tự động đặt tên outfit bằng AI: $e');
@@ -298,17 +322,21 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
       Uint8List? bytes = preCapturedBytes;
       if (bytes == null) {
         // Fallback: try capturing now if pre-capture failed
-        final boundary = _canvasRepaintKey.currentContext?.findRenderObject()
-            as RenderRepaintBoundary?;
+        final boundary =
+            _canvasRepaintKey.currentContext?.findRenderObject()
+                as RenderRepaintBoundary?;
         if (boundary == null) throw Exception('Không thể chụp canvas');
 
         final uiImage = await boundary.toImage(pixelRatio: 2.5);
-        final byteData = await uiImage.toByteData(format: ui.ImageByteFormat.png);
+        final byteData = await uiImage.toByteData(
+          format: ui.ImageByteFormat.png,
+        );
         bytes = byteData!.buffer.asUint8List();
       }
 
       final activeSize = canvasSize ?? _canvasRepaintKey.currentContext?.size;
-      if (activeSize == null) throw Exception('Không thể xác định kích thước canvas');
+      if (activeSize == null)
+        throw Exception('Không thể xác định kích thước canvas');
 
       // Build items list for API
       final apiItems = _canvasItems.map((c) {
@@ -382,8 +410,9 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
     await Future.delayed(const Duration(milliseconds: 120));
 
     try {
-      final boundary = _canvasRepaintKey.currentContext?.findRenderObject()
-          as RenderRepaintBoundary?;
+      final boundary =
+          _canvasRepaintKey.currentContext?.findRenderObject()
+              as RenderRepaintBoundary?;
       if (boundary == null) throw Exception('Không thể chụp canvas');
 
       final uiImage = await boundary.toImage(pixelRatio: 3.0); // High quality
@@ -423,7 +452,8 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
   }
 
   Future<Map<String, String>?> _showSaveDialog({String? suggestedName}) async {
-    String title = suggestedName ??
+    String title =
+        suggestedName ??
         'Outfit ${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}';
     bool isPublic = false;
 
@@ -493,8 +523,13 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
                     initialValue: title,
                     decoration: InputDecoration(
                       labelText: 'Tên trang phục',
-                      helperText: suggestedName != null ? '✨ AI Stylist đề xuất tên gọi này' : null,
-                      helperStyle: const TextStyle(color: Colors.deepPurple, fontWeight: FontWeight.bold),
+                      helperText: suggestedName != null
+                          ? '✨ AI Stylist đề xuất tên gọi này'
+                          : null,
+                      helperStyle: const TextStyle(
+                        color: Colors.deepPurple,
+                        fontWeight: FontWeight.bold,
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -662,8 +697,7 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
             ),
           ),
 
-          if (_selectedUid != null)
-            _buildFloatingToolbar(),
+          if (_selectedUid != null) _buildFloatingToolbar(),
 
           // ── Divider with hint ─────────────────────────────────────────────
           Container(
@@ -772,9 +806,7 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
                       // Grid background pattern
                       if (_showGrid)
                         const Positioned.fill(
-                          child: CustomPaint(
-                            painter: _GridPainter(),
-                          ),
+                          child: CustomPaint(painter: _GridPainter()),
                         ),
 
                       // Grid pattern for empty state
@@ -1109,15 +1141,14 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
                       child: Image.network(
                         item.imageUrl,
                         fit: BoxFit.contain,
-                        errorBuilder: (context, error, stackTrace) =>
-                            Container(
-                              color: AppColors.secondary,
-                              child: const Icon(
-                                Icons.broken_image_outlined,
-                                size: 28,
-                                color: AppColors.primary,
-                              ),
-                            ),
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          color: AppColors.secondary,
+                          child: const Icon(
+                            Icons.broken_image_outlined,
+                            size: 28,
+                            color: AppColors.primary,
+                          ),
+                        ),
                       ),
                     ),
                   // Add overlay
@@ -1228,10 +1259,12 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
               setState(() {
                 int minZ = _canvasItems.isEmpty
                     ? 0
-                    : _canvasItems.map((e) => e.zIndex).fold(
-                        0,
-                        (prev, element) => element < prev ? element : prev,
-                      );
+                    : _canvasItems
+                          .map((e) => e.zIndex)
+                          .fold(
+                            0,
+                            (prev, element) => element < prev ? element : prev,
+                          );
                 selectedItem.zIndex = minZ - 1;
               });
             },

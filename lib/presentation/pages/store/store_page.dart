@@ -15,7 +15,8 @@ class StorePage extends StatefulWidget {
 }
 
 class _StorePageState extends State<StorePage> {
-  final AffiliateApiService _affiliateApiService = GetIt.I<AffiliateApiService>();
+  final AffiliateApiService _affiliateApiService =
+      GetIt.I<AffiliateApiService>();
   final AuthLocalStorage _localStorage = GetIt.I<AuthLocalStorage>();
 
   String _selectedCategory = 'Tất cả';
@@ -44,11 +45,16 @@ class _StorePageState extends State<StorePage> {
       _errorMessage = null;
     });
     try {
-      final result = await _affiliateApiService.getProducts(page: 1, pageSize: 100);
+      final result = await _affiliateApiService.getProducts(
+        page: 1,
+        pageSize: 100,
+      );
       final List<dynamic> items = result['items'] ?? result['Items'] ?? [];
       if (mounted) {
         setState(() {
-          _products = items.map((item) => Map<String, dynamic>.from(item)).toList();
+          _products = items
+              .map((item) => Map<String, dynamic>.from(item))
+              .toList();
           _isLoading = false;
         });
       }
@@ -69,7 +75,8 @@ class _StorePageState extends State<StorePage> {
     }
     if (_selectedCategory == 'Tất cả') return _products;
     return _products.where((p) {
-      final cat = (p['Category'] ?? p['category'])?.toString().toLowerCase() ?? '';
+      final cat =
+          (p['Category'] ?? p['category'])?.toString().toLowerCase() ?? '';
       if (_selectedCategory == 'Áo') {
         return cat == 'top' || cat == 'outerwear';
       }
@@ -80,7 +87,10 @@ class _StorePageState extends State<StorePage> {
         return cat == 'dress';
       }
       if (_selectedCategory == 'Phụ kiện') {
-        return cat == 'accessory' || cat == 'bag' || cat == 'shoes' || cat == 'other';
+        return cat == 'accessory' ||
+            cat == 'bag' ||
+            cat == 'shoes' ||
+            cat == 'other';
       }
       return false;
     }).toList();
@@ -93,38 +103,48 @@ class _StorePageState extends State<StorePage> {
 
     return _products.where((p) {
       final name = (p['Name'] ?? p['name'] ?? '').toString().toLowerCase();
-      final desc = (p['Description'] ?? p['description'] ?? '').toString().toLowerCase();
-      final cat = (p['Category'] ?? p['category'] ?? '').toString().toLowerCase();
+      final desc = (p['Description'] ?? p['description'] ?? '')
+          .toString()
+          .toLowerCase();
+      final cat = (p['Category'] ?? p['category'] ?? '')
+          .toString()
+          .toLowerCase();
       final text = '$name $desc';
 
       // Filter theo phong cách
       bool matchStyle = true;
       switch (stylePref) {
         case 'casual':
-          matchStyle = text.contains('casual') ||
+          matchStyle =
+              text.contains('casual') ||
               text.contains('thuờời') ||
-              cat == 'top' || cat == 'bottom';
+              cat == 'top' ||
+              cat == 'bottom';
           break;
         case 'cong_so':
-          matchStyle = text.contains('sơ mi') ||
+          matchStyle =
+              text.contains('sơ mi') ||
               text.contains('vest') ||
               text.contains('công sở') ||
               text.contains('formal');
           break;
         case 'streetwear':
-          matchStyle = text.contains('hoodie') ||
+          matchStyle =
+              text.contains('hoodie') ||
               text.contains('oversized') ||
               text.contains('street') ||
               text.contains('bomber');
           break;
         case 'thanh_lich':
-          matchStyle = cat == 'dress' ||
+          matchStyle =
+              cat == 'dress' ||
               text.contains('đầm') ||
               text.contains('chân váy') ||
               text.contains('thanh lịch');
           break;
         case 'sporty':
-          matchStyle = text.contains('sport') ||
+          matchStyle =
+              text.contains('sport') ||
               text.contains('thể thao') ||
               text.contains('jogger') ||
               text.contains('legging');
@@ -135,17 +155,20 @@ class _StorePageState extends State<StorePage> {
       bool matchColor = true;
       switch (colorPref) {
         case 'toi_mau':
-          matchColor = text.contains('đen') ||
+          matchColor =
+              text.contains('đen') ||
               text.contains('navy') ||
               text.contains('dark');
           break;
         case 'pastel':
-          matchColor = text.contains('hồng') ||
+          matchColor =
+              text.contains('hồng') ||
               text.contains('nhạt') ||
               text.contains('pastel');
           break;
         default:
-          matchColor = true; // Không filter mạnh theo màu nếu không có dấu hiệu rõ ràng
+          matchColor =
+              true; // Không filter mạnh theo màu nếu không có dấu hiệu rõ ràng
       }
 
       return matchStyle || matchColor;
@@ -215,10 +238,7 @@ class _StorePageState extends State<StorePage> {
                     widget.onMenuPressed?.call();
                   }
                 },
-                icon: const Icon(
-                  Icons.menu_rounded,
-                  color: AppColors.primary,
-                ),
+                icon: const Icon(Icons.menu_rounded, color: AppColors.primary),
               ),
             ),
           ),
@@ -236,12 +256,14 @@ class _StorePageState extends State<StorePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            
             // Bộ lọc categories
             SizedBox(
               height: 58,
               child: ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
                 scrollDirection: Axis.horizontal,
                 itemCount: _categories.length,
                 itemBuilder: (context, index) {
@@ -264,211 +286,280 @@ class _StorePageState extends State<StorePage> {
                 },
               ),
             ),
-            
+
             // Danh sách sản phẩm grid
             Expanded(
               child: _isLoading
                   ? const Center(
                       child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          AppColors.primary,
+                        ),
                       ),
                     )
                   : _errorMessage != null
-                      ? Center(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 24),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(
-                                  Icons.error_outline_rounded,
-                                  color: Colors.redAccent,
-                                  size: 48,
+                  ? Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(
+                              Icons.error_outline_rounded,
+                              color: Colors.redAccent,
+                              size: 48,
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              _errorMessage!,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Colors.black54,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            ElevatedButton.icon(
+                              onPressed: _fetchProducts,
+                              icon: const Icon(Icons.refresh_rounded),
+                              label: const Text('Thử lại'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primary,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  _errorMessage!,
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.black54,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                ElevatedButton.icon(
-                                  onPressed: _fetchProducts,
-                                  icon: const Icon(Icons.refresh_rounded),
-                                  label: const Text('Thử lại'),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppColors.primary,
-                                    foregroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  : RefreshIndicator(
+                      onRefresh: _fetchProducts,
+                      color: AppColors.primary,
+                      child: _filteredProducts.isEmpty
+                          ? ListView(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              children: const [
+                                SizedBox(height: 100),
+                                Center(
+                                  child: Text(
+                                    'Không có sản phẩm nào.',
+                                    style: TextStyle(
+                                      color: Colors.black54,
+                                      fontSize: 14,
                                     ),
                                   ),
                                 ),
                               ],
-                            ),
-                          ),
-                        )
-                      : RefreshIndicator(
-                          onRefresh: _fetchProducts,
-                          color: AppColors.primary,
-                          child: _filteredProducts.isEmpty
-                              ? ListView(
-                                  physics: const AlwaysScrollableScrollPhysics(),
-                                  children: const [
-                                    SizedBox(height: 100),
-                                    Center(
-                                      child: Text(
-                                        'Không có sản phẩm nào.',
-                                        style: TextStyle(
-                                          color: Colors.black54,
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                )
-                              : GridView.builder(
-                                  physics: const AlwaysScrollableScrollPhysics(),
-                                  padding: const EdgeInsets.fromLTRB(20, 4, 20, 110),
-                                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                            )
+                          : GridView.builder(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              padding: const EdgeInsets.fromLTRB(
+                                20,
+                                4,
+                                20,
+                                110,
+                              ),
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
                                     crossAxisCount: 2,
                                     crossAxisSpacing: 14,
                                     mainAxisSpacing: 14,
                                     childAspectRatio: 0.72,
                                   ),
-                                  itemCount: _filteredProducts.length,
-                                  itemBuilder: (context, index) {
-                                    final product = _filteredProducts[index];
-                                    final imageUrl = _getProductImage(product);
-                                    final rating = product['Rating'] ?? product['rating'] ?? 5.0;
-                                    return FadeInUp(
-                                      delay: Duration(milliseconds: 50 * (index % 6)),
-                                      child: GestureDetector(
-                                        onTap: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (_) => ProductDetailPage(product: product),
-                                            ),
-                                          );
-                                        },
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            borderRadius: BorderRadius.circular(22),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: AppColors.primary.withOpacity(0.05),
-                                                blurRadius: 18,
-                                                offset: const Offset(0, 8),
-                                              ),
-                                            ],
+                              itemCount: _filteredProducts.length,
+                              itemBuilder: (context, index) {
+                                final product = _filteredProducts[index];
+                                final imageUrl = _getProductImage(product);
+                                final rating =
+                                    product['Rating'] ??
+                                    product['rating'] ??
+                                    5.0;
+                                return FadeInUp(
+                                  delay: Duration(
+                                    milliseconds: 50 * (index % 6),
+                                  ),
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => ProductDetailPage(
+                                            product: product,
                                           ),
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Expanded(
-                                                child: Stack(
-                                                  children: [
-                                                    Container(
-                                                      width: double.infinity,
-                                                      decoration: const BoxDecoration(
-                                                        color: Color(0xFFF8F9FA),
-                                                        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
-                                                      ),
-                                                      child: (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'))
-                                                          ? ClipRRect(
-                                                              borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
-                                                              child: Image.network(
-                                                                imageUrl,
-                                                                width: double.infinity,
-                                                                height: double.infinity,
-                                                                fit: BoxFit.cover,
-                                                                errorBuilder: (context, error, stackTrace) {
+                                        ),
+                                      );
+                                    },
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(22),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: AppColors.primary
+                                                .withOpacity(0.05),
+                                            blurRadius: 18,
+                                            offset: const Offset(0, 8),
+                                          ),
+                                        ],
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Expanded(
+                                            child: Stack(
+                                              children: [
+                                                Container(
+                                                  width: double.infinity,
+                                                  decoration: const BoxDecoration(
+                                                    color: Color(0xFFF8F9FA),
+                                                    borderRadius:
+                                                        BorderRadius.vertical(
+                                                          top: Radius.circular(
+                                                            22,
+                                                          ),
+                                                        ),
+                                                  ),
+                                                  child:
+                                                      (imageUrl.startsWith(
+                                                            'http://',
+                                                          ) ||
+                                                          imageUrl.startsWith(
+                                                            'https://',
+                                                          ))
+                                                      ? ClipRRect(
+                                                          borderRadius:
+                                                              const BorderRadius.vertical(
+                                                                top:
+                                                                    Radius.circular(
+                                                                      22,
+                                                                    ),
+                                                              ),
+                                                          child: Image.network(
+                                                            imageUrl,
+                                                            width:
+                                                                double.infinity,
+                                                            height:
+                                                                double.infinity,
+                                                            fit: BoxFit.cover,
+                                                            errorBuilder:
+                                                                (
+                                                                  context,
+                                                                  error,
+                                                                  stackTrace,
+                                                                ) {
                                                                   return const Center(
                                                                     child: Icon(
-                                                                      Icons.broken_image_rounded,
-                                                                      color: Colors.grey,
+                                                                      Icons
+                                                                          .broken_image_rounded,
+                                                                      color: Colors
+                                                                          .grey,
                                                                     ),
                                                                   );
                                                                 },
-                                                              ),
-                                                            )
-                                                          : const Center(
-                                                              child: Icon(
-                                                                Icons.image_not_supported_rounded,
-                                                                color: Colors.grey,
-                                                              ),
-                                                            ),
-                                                    ),
-                                                    Positioned(
-                                                      top: 8,
-                                                      right: 8,
-                                                      child: Container(
-                                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                                        decoration: BoxDecoration(
-                                                          color: Colors.white.withOpacity(0.9),
-                                                          borderRadius: BorderRadius.circular(20),
+                                                          ),
+                                                        )
+                                                      : const Center(
+                                                          child: Icon(
+                                                            Icons
+                                                                .image_not_supported_rounded,
+                                                            color: Colors.grey,
+                                                          ),
                                                         ),
-                                                        child: Row(
-                                                          mainAxisSize: MainAxisSize.min,
-                                                          children: [
-                                                            const Icon(Icons.star, color: Colors.amber, size: 12),
-                                                            const SizedBox(width: 2),
-                                                            Text(
-                                                              '$rating',
-                                                              style: const TextStyle(
+                                                ),
+                                                Positioned(
+                                                  top: 8,
+                                                  right: 8,
+                                                  child: Container(
+                                                    padding:
+                                                        const EdgeInsets.symmetric(
+                                                          horizontal: 8,
+                                                          vertical: 4,
+                                                        ),
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.white
+                                                          .withOpacity(0.9),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            20,
+                                                          ),
+                                                    ),
+                                                    child: Row(
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      children: [
+                                                        const Icon(
+                                                          Icons.star,
+                                                          color: Colors.amber,
+                                                          size: 12,
+                                                        ),
+                                                        const SizedBox(
+                                                          width: 2,
+                                                        ),
+                                                        Text(
+                                                          '$rating',
+                                                          style:
+                                                              const TextStyle(
                                                                 fontSize: 10,
-                                                                fontWeight: FontWeight.bold,
-                                                                color: AppColors.primary,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                                color: AppColors
+                                                                    .primary,
                                                               ),
-                                                            ),
-                                                          ],
                                                         ),
-                                                      ),
+                                                      ],
                                                     ),
-                                                  ],
+                                                  ),
                                                 ),
-                                              ),
-                                              Padding(
-                                                padding: const EdgeInsets.all(12),
-                                                child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                      _getProductName(product),
-                                                      maxLines: 1,
-                                                      overflow: TextOverflow.ellipsis,
-                                                      style: const TextStyle(
-                                                        fontWeight: FontWeight.w800,
-                                                        fontSize: 13,
-                                                        color: AppColors.primary,
-                                                      ),
-                                                    ),
-                                                    const SizedBox(height: 4),
-                                                    Text(
-                                                      _formatPrice(product['Price'] ?? product['price']),
-                                                      style: const TextStyle(
-                                                        fontSize: 14,
-                                                        fontWeight: FontWeight.w900,
-                                                        color: AppColors.primaryLight,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ],
+                                              ],
+                                            ),
                                           ),
-                                        ),
+                                          Padding(
+                                            padding: const EdgeInsets.all(12),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  _getProductName(product),
+                                                  maxLines: 1,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: const TextStyle(
+                                                    fontWeight: FontWeight.w800,
+                                                    fontSize: 13,
+                                                    color: AppColors.primary,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 4),
+                                                Text(
+                                                  _formatPrice(
+                                                    product['Price'] ??
+                                                        product['price'],
+                                                  ),
+                                                  style: const TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w900,
+                                                    color:
+                                                        AppColors.primaryLight,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                    );
-                                  },
-                                ),
-                        ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                    ),
             ),
           ],
         ),
