@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -23,13 +24,59 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   bool _isLoading = false;
   bool _showPassword = false;
   bool _showConfirm = false;
+  Timer? _timer;
+  int _countdown = 0;
+  bool _isResending = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _startTimer(); // Bắt đầu đếm ngược 60s ngay khi vào trang để tránh gửi dồn dập
+  }
 
   @override
   void dispose() {
     _otpController.dispose();
     _passwordController.dispose();
     _confirmController.dispose();
+    _timer?.cancel();
     super.dispose();
+  }
+
+  void _startTimer() {
+    setState(() {
+      _countdown = 60;
+    });
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_countdown == 0) {
+        setState(() {
+          _timer?.cancel();
+        });
+      } else {
+        setState(() {
+          _countdown--;
+        });
+      }
+    });
+  }
+
+  Future<void> _resendOtp() async {
+    if (_countdown > 0 || _isResending) return;
+    setState(() => _isResending = true);
+    try {
+      final msg = await _authService.forgotPassword(widget.email);
+      _startTimer();
+      if (mounted) {
+        _showSnackbar(msg);
+      }
+    } catch (e) {
+      if (mounted) {
+        _showSnackbar(e.toString().replaceAll('Exception: ', ''), isError: true);
+      }
+    } finally {
+      if (mounted) setState(() => _isResending = false);
+    }
   }
 
   Future<void> _resetPassword() async {
@@ -63,8 +110,13 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
           context: context,
           barrierDismissible: false,
           builder: (context) => AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            title: const Text('Thành công', style: TextStyle(fontWeight: FontWeight.bold)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            title: const Text(
+              'Thành công',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
             content: Text(msg.replaceAll('Exception: ', '')),
             actions: [
               TextButton(
@@ -84,7 +136,10 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       }
     } catch (e) {
       if (mounted) {
-        _showSnackbar(e.toString().replaceAll('Exception: ', ''), isError: true);
+        _showSnackbar(
+          e.toString().replaceAll('Exception: ', ''),
+          isError: true,
+        );
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -103,7 +158,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
-    final bool isSmallScreen = screenSize.height < 740 || screenSize.width < 360;
+    final bool isSmallScreen =
+        screenSize.height < 740 || screenSize.width < 360;
 
     final double spacingTiny = isSmallScreen ? 4.0 : 8.0;
     final double spacingMedium = isSmallScreen ? 12.0 : 16.0;
@@ -180,9 +236,15 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                             borderRadius: BorderRadius.circular(16),
                             borderSide: BorderSide.none,
                           ),
-                          contentPadding: isSmallScreen 
-                              ? const EdgeInsets.symmetric(horizontal: 16, vertical: 12)
-                              : const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                          contentPadding: isSmallScreen
+                              ? const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
+                                )
+                              : const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 16,
+                                ),
                         ),
                       ),
                       SizedBox(height: spacingTiny),
@@ -208,9 +270,15 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                             borderRadius: BorderRadius.circular(16),
                             borderSide: BorderSide.none,
                           ),
-                          contentPadding: isSmallScreen 
-                              ? const EdgeInsets.symmetric(horizontal: 16, vertical: 12)
-                              : const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                          contentPadding: isSmallScreen
+                              ? const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
+                                )
+                              : const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 16,
+                                ),
                         ),
                       ),
                       SizedBox(height: spacingTiny),
@@ -236,26 +304,83 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                             borderRadius: BorderRadius.circular(16),
                             borderSide: BorderSide.none,
                           ),
-                          contentPadding: isSmallScreen 
-                              ? const EdgeInsets.symmetric(horizontal: 16, vertical: 12)
-                              : const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                          contentPadding: isSmallScreen
+                              ? const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
+                                )
+                              : const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 16,
+                                ),
                         ),
                       ),
                       SizedBox(height: spacingMedium),
                       if (_isLoading)
                         const Center(
-                          child: CircularProgressIndicator(color: AppColors.primary),
+                          child: CircularProgressIndicator(
+                            color: AppColors.primary,
+                          ),
                         )
-                      else
+                      else ...[
                         ElevatedButton(
                           onPressed: _resetPassword,
                           style: ElevatedButton.styleFrom(
-                            padding: isSmallScreen 
+                            padding: isSmallScreen
                                 ? const EdgeInsets.symmetric(vertical: 12)
                                 : const EdgeInsets.symmetric(vertical: 16),
                           ),
-                          child: Text('Đặt lại mật khẩu', style: TextStyle(fontSize: isSmallScreen ? 15.0 : 16.0)),
+                          child: Text(
+                            'Đặt lại mật khẩu',
+                            style: TextStyle(
+                              fontSize: isSmallScreen ? 15.0 : 16.0,
+                            ),
+                          ),
                         ),
+                        SizedBox(height: spacingMedium),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Không nhận được mã? ',
+                              style: TextStyle(
+                                color: AppColors.primary.withOpacity(0.6),
+                                fontSize: isSmallScreen ? 13.0 : 14.0,
+                              ),
+                            ),
+                            _countdown > 0
+                                ? Text(
+                                    'Gửi lại sau (${_countdown}s)',
+                                    style: TextStyle(
+                                      color: AppColors.primary.withOpacity(0.5),
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: isSmallScreen ? 13.0 : 14.0,
+                                    ),
+                                  )
+                                : _isResending
+                                    ? SizedBox(
+                                        width: 14,
+                                        height: 14,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: AppColors.primary,
+                                        ),
+                                      )
+                                    : GestureDetector(
+                                        onTap: _resendOtp,
+                                        child: Text(
+                                          'Gửi lại ngay',
+                                          style: TextStyle(
+                                            color: AppColors.primary,
+                                            fontWeight: FontWeight.bold,
+                                            decoration: TextDecoration.underline,
+                                            fontSize: isSmallScreen ? 13.0 : 14.0,
+                                          ),
+                                        ),
+                                      ),
+                          ],
+                        ),
+                      ],
                     ],
                   ),
                 ),

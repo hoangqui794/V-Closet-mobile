@@ -42,12 +42,13 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
     super.initState();
     _userId = _localStorage.getUserId() ?? 0;
     _transferContent = 'VCLOSET ${_userId > 0 ? _userId : "PREMIUM"}';
-    
+
     // Tạo link VietQR động
     final priceInt = widget.plan.price.toInt();
     final accountNameEncoded = Uri.encodeComponent('TRUONG HOANG QUI');
     final addInfoEncoded = Uri.encodeComponent(_transferContent);
-    _qrCodeUrl = 'https://img.vietqr.io/image/TPBank-54070904571-compact2.png?amount=$priceInt&addInfo=$addInfoEncoded&accountName=$accountNameEncoded';
+    _qrCodeUrl =
+        'https://img.vietqr.io/image/TPBank-54070904571-compact2.png?amount=$priceInt&addInfo=$addInfoEncoded&accountName=$accountNameEncoded';
   }
 
   @override
@@ -190,13 +191,17 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
 
     try {
       // 1. Upload ảnh proof lên server
-      final uploadedUrl = await _subscriptionApiService.uploadPaymentProof(_selectedImage!);
-      
+      final uploadedUrl = await _subscriptionApiService.uploadPaymentProof(
+        _selectedImage!,
+      );
+
       // 2. Submit thông tin manual payment lên server
       await _subscriptionApiService.submitManualPayment(
         planId: widget.plan.id,
         proofImageUrl: uploadedUrl,
-        userNote: _noteController.text.trim().isNotEmpty ? _noteController.text.trim() : null,
+        userNote: _noteController.text.trim().isNotEmpty
+            ? _noteController.text.trim()
+            : null,
       );
 
       setState(() {
@@ -217,7 +222,9 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
   @override
   Widget build(BuildContext context) {
     final formatCurrency = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
-    final formattedPrice = widget.plan.price.toStringAsFixed(0).replaceAllMapped(formatCurrency, (Match m) => '${m[1]}.');
+    final formattedPrice = widget.plan.price
+        .toStringAsFixed(0)
+        .replaceAllMapped(formatCurrency, (Match m) => '${m[1]}.');
 
     return Container(
       decoration: const BoxDecoration(
@@ -234,8 +241,8 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
         child: _isSuccess
             ? _buildSuccessView()
             : _isUploading
-                ? _buildLoadingView()
-                : _buildFormView(formattedPrice),
+            ? _buildLoadingView()
+            : _buildFormView(formattedPrice),
       ),
     );
   }
@@ -285,7 +292,9 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
               ),
               child: const Text(
                 'Đóng',
@@ -362,12 +371,12 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
               IconButton(
                 icon: const Icon(Icons.close, color: AppColors.primary),
                 onPressed: () => Navigator.pop(context),
-              )
+              ),
             ],
           ),
         ),
         const Divider(height: 1),
-        
+
         Expanded(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
@@ -385,7 +394,7 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
                         color: AppColors.primary.withOpacity(0.03),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
-                      )
+                      ),
                     ],
                   ),
                   child: Row(
@@ -422,7 +431,7 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
                           fontWeight: FontWeight.w900,
                           color: AppColors.primary,
                         ),
-                      )
+                      ),
                     ],
                   ),
                 ),
@@ -451,7 +460,7 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
                               color: AppColors.primary.withOpacity(0.05),
                               blurRadius: 15,
                               offset: const Offset(0, 6),
-                            )
+                            ),
                           ],
                         ),
                         child: ClipRRect(
@@ -468,7 +477,9 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
                                 height: 220,
                                 color: const Color(0xFFFAF9F6),
                                 child: const Center(
-                                  child: CircularProgressIndicator(color: AppColors.primary),
+                                  child: CircularProgressIndicator(
+                                    color: AppColors.primary,
+                                  ),
                                 ),
                               );
                             },
@@ -477,7 +488,11 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
                                 width: 220,
                                 height: 220,
                                 color: const Color(0xFFFAF9F6),
-                                child: const Icon(Icons.qr_code_2_rounded, size: 64, color: AppColors.accent),
+                                child: const Icon(
+                                  Icons.qr_code_2_rounded,
+                                  size: 64,
+                                  color: AppColors.accent,
+                                ),
                               );
                             },
                           ),
@@ -540,14 +555,18 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
                   ),
                 ),
                 const SizedBox(height: 10),
-                
+
                 _buildImagePickerArea(),
-                
+
                 if (_errorMessage.isNotEmpty) ...[
                   const SizedBox(height: 12),
                   Text(
                     _errorMessage,
-                    style: const TextStyle(color: AppColors.error, fontSize: 12, fontWeight: FontWeight.w500),
+                    style: const TextStyle(
+                      color: AppColors.error,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ],
                 const SizedBox(height: 20),
@@ -565,7 +584,9 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
                     floatingLabelBehavior: FloatingLabelBehavior.always,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide(color: AppColors.primary.withOpacity(0.1)),
+                      borderSide: BorderSide(
+                        color: AppColors.primary.withOpacity(0.1),
+                      ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
@@ -584,12 +605,17 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
                       backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                       elevation: 0,
                     ),
                     child: const Text(
                       'Tôi đã chuyển khoản & Nộp biên lai',
-                      style: TextStyle(fontWeight: FontWeight.w900, fontSize: 15),
+                      style: TextStyle(
+                        fontWeight: FontWeight.w900,
+                        fontSize: 15,
+                      ),
                     ),
                   ),
                 ),
@@ -622,11 +648,19 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.add_photo_alternate_outlined, color: AppColors.primary.withOpacity(0.5), size: 36),
+              Icon(
+                Icons.add_photo_alternate_outlined,
+                color: AppColors.primary.withOpacity(0.5),
+                size: 36,
+              ),
               const SizedBox(height: 10),
               const Text(
                 'Bấm vào để chụp/chọn ảnh biên lai',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primary),
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primary,
+                ),
               ),
               const SizedBox(height: 4),
               Text(
@@ -665,12 +699,19 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
               children: [
                 const Text(
                   'Biên lai đã chọn',
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.primary),
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primary,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   _selectedImage!.path.split(Platform.pathSeparator).last,
-                  style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: AppColors.textMuted,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -678,7 +719,10 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.delete_outline_rounded, color: AppColors.error),
+            icon: const Icon(
+              Icons.delete_outline_rounded,
+              color: AppColors.error,
+            ),
             onPressed: () {
               setState(() {
                 _selectedImage = null;
@@ -701,7 +745,9 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: isHighlighted ? AppColors.secondary.withOpacity(0.15) : Colors.white,
+        color: isHighlighted
+            ? AppColors.secondary.withOpacity(0.15)
+            : Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: isHighlighted
             ? Border.all(color: AppColors.secondary.withOpacity(0.5), width: 1)
@@ -717,7 +763,9 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
                   label,
                   style: TextStyle(
                     fontSize: 11,
-                    color: isHighlighted ? AppColors.primary : AppColors.textMuted,
+                    color: isHighlighted
+                        ? AppColors.primary
+                        : AppColors.textMuted,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -726,7 +774,9 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
                   value,
                   style: TextStyle(
                     fontSize: 13,
-                    fontWeight: isHighlighted ? FontWeight.w900 : FontWeight.bold,
+                    fontWeight: isHighlighted
+                        ? FontWeight.w900
+                        : FontWeight.bold,
                     color: AppColors.primary,
                   ),
                 ),
@@ -735,7 +785,11 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
           ),
           if (canCopy && copyValue != null)
             IconButton(
-              icon: const Icon(Icons.copy_rounded, color: AppColors.primary, size: 20),
+              icon: const Icon(
+                Icons.copy_rounded,
+                color: AppColors.primary,
+                size: 20,
+              ),
               onPressed: () => _copyToClipboard(copyValue, label),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),

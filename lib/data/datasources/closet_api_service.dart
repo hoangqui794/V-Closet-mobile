@@ -23,9 +23,10 @@ class ClosetApiService {
   /// Tạo tủ đồ mới
   Future<bool> createCloset(String name) async {
     try {
-      final response = await _apiService.post('/api/Closets', data: {
-        'name': name,
-      });
+      final response = await _apiService.post(
+        '/api/Closets',
+        data: {'name': name},
+      );
       return response.statusCode == 200;
     } catch (e) {
       print('Lỗi tạo tủ đồ: $e');
@@ -38,9 +39,7 @@ class ClosetApiService {
     try {
       final response = await _apiService.put(
         '/api/Wardrobe/$itemId/assign-closet',
-        queryParameters: {
-          if (closetId != null) 'closetId': closetId,
-        },
+        queryParameters: {if (closetId != null) 'closetId': closetId},
       );
       return response.statusCode == 200;
     } catch (e) {
@@ -54,9 +53,7 @@ class ClosetApiService {
     try {
       final response = await _apiService.put(
         '/api/Closets/$closetId',
-        data: {
-          'name': newName,
-        },
+        data: {'name': newName},
       );
       return response.statusCode == 200;
     } catch (e) {

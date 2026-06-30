@@ -6,7 +6,7 @@ import 'package:signalr_netcore/signalr_client.dart';
 import 'auth_local_storage.dart';
 
 /// Service quản lý kết nối SignalR tới ChatHub (/hubs/chat).
-/// 
+///
 /// Sử dụng:
 ///   // Khởi tạo kết nối (gọi 1 lần khi vào màn hình chat)
 ///   await ChatSignalRService().connect();
@@ -33,7 +33,8 @@ class ChatSignalRService {
   // Stream broadcast: phát ra mỗi khi nhận tin nhắn mới từ Hub
   // Payload là Map<String, dynamic> tương ứng với ChatMessageResponseDto của BE
   final _messageController = StreamController<Map<String, dynamic>>.broadcast();
-  Stream<Map<String, dynamic>> get onReceiveMessage => _messageController.stream;
+  Stream<Map<String, dynamic>> get onReceiveMessage =>
+      _messageController.stream;
 
   bool get isConnected =>
       _hubConnection != null &&
@@ -56,9 +57,7 @@ class ChatSignalRService {
     _hubConnection = HubConnectionBuilder()
         .withUrl(
           hubUrl,
-          options: HttpConnectionOptions(
-            accessTokenFactory: () async => token,
-          ),
+          options: HttpConnectionOptions(accessTokenFactory: () async => token),
         )
         .withAutomaticReconnect()
         .build();

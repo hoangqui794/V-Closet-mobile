@@ -28,10 +28,11 @@ class ProductDetailPage extends StatefulWidget {
 }
 
 class _ProductDetailPageState extends State<ProductDetailPage> {
-  final AffiliateApiService _affiliateApiService = GetIt.I<AffiliateApiService>();
+  final AffiliateApiService _affiliateApiService =
+      GetIt.I<AffiliateApiService>();
   String? _selectedSize;
   bool _isOpening = false;
-  
+
   double? _userHeight;
   double? _userWeight;
   String? _userGender;
@@ -52,7 +53,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
         // Auto select recommended size if available and not already selected
         if (_selectedSize == null) {
-          final sizes = List<String>.from(widget.product['sizes'] ?? widget.product['Sizes'] ?? []);
+          final sizes = List<String>.from(
+            widget.product['sizes'] ?? widget.product['Sizes'] ?? [],
+          );
           final rec = _getRecommendedSize(sizes);
           if (rec != null) {
             _selectedSize = rec;
@@ -134,11 +137,21 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     if (isNumeric) {
       int targetNum = 30;
       switch (sizeLetter) {
-        case 'S': targetNum = 29; break;
-        case 'M': targetNum = 30; break;
-        case 'L': targetNum = 31; break;
-        case 'XL': targetNum = 32; break;
-        case 'XXL': targetNum = 33; break;
+        case 'S':
+          targetNum = 29;
+          break;
+        case 'M':
+          targetNum = 30;
+          break;
+        case 'L':
+          targetNum = 31;
+          break;
+        case 'XL':
+          targetNum = 32;
+          break;
+        case 'XXL':
+          targetNum = 33;
+          break;
       }
 
       String? closestSize;
@@ -279,13 +292,19 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   }
 
   String _getProductCategory(Map<String, dynamic> product) {
-    final cat = product['Category'] as String? ??
+    final cat =
+        product['Category'] as String? ??
         product['category'] as String? ??
         'Fashion';
-    if (cat.toLowerCase() == 'top' || cat.toLowerCase() == 'outerwear') return 'Áo';
+    if (cat.toLowerCase() == 'top' || cat.toLowerCase() == 'outerwear')
+      return 'Áo';
     if (cat.toLowerCase() == 'bottom') return 'Quần';
     if (cat.toLowerCase() == 'dress') return 'Váy đầm';
-    if (cat.toLowerCase() == 'accessory' || cat.toLowerCase() == 'bag' || cat.toLowerCase() == 'shoes' || cat.toLowerCase() == 'other') return 'Phụ kiện';
+    if (cat.toLowerCase() == 'accessory' ||
+        cat.toLowerCase() == 'bag' ||
+        cat.toLowerCase() == 'shoes' ||
+        cat.toLowerCase() == 'other')
+      return 'Phụ kiện';
     return cat;
   }
 
@@ -293,15 +312,13 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     return product['Description'] as String? ??
         product['description'] as String? ??
         'Sản phẩm chất lượng cao, thiết kế hiện đại và thời thượng. '
-        'Phù hợp với nhiều dịp khác nhau, từ công sở đến đi chơi. '
-        'Chất liệu thoáng mát, dễ chịu khi mặc. '
-        'Bảo quản bằng cách giặt tay hoặc giặt máy ở chế độ nhẹ.';
+            'Phù hợp với nhiều dịp khác nhau, từ công sở đến đi chơi. '
+            'Chất liệu thoáng mát, dễ chịu khi mặc. '
+            'Bảo quản bằng cách giặt tay hoặc giặt máy ở chế độ nhẹ.';
   }
 
   String _getProductId(Map<String, dynamic> product) {
-    return product['Id'] as String? ??
-        product['id'] as String? ??
-        '';
+    return product['Id'] as String? ?? product['id'] as String? ?? '';
   }
 
   double _getProductRating(Map<String, dynamic> product) {
@@ -331,7 +348,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           clickSource: 'Store_Detail',
         );
         if (result != null) {
-          targetUrl = result['TargetAffiliateLink'] as String? ??
+          targetUrl =
+              result['TargetAffiliateLink'] as String? ??
               result['targetAffiliateLink'] as String?;
         }
       } catch (e) {
@@ -355,7 +373,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             content: Text('Không thể mở Shopee. Vui lòng thử lại! Lỗi: $e'),
             backgroundColor: Colors.red.shade400,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
             margin: const EdgeInsets.all(16),
           ),
         );
@@ -378,7 +398,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    final sizes = List<String>.from(widget.product['sizes'] ?? widget.product['Sizes'] ?? []);
+    final sizes = List<String>.from(
+      widget.product['sizes'] ?? widget.product['Sizes'] ?? [],
+    );
     final recommendedSize = _getRecommendedSize(sizes);
     final imageUrl = _getProductImage(widget.product);
 
@@ -390,18 +412,29 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           SizedBox(
             height: MediaQuery.of(context).size.height * 0.48,
             width: double.infinity,
-            child: (imageUrl.isNotEmpty && (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')))
+            child:
+                (imageUrl.isNotEmpty &&
+                    (imageUrl.startsWith('http://') ||
+                        imageUrl.startsWith('https://')))
                 ? Image.network(
                     imageUrl,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stack) => Container(
                       color: const Color(0xFFF0F0F5),
-                      child: const Icon(Icons.image_not_supported_rounded, size: 80, color: Colors.grey),
+                      child: const Icon(
+                        Icons.image_not_supported_rounded,
+                        size: 80,
+                        color: Colors.grey,
+                      ),
                     ),
                   )
                 : Container(
                     color: const Color(0xFFF0F0F5),
-                    child: const Icon(Icons.image_not_supported_rounded, size: 80, color: Colors.grey),
+                    child: const Icon(
+                      Icons.image_not_supported_rounded,
+                      size: 80,
+                      color: Colors.grey,
+                    ),
                   ),
           ),
 
@@ -412,7 +445,10 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             right: 0,
             child: SafeArea(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -466,14 +502,21 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                 ),
                                 const SizedBox(width: 12),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 6,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: const Color(0xFFFFF9E6),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Row(
                                     children: [
-                                      const Icon(Icons.star_rounded, color: Colors.amber, size: 16),
+                                      const Icon(
+                                        Icons.star_rounded,
+                                        color: Colors.amber,
+                                        size: 16,
+                                      ),
                                       const SizedBox(width: 4),
                                       Text(
                                         '${_getProductRating(widget.product)}',
@@ -493,7 +536,10 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
                             // Danh mục
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 5,
+                              ),
                               decoration: BoxDecoration(
                                 color: AppColors.primary.withOpacity(0.08),
                                 borderRadius: BorderRadius.circular(20),
@@ -512,7 +558,10 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
                             // Giá
                             Text(
-                              _formatPrice(widget.product['Price'] ?? widget.product['price']),
+                              _formatPrice(
+                                widget.product['Price'] ??
+                                    widget.product['price'],
+                              ),
                               style: const TextStyle(
                                 fontSize: 28,
                                 fontWeight: FontWeight.w900,
@@ -562,19 +611,29 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                   final isSelected = _selectedSize == size;
                                   final isRecommended = size == recommendedSize;
                                   return GestureDetector(
-                                    onTap: () => setState(() => _selectedSize = size),
+                                    onTap: () =>
+                                        setState(() => _selectedSize = size),
                                     child: AnimatedContainer(
-                                      duration: const Duration(milliseconds: 200),
-                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                      duration: const Duration(
+                                        milliseconds: 200,
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 10,
+                                      ),
                                       decoration: BoxDecoration(
-                                        color: isSelected 
-                                            ? AppColors.primary 
-                                            : (isRecommended ? const Color(0xFFF3E5F5) : const Color(0xFFF5F5F8)),
+                                        color: isSelected
+                                            ? AppColors.primary
+                                            : (isRecommended
+                                                  ? const Color(0xFFF3E5F5)
+                                                  : const Color(0xFFF5F5F8)),
                                         borderRadius: BorderRadius.circular(12),
                                         border: Border.all(
                                           color: isSelected
                                               ? AppColors.primary
-                                              : (isRecommended ? AppColors.primaryLight : Colors.transparent),
+                                              : (isRecommended
+                                                    ? AppColors.primaryLight
+                                                    : Colors.transparent),
                                           width: 1.5,
                                         ),
                                       ),
@@ -586,7 +645,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                             style: TextStyle(
                                               fontSize: 13,
                                               fontWeight: FontWeight.w700,
-                                              color: isSelected ? Colors.white : AppColors.primary,
+                                              color: isSelected
+                                                  ? Colors.white
+                                                  : AppColors.primary,
                                             ),
                                           ),
                                           if (isRecommended) ...[
@@ -595,7 +656,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                               '✨',
                                               style: TextStyle(
                                                 fontSize: 10,
-                                                color: isSelected ? Colors.white : AppColors.primaryLight,
+                                                color: isSelected
+                                                    ? Colors.white
+                                                    : AppColors.primaryLight,
                                               ),
                                             ),
                                           ],
@@ -616,7 +679,12 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        border: Border(top: BorderSide(color: Colors.grey.withOpacity(0.1), width: 1)),
+                        border: Border(
+                          top: BorderSide(
+                            color: Colors.grey.withOpacity(0.1),
+                            width: 1,
+                          ),
+                        ),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withOpacity(0.03),
@@ -632,7 +700,10 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                               height: 56,
                               child: OutlinedButton.icon(
                                 onPressed: _openTryOnBottomSheet,
-                                icon: const Icon(Icons.face_retouching_natural_rounded, size: 22),
+                                icon: const Icon(
+                                  Icons.face_retouching_natural_rounded,
+                                  size: 22,
+                                ),
                                 label: const Text(
                                   'Mặc thử AI',
                                   style: TextStyle(
@@ -642,8 +713,13 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                 ),
                                 style: OutlinedButton.styleFrom(
                                   foregroundColor: AppColors.primary,
-                                  side: const BorderSide(color: AppColors.primary, width: 1.5),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                                  side: const BorderSide(
+                                    color: AppColors.primary,
+                                    width: 1.5,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(18),
+                                  ),
                                 ),
                               ),
                             ),
@@ -655,10 +731,16 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                               child: ElevatedButton(
                                 onPressed: _isOpening ? null : _openShopee,
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFFEE4D2D), // màu cam Shopee
+                                  backgroundColor: const Color(
+                                    0xFFEE4D2D,
+                                  ), // màu cam Shopee
                                   foregroundColor: Colors.white,
-                                  disabledBackgroundColor: const Color(0xFFEE4D2D).withOpacity(0.6),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                                  disabledBackgroundColor: const Color(
+                                    0xFFEE4D2D,
+                                  ).withOpacity(0.6),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(18),
+                                  ),
                                   elevation: 0,
                                 ),
                                 child: _isOpening
@@ -666,19 +748,31 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                         width: 24,
                                         height: 24,
                                         child: CircularProgressIndicator(
-                                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                                Colors.white,
+                                              ),
                                           strokeWidth: 2,
                                         ),
                                       )
                                     : Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
                                         children: [
                                           Image.network(
                                             'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Shopee.svg/32px-Shopee.svg.png',
                                             width: 22,
                                             height: 22,
-                                            errorBuilder: (context, error, stack) =>
-                                                const Icon(Icons.shopping_bag_rounded, size: 22, color: Colors.white),
+                                            errorBuilder:
+                                                (
+                                                  context,
+                                                  error,
+                                                  stack,
+                                                ) => const Icon(
+                                                  Icons.shopping_bag_rounded,
+                                                  size: 22,
+                                                  color: Colors.white,
+                                                ),
                                           ),
                                           const SizedBox(width: 8),
                                           const Text(
@@ -716,7 +810,8 @@ class _ProductTryOnSheet extends StatefulWidget {
   State<_ProductTryOnSheet> createState() => _ProductTryOnSheetState();
 }
 
-class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTickerProviderStateMixin {
+class _ProductTryOnSheetState extends State<_ProductTryOnSheet>
+    with SingleTickerProviderStateMixin {
   final TryOnApiService _tryOnApiService = GetIt.I<TryOnApiService>();
   final UserApiService _userApiService = GetIt.I<UserApiService>();
   final AuthLocalStorage _localStorage = GetIt.I<AuthLocalStorage>();
@@ -725,27 +820,27 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
     {
       'name': 'Mẫu Nữ 1',
       'url': 'assets/images/mau_nu_1.jpg',
-      'gender': 'female'
+      'gender': 'female',
     },
     {
       'name': 'Mẫu Nữ 2',
       'url': 'assets/images/mau_nu_2.jpg',
-      'gender': 'female'
+      'gender': 'female',
     },
     {
       'name': 'Mẫu Nữ 3',
       'url': 'assets/images/mau_nu_3.jpg',
-      'gender': 'female'
+      'gender': 'female',
     },
     {
       'name': 'Mẫu Nam 1',
       'url': 'assets/images/mau_nam_1.jpg',
-      'gender': 'male'
+      'gender': 'male',
     },
     {
       'name': 'Mẫu Nam 2',
       'url': 'assets/images/mau_nam_2.jpg',
-      'gender': 'male'
+      'gender': 'male',
     },
   ];
 
@@ -755,7 +850,7 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
   bool _isLoadingProfile = true;
   bool _isGenerating = false;
   bool _isSavingImage = false;
-  
+
   String? _selectedModelUrl;
   String? _personalMannequinUrl;
   File? _customModelFile;
@@ -775,12 +870,12 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
   void initState() {
     super.initState();
     _selectedModelUrl = _sampleModels[0]['url'];
-    
+
     _scanController = AnimationController(
       duration: const Duration(seconds: 2),
       vsync: this,
     )..repeat(reverse: true);
-    
+
     _scanAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _scanController, curve: Curves.easeInOut),
     );
@@ -799,7 +894,9 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
   Future<void> _loadUserProfile() async {
     try {
       final profile = await _userApiService.getMyProfile();
-      final mannequinUrl = profile['mannequinImageUrl'] as String? ?? profile['MannequinImageUrl'] as String?;
+      final mannequinUrl =
+          profile['mannequinImageUrl'] as String? ??
+          profile['MannequinImageUrl'] as String?;
       if (mounted) {
         setState(() {
           _personalMannequinUrl = mannequinUrl;
@@ -846,14 +943,18 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
               ),
             ),
             const SizedBox(height: 20),
-            
+
             // Header
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Row(
                   children: [
-                    Icon(Icons.info_outline_rounded, color: AppColors.primary, size: 22),
+                    Icon(
+                      Icons.info_outline_rounded,
+                      color: AppColors.primary,
+                      size: 22,
+                    ),
                     SizedBox(width: 8),
                     Text(
                       'Lưu ý chọn ảnh người mẫu',
@@ -867,7 +968,10 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
                 ),
                 IconButton(
                   onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.close_rounded, color: AppColors.primary),
+                  icon: const Icon(
+                    Icons.close_rounded,
+                    color: AppColors.primary,
+                  ),
                 ),
               ],
             ),
@@ -882,7 +986,10 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
                     decoration: BoxDecoration(
                       color: Colors.green.shade50.withOpacity(0.6),
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.green.shade200, width: 1),
+                      border: Border.all(
+                        color: Colors.green.shade200,
+                        width: 1,
+                      ),
                     ),
                     child: Stack(
                       children: [
@@ -890,16 +997,27 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.accessibility_new_rounded, size: 36, color: Colors.green.shade700),
+                              Icon(
+                                Icons.accessibility_new_rounded,
+                                size: 36,
+                                color: Colors.green.shade700,
+                              ),
                               const SizedBox(height: 6),
                               const Text(
                                 'Chuẩn chính diện',
-                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.green),
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.green,
+                                ),
                               ),
                               const SizedBox(height: 2),
                               Text(
                                 'Đứng thẳng, rõ thân',
-                                style: TextStyle(fontSize: 9, color: Colors.green.shade800),
+                                style: TextStyle(
+                                  fontSize: 9,
+                                  color: Colors.green.shade800,
+                                ),
                               ),
                             ],
                           ),
@@ -907,7 +1025,11 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
                         const Positioned(
                           top: 8,
                           right: 8,
-                          child: Icon(Icons.check_circle_rounded, color: Colors.green, size: 18),
+                          child: Icon(
+                            Icons.check_circle_rounded,
+                            color: Colors.green,
+                            size: 18,
+                          ),
                         ),
                       ],
                     ),
@@ -928,16 +1050,27 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.person_off_rounded, size: 36, color: Colors.red.shade700),
+                              Icon(
+                                Icons.person_off_rounded,
+                                size: 36,
+                                color: Colors.red.shade700,
+                              ),
                               const SizedBox(height: 6),
                               Text(
                                 'Không nên chọn',
-                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.red.shade700),
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.red.shade700,
+                                ),
                               ),
                               const SizedBox(height: 2),
                               Text(
                                 'Nghiêng, bị che khuất',
-                                style: TextStyle(fontSize: 9, color: Colors.red.shade800),
+                                style: TextStyle(
+                                  fontSize: 9,
+                                  color: Colors.red.shade800,
+                                ),
                               ),
                             ],
                           ),
@@ -945,7 +1078,11 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
                         const Positioned(
                           top: 8,
                           right: 8,
-                          child: Icon(Icons.cancel_rounded, color: Colors.red, size: 18),
+                          child: Icon(
+                            Icons.cancel_rounded,
+                            color: Colors.red,
+                            size: 18,
+                          ),
                         ),
                       ],
                     ),
@@ -968,15 +1105,32 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.check_circle_rounded, color: Colors.green, size: 16),
+                      const Icon(
+                        Icons.check_circle_rounded,
+                        color: Colors.green,
+                        size: 16,
+                      ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: RichText(
                           text: const TextSpan(
-                            style: TextStyle(fontSize: 12, color: AppColors.primary, height: 1.4),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.primary,
+                              height: 1.4,
+                            ),
                             children: [
-                              TextSpan(text: 'Nên: ', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
-                              TextSpan(text: 'Chọn ảnh chụp chính diện, đứng thẳng, rõ thân người. Mặc quần áo ôm sát sườn hoặc thon gọn (áo phông mỏng, quần/váy ôm).'),
+                              TextSpan(
+                                text: 'Nên: ',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.green,
+                                ),
+                              ),
+                              TextSpan(
+                                text:
+                                    'Chọn ảnh chụp chính diện, đứng thẳng, rõ thân người. Mặc quần áo ôm sát sườn hoặc thon gọn (áo phông mỏng, quần/váy ôm).',
+                              ),
                             ],
                           ),
                         ),
@@ -990,15 +1144,32 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.cancel_rounded, color: Colors.red, size: 16),
+                      const Icon(
+                        Icons.cancel_rounded,
+                        color: Colors.red,
+                        size: 16,
+                      ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: RichText(
                           text: const TextSpan(
-                            style: TextStyle(fontSize: 12, color: AppColors.primary, height: 1.4),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.primary,
+                              height: 1.4,
+                            ),
                             children: [
-                              TextSpan(text: 'Tránh: ', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
-                              TextSpan(text: 'Ảnh đứng nghiêng/chụp xéo góc, tay khoanh trước ngực, tay che người hoặc tay đút túi. Không mặc quần áo quá phồng, quá rộng hoặc áo khoác phao dày.'),
+                              TextSpan(
+                                text: 'Tránh: ',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.red,
+                                ),
+                              ),
+                              TextSpan(
+                                text:
+                                    'Ảnh đứng nghiêng/chụp xéo góc, tay khoanh trước ngực, tay che người hoặc tay đút túi. Không mặc quần áo quá phồng, quá rộng hoặc áo khoác phao dày.',
+                              ),
                             ],
                           ),
                         ),
@@ -1017,17 +1188,30 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
                   child: OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      side: const BorderSide(color: AppColors.primaryLight, width: 1.5),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      side: const BorderSide(
+                        color: AppColors.primaryLight,
+                        width: 1.5,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                     ),
                     onPressed: () {
                       Navigator.pop(context);
                       _pickModelImage(ImageSource.camera);
                     },
-                    icon: const Icon(Icons.camera_alt_rounded, color: AppColors.primaryLight, size: 18),
+                    icon: const Icon(
+                      Icons.camera_alt_rounded,
+                      color: AppColors.primaryLight,
+                      size: 18,
+                    ),
                     label: const Text(
                       'Chụp ảnh mới',
-                      style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primaryLight, fontSize: 13),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primaryLight,
+                        fontSize: 13,
+                      ),
                     ),
                   ),
                 ),
@@ -1037,17 +1221,27 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       backgroundColor: AppColors.primary,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                       elevation: 0,
                     ),
                     onPressed: () {
                       Navigator.pop(context);
                       _pickModelImage(ImageSource.gallery);
                     },
-                    icon: const Icon(Icons.photo_library_rounded, color: Colors.white, size: 18),
+                    icon: const Icon(
+                      Icons.photo_library_rounded,
+                      color: Colors.white,
+                      size: 18,
+                    ),
                     label: const Text(
                       'Chọn từ thư viện',
-                      style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 13),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        fontSize: 13,
+                      ),
                     ),
                   ),
                 ),
@@ -1072,9 +1266,9 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
     } catch (e) {
       debugPrint('Error picking model image: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Không thể chọn ảnh: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Không thể chọn ảnh: $e')));
       }
     }
   }
@@ -1098,14 +1292,23 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
     }
   }
 
-  Future<Uint8List> _generateShopAndWardrobeCollageBytes(String shopImageUrl, String shopCategory, ClothingItem wardrobeItem) async {
+  Future<Uint8List> _generateShopAndWardrobeCollageBytes(
+    String shopImageUrl,
+    String shopCategory,
+    ClothingItem wardrobeItem,
+  ) async {
     final dio = dio_pkg.Dio();
     ui.Image? shopImg;
     ui.Image? wardrobeImg;
 
     try {
-      final response = await dio.get(shopImageUrl, options: dio_pkg.Options(responseType: dio_pkg.ResponseType.bytes));
-      final codec = await ui.instantiateImageCodec(Uint8List.fromList(response.data as List<int>));
+      final response = await dio.get(
+        shopImageUrl,
+        options: dio_pkg.Options(responseType: dio_pkg.ResponseType.bytes),
+      );
+      final codec = await ui.instantiateImageCodec(
+        Uint8List.fromList(response.data as List<int>),
+      );
       final frame = await codec.getNextFrame();
       shopImg = frame.image;
     } catch (e) {
@@ -1114,8 +1317,13 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
 
     try {
       final url = wardrobeItem.originalImageUrl ?? wardrobeItem.imageUrl;
-      final response = await dio.get(url, options: dio_pkg.Options(responseType: dio_pkg.ResponseType.bytes));
-      final codec = await ui.instantiateImageCodec(Uint8List.fromList(response.data as List<int>));
+      final response = await dio.get(
+        url,
+        options: dio_pkg.Options(responseType: dio_pkg.ResponseType.bytes),
+      );
+      final codec = await ui.instantiateImageCodec(
+        Uint8List.fromList(response.data as List<int>),
+      );
       final frame = await codec.getNextFrame();
       wardrobeImg = frame.image;
     } catch (e) {
@@ -1128,7 +1336,10 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
     const canvasHeight = 800.0;
 
     final paintBg = Paint()..color = const Color(0xFFF3F3F3);
-    canvas.drawRect(const Rect.fromLTWH(0, 0, canvasWidth, canvasHeight), paintBg);
+    canvas.drawRect(
+      const Rect.fromLTWH(0, 0, canvasWidth, canvasHeight),
+      paintBg,
+    );
 
     Rect getRect(String category) {
       category = category.toLowerCase();
@@ -1156,7 +1367,10 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
     }
 
     final picture = recorder.endRecording();
-    final img = await picture.toImage(canvasWidth.toInt(), canvasHeight.toInt());
+    final img = await picture.toImage(
+      canvasWidth.toInt(),
+      canvasHeight.toInt(),
+    );
     final byteData = await img.toByteData(format: ui.ImageByteFormat.png);
     return byteData!.buffer.asUint8List();
   }
@@ -1164,20 +1378,20 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
   void _paintImageFit(Canvas canvas, ui.Image img, Rect rect) {
     final double srcWidth = img.width.toDouble();
     final double srcHeight = img.height.toDouble();
-    
+
     final double destWidth = rect.width;
     final double destHeight = rect.height;
-    
+
     final double scale = (destWidth / srcWidth < destHeight / srcHeight)
         ? destWidth / srcWidth
         : destHeight / srcHeight;
-        
+
     final double w = srcWidth * scale;
     final double h = srcHeight * scale;
-    
+
     final double x = rect.left + (destWidth - w) / 2;
     final double y = rect.top + (destHeight - h) / 2;
-    
+
     canvas.drawImageRect(
       img,
       Rect.fromLTWH(0, 0, srcWidth, srcHeight),
@@ -1219,7 +1433,11 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
   }
 
   String _mapCategoryForApi(Map<String, dynamic> product) {
-    final cat = (product['Category'] as String? ?? product['category'] as String? ?? 'auto').toLowerCase();
+    final cat =
+        (product['Category'] as String? ??
+                product['category'] as String? ??
+                'auto')
+            .toLowerCase();
     if (cat == 'top' || cat == 'outerwear') return 'tops';
     if (cat == 'bottom') return 'bottoms';
     if (cat == 'dress') return 'one-pieces';
@@ -1250,10 +1468,13 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
       }
 
       final category = _mapCategoryForApi(widget.product);
-      final bool isCustomModel = _customModelFile != null && _selectedModelUrl == null;
+      final bool isCustomModel =
+          _customModelFile != null && _selectedModelUrl == null;
       final bool isMultiGarment = _selectedWardrobeItem != null;
       final String? selectedModelUrlLocal = _selectedModelUrl;
-      final bool isLocalModel = selectedModelUrlLocal != null && selectedModelUrlLocal.startsWith('assets/');
+      final bool isLocalModel =
+          selectedModelUrlLocal != null &&
+          selectedModelUrlLocal.startsWith('assets/');
 
       if (isCustomModel || isMultiGarment || isLocalModel) {
         setState(() => _loadingMessage = 'Đang chuẩn bị ảnh người mẫu...');
@@ -1282,7 +1503,9 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
 
         List<int> garmentBytes;
         if (isMultiGarment) {
-          setState(() => _loadingMessage = 'Đang ghép ảnh phối đồ (Flat Lay)...');
+          setState(
+            () => _loadingMessage = 'Đang ghép ảnh phối đồ (Flat Lay)...',
+          );
           garmentBytes = await _generateShopAndWardrobeCollageBytes(
             garmentUrl,
             category,
@@ -1299,7 +1522,7 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
         }
 
         setState(() => _loadingMessage = 'Đang gửi dữ liệu phối đồ lên AI...');
-        
+
         final dioClient = GetIt.I<dio_pkg.Dio>();
         final uploadFormData = dio_pkg.FormData.fromMap({
           "modelFile": dio_pkg.MultipartFile.fromBytes(
@@ -1347,7 +1570,8 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
       String msg = e.toString();
       if (e is dio_pkg.DioException) {
         if (e.response?.statusCode == 413) {
-          msg = 'Dung lượng ảnh quá lớn (giới hạn 30MB). Vui lòng chọn hoặc chụp ảnh nhẹ hơn.';
+          msg =
+              'Dung lượng ảnh quá lớn (giới hạn 30MB). Vui lòng chọn hoặc chụp ảnh nhẹ hơn.';
         } else {
           final errorData = e.response?.data;
           if (errorData is Map) {
@@ -1358,7 +1582,8 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
             }
           } else if (errorData != null) {
             final errorStr = errorData.toString();
-            if (errorStr.contains('<html') || errorStr.contains('<!DOCTYPE html>')) {
+            if (errorStr.contains('<html') ||
+                errorStr.contains('<!DOCTYPE html>')) {
               msg = 'Máy chủ AI tạm thời không phản hồi. Vui lòng thử lại sau.';
             } else {
               msg = errorStr;
@@ -1422,7 +1647,8 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
           debugPrint('Try-on failed error: $error');
           setState(() {
             _isGenerating = false;
-            _errorMessage = 'Thử đồ thất bại do lỗi xử lý AI. Vui lòng thử lại sau.';
+            _errorMessage =
+                'Thử đồ thất bại do lỗi xử lý AI. Vui lòng thử lại sau.';
           });
         }
       } catch (e) {
@@ -1433,7 +1659,7 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
 
   Future<void> _saveImageToGallery(String imageUrl) async {
     setState(() => _isSavingImage = true);
-    
+
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -1501,7 +1727,9 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
         if (_isLoadingWardrobe)
           const SizedBox(
             height: 90,
-            child: Center(child: CircularProgressIndicator(color: AppColors.primary)),
+            child: Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
+            ),
           )
         else if (_wardrobeItems.isEmpty)
           Container(
@@ -1514,7 +1742,10 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
             ),
             child: Text(
               'Tủ đồ của bạn chưa có sản phẩm nào.',
-              style: TextStyle(color: Colors.grey[500], fontStyle: FontStyle.italic),
+              style: TextStyle(
+                color: Colors.grey[500],
+                fontStyle: FontStyle.italic,
+              ),
             ),
           )
         else
@@ -1527,7 +1758,7 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
                 final item = _wardrobeItems[index];
                 final isSelected = _selectedWardrobeItem == item;
                 final imgUrl = item.originalImageUrl ?? item.imageUrl;
-                
+
                 return GestureDetector(
                   onTap: () {
                     setState(() {
@@ -1546,7 +1777,9 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                  color: isSelected ? AppColors.primary : Colors.grey[300]!,
+                                  color: isSelected
+                                      ? AppColors.primary
+                                      : Colors.grey[300]!,
                                   width: isSelected ? 3 : 1.5,
                                 ),
                               ),
@@ -1555,7 +1788,8 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
                                 child: Image.network(
                                   imgUrl,
                                   fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stack) => const Icon(Icons.image),
+                                  errorBuilder: (context, error, stack) =>
+                                      const Icon(Icons.image),
                                 ),
                               ),
                             ),
@@ -1566,7 +1800,11 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
                                 child: CircleAvatar(
                                   radius: 9,
                                   backgroundColor: AppColors.primary,
-                                  child: Icon(Icons.check, size: 12, color: Colors.white),
+                                  child: Icon(
+                                    Icons.check,
+                                    size: 12,
+                                    color: Colors.white,
+                                  ),
                                 ),
                               ),
                           ],
@@ -1581,8 +1819,12 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 11,
-                              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                              color: isSelected ? AppColors.primary : Colors.black54,
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                              color: isSelected
+                                  ? AppColors.primary
+                                  : Colors.black54,
                             ),
                           ),
                         ),
@@ -1598,7 +1840,8 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
   }
 
   Widget _buildUploadModelItem() {
-    final isCustomSelected = _customModelFile != null && _selectedModelUrl == null;
+    final isCustomSelected =
+        _customModelFile != null && _selectedModelUrl == null;
     return GestureDetector(
       onTap: _showImageSourceDialog,
       child: Column(
@@ -1611,16 +1854,15 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: isCustomSelected ? AppColors.primary : Colors.grey[300]!,
+                    color: isCustomSelected
+                        ? AppColors.primary
+                        : Colors.grey[300]!,
                     width: isCustomSelected ? 3 : 1.5,
                   ),
                 ),
                 child: ClipOval(
                   child: _customModelFile != null
-                      ? Image.file(
-                          _customModelFile!,
-                          fit: BoxFit.cover,
-                        )
+                      ? Image.file(_customModelFile!, fit: BoxFit.cover)
                       : Container(
                           color: Colors.grey[100],
                           child: const Icon(
@@ -1648,7 +1890,9 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
             _customModelFile != null ? 'Ảnh đã chọn' : 'Tự tải ảnh',
             style: TextStyle(
               fontSize: 11,
-              fontWeight: isCustomSelected ? FontWeight.bold : FontWeight.normal,
+              fontWeight: isCustomSelected
+                  ? FontWeight.bold
+                  : FontWeight.normal,
               color: isCustomSelected ? AppColors.primary : Colors.black54,
             ),
           ),
@@ -1657,7 +1901,11 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
     );
   }
 
-  Widget _buildModelItem({required String name, required String url, bool isPersonal = false}) {
+  Widget _buildModelItem({
+    required String name,
+    required String url,
+    bool isPersonal = false,
+  }) {
     final isSelected = _selectedModelUrl == url && _customModelFile == null;
     return GestureDetector(
       onTap: () {
@@ -1685,12 +1933,14 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
                       ? Image.asset(
                           url,
                           fit: BoxFit.cover,
-                          errorBuilder: (context, error, stack) => const Icon(Icons.person),
+                          errorBuilder: (context, error, stack) =>
+                              const Icon(Icons.person),
                         )
                       : Image.network(
                           url,
                           fit: BoxFit.cover,
-                          errorBuilder: (context, error, stack) => const Icon(Icons.person),
+                          errorBuilder: (context, error, stack) =>
+                              const Icon(Icons.person),
                         ),
                 ),
               ),
@@ -1709,14 +1959,21 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
                   left: 0,
                   top: 0,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 4,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.blueAccent,
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: const Text(
                       'Mannequin',
-                      style: TextStyle(fontSize: 8, color: Colors.white, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 8,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
@@ -1769,7 +2026,7 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
                     color: Colors.black.withOpacity(0.08),
                     blurRadius: 20,
                     offset: const Offset(0, 8),
-                  )
+                  ),
                 ],
               ),
               child: ClipRRect(
@@ -1803,7 +2060,7 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
                                   color: Colors.greenAccent.withOpacity(0.8),
                                   blurRadius: 12,
                                   spreadRadius: 2,
-                                )
+                                ),
                               ],
                             ),
                           ),
@@ -1837,10 +2094,7 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
             Text(
               'Quá trình này có thể mất tới 15-30 giây. Vui lòng không đóng ứng dụng.',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 13,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 13, color: Colors.grey[600]),
             ),
             const SizedBox(height: 8),
             Text(
@@ -1871,7 +2125,7 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
                       color: Colors.black.withOpacity(0.08),
                       blurRadius: 20,
                       offset: const Offset(0, 8),
-                    )
+                    ),
                   ],
                 ),
                 child: ClipRRect(
@@ -1913,7 +2167,9 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.primary,
                         side: const BorderSide(color: AppColors.primary),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
                       ),
                     ),
                   ),
@@ -1923,19 +2179,26 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
                   child: SizedBox(
                     height: 52,
                     child: ElevatedButton.icon(
-                      onPressed: _isSavingImage ? null : () => _saveImageToGallery(_resultUrl!),
-                      icon: _isSavingImage 
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                          )
-                        : const Icon(Icons.download_rounded),
+                      onPressed: _isSavingImage
+                          ? null
+                          : () => _saveImageToGallery(_resultUrl!),
+                      icon: _isSavingImage
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Icon(Icons.download_rounded),
                       label: const Text('Tải về máy'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
                       ),
                     ),
                   ),
@@ -1953,11 +2216,19 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline_rounded, size: 64, color: Colors.redAccent),
+            const Icon(
+              Icons.error_outline_rounded,
+              size: 64,
+              color: Colors.redAccent,
+            ),
             const SizedBox(height: 16),
             const Text(
               'Không thể hoàn tất mặc thử',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primary),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primary,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
@@ -1978,7 +2249,9 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                 ),
                 child: const Text('Quay lại chọn mẫu'),
               ),
@@ -2005,7 +2278,12 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
                         height: 120,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(16),
-                          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 10,
+                            ),
+                          ],
                         ),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(16),
@@ -2015,19 +2293,29 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
                       if (_selectedWardrobeItem != null) ...[
                         const Padding(
                           padding: EdgeInsets.symmetric(horizontal: 8),
-                          child: Icon(Icons.link_rounded, size: 24, color: Colors.grey),
+                          child: Icon(
+                            Icons.link_rounded,
+                            size: 24,
+                            color: Colors.grey,
+                          ),
                         ),
                         Container(
                           width: 90,
                           height: 120,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(16),
-                            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 10,
+                              ),
+                            ],
                           ),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(16),
                             child: Image.network(
-                              _selectedWardrobeItem!.originalImageUrl ?? _selectedWardrobeItem!.imageUrl,
+                              _selectedWardrobeItem!.originalImageUrl ??
+                                  _selectedWardrobeItem!.imageUrl,
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -2035,24 +2323,42 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
                       ],
                       const Padding(
                         padding: EdgeInsets.symmetric(horizontal: 12),
-                        child: Icon(Icons.add_rounded, size: 28, color: Colors.grey),
+                        child: Icon(
+                          Icons.add_rounded,
+                          size: 28,
+                          color: Colors.grey,
+                        ),
                       ),
                       Container(
                         width: 90,
                         height: 120,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(16),
-                          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 10,
+                            ),
+                          ],
                         ),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(16),
                           child: _selectedModelUrl != null
                               ? (_selectedModelUrl!.startsWith('assets/')
-                                  ? Image.asset(_selectedModelUrl!, fit: BoxFit.cover)
-                                  : Image.network(_selectedModelUrl!, fit: BoxFit.cover))
+                                    ? Image.asset(
+                                        _selectedModelUrl!,
+                                        fit: BoxFit.cover,
+                                      )
+                                    : Image.network(
+                                        _selectedModelUrl!,
+                                        fit: BoxFit.cover,
+                                      ))
                               : (_customModelFile != null
-                                  ? Image.file(_customModelFile!, fit: BoxFit.cover)
-                                  : Container(color: Colors.grey[200])),
+                                    ? Image.file(
+                                        _customModelFile!,
+                                        fit: BoxFit.cover,
+                                      )
+                                    : Container(color: Colors.grey[200])),
                         ),
                       ),
                     ],
@@ -2074,7 +2380,8 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
                       children: [
                         _buildUploadModelItem(),
                         const SizedBox(width: 12),
-                        if (_personalMannequinUrl != null && _personalMannequinUrl!.isNotEmpty) ...[
+                        if (_personalMannequinUrl != null &&
+                            _personalMannequinUrl!.isNotEmpty) ...[
                           _buildModelItem(
                             name: 'Cá nhân',
                             url: _personalMannequinUrl!,
@@ -2082,22 +2389,29 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
                           ),
                           const SizedBox(width: 12),
                         ],
-                        ..._sampleModels.map((model) => Padding(
-                          padding: const EdgeInsets.only(right: 12),
-                          child: _buildModelItem(
-                            name: model['name']!,
-                            url: model['url']!,
-                            isPersonal: false,
+                        ..._sampleModels.map(
+                          (model) => Padding(
+                            padding: const EdgeInsets.only(right: 12),
+                            child: _buildModelItem(
+                              name: model['name']!,
+                              url: model['url']!,
+                              isPersonal: false,
+                            ),
                           ),
-                        )),
+                        ),
                       ],
                     ),
                   ),
-                  if (_personalMannequinUrl == null || _personalMannequinUrl!.isEmpty) ...[
+                  if (_personalMannequinUrl == null ||
+                      _personalMannequinUrl!.isEmpty) ...[
                     const SizedBox(height: 10),
                     Row(
                       children: [
-                        Icon(Icons.lightbulb_rounded, size: 16, color: Colors.amber[700]),
+                        Icon(
+                          Icons.lightbulb_rounded,
+                          size: 16,
+                          color: Colors.amber[700],
+                        ),
                         const SizedBox(width: 6),
                         Expanded(
                           child: Text(
@@ -2132,7 +2446,10 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
                     Flexible(
                       child: Text(
                         'Giữ nguyên phông nền ảnh mẫu',
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -2161,7 +2478,11 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
             ),
             child: Row(
               children: [
-                Icon(Icons.info_outline_rounded, size: 18, color: Colors.amber[800]),
+                Icon(
+                  Icons.info_outline_rounded,
+                  size: 18,
+                  color: Colors.amber[800],
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -2190,7 +2511,9 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
               ),
             ),
           ),
@@ -2241,16 +2564,17 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close_rounded, color: AppColors.primary),
+                      icon: const Icon(
+                        Icons.close_rounded,
+                        color: AppColors.primary,
+                      ),
                       onPressed: () => Navigator.pop(context),
                     ),
                   ],
                 ),
               ),
               const Divider(height: 1),
-              Expanded(
-                child: _buildBody(garmentUrl),
-              ),
+              Expanded(child: _buildBody(garmentUrl)),
             ],
           ),
         ),

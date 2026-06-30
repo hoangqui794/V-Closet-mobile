@@ -49,9 +49,7 @@ class _PersonalColorCheckPageState extends State<PersonalColorCheckPage> {
             return SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
               child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: constraints.maxHeight,
-                ),
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
                 child: IntrinsicHeight(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -76,7 +74,8 @@ class _PersonalColorCheckPageState extends State<PersonalColorCheckPage> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (_) => const PersonalColorDetailPage(),
+                                      builder: (_) =>
+                                          const PersonalColorDetailPage(),
                                     ),
                                   );
                                 },
@@ -237,10 +236,7 @@ class _TonePreviewCard extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.center,
-                colors: [
-                  Colors.black.withOpacity(0.22),
-                  Colors.transparent,
-                ],
+                colors: [Colors.black.withOpacity(0.22), Colors.transparent],
               ),
             ),
           ),

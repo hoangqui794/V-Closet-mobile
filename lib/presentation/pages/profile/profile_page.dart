@@ -105,7 +105,9 @@ class _ProfilePageState extends State<ProfilePage> {
     try {
       final msg = await _userService.deactivateAccount();
       await SignalRService().disconnect();
-      await GetIt.I<AuthApiService>().logout(); // Xoá token cục bộ
+      // Xoá session cục bộ trực tiếp thay vì gọi logout() qua API để tránh lỗi 401
+      // trên tài khoản đã vô hiệu hóa kích hoạt vòng lặp refresh-token của interceptor.
+      await _localStorage.clearSession();
 
       if (mounted) {
         showDialog(
@@ -541,7 +543,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                     final checkResult = await Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (_) => const ColorHarmonyCheckerPage(),
+                                        builder: (_) =>
+                                            const ColorHarmonyCheckerPage(),
                                       ),
                                     );
 
@@ -549,11 +552,16 @@ class _ProfilePageState extends State<ProfilePage> {
                                       final saveResult = await Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                          builder: (_) => PersonalColorDetailPage(
-                                            isFromScan: true,
-                                            scannedSkinTone: checkResult['skinTone']?.toString(),
-                                            scannedColorPref: checkResult['colorPref']?.toString(),
-                                          ),
+                                          builder: (_) =>
+                                              PersonalColorDetailPage(
+                                                isFromScan: true,
+                                                scannedSkinTone:
+                                                    checkResult['skinTone']
+                                                        ?.toString(),
+                                                scannedColorPref:
+                                                    checkResult['colorPref']
+                                                        ?.toString(),
+                                              ),
                                         ),
                                       );
 

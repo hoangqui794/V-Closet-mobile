@@ -28,12 +28,14 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Cấu hình Edge-to-Edge cho Android 15+: thanh status/navigation bar trong suốt
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-    statusBarColor: Colors.transparent,
-    statusBarIconBrightness: Brightness.dark,
-    systemNavigationBarColor: Colors.transparent,
-    systemNavigationBarIconBrightness: Brightness.dark,
-  ));
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+      systemNavigationBarColor: Colors.transparent,
+      systemNavigationBarIconBrightness: Brightness.dark,
+    ),
+  );
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   FlutterError.onError = (FlutterErrorDetails details) {
     FlutterError.presentError(details);
@@ -52,7 +54,8 @@ void main() async {
   adService.loadInterstitialAd();
 
   final hasSession = GetIt.I<AuthLocalStorage>().hasSession();
-  final isOnboardingCompleted = GetIt.I<AuthLocalStorage>().isOnboardingCompleted();
+  final isOnboardingCompleted = GetIt.I<AuthLocalStorage>()
+      .isOnboardingCompleted();
   final userRole = GetIt.I<AuthLocalStorage>().getUserRole() ?? 'Customer';
   final isPasswordSet = GetIt.I<AuthLocalStorage>().isPasswordSet();
 
@@ -63,13 +66,16 @@ void main() async {
   debugPrint('isPasswordSet: $isPasswordSet');
   debugPrint('================================');
 
-  runApp(ProviderScope(
-    child: VClosetApp(
-      hasSession: hasSession,
-      isOnboardingCompleted: userRole.toLowerCase() != 'customer' || isOnboardingCompleted,
-      isPasswordSet: isPasswordSet,
+  runApp(
+    ProviderScope(
+      child: VClosetApp(
+        hasSession: hasSession,
+        isOnboardingCompleted:
+            userRole.toLowerCase() != 'customer' || isOnboardingCompleted,
+        isPasswordSet: isPasswordSet,
+      ),
     ),
-  ));
+  );
 }
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -120,9 +126,9 @@ class _VClosetAppState extends State<VClosetApp> {
       navigatorKey: navigatorKey,
       // Named routes — mọi trang navigate qua tên, không cần import nhau
       routes: {
-        AppRoutes.login:      (_) => const LoginPage(),
+        AppRoutes.login: (_) => const LoginPage(),
         AppRoutes.onboarding: (_) => const StyleDnaQuizPage(isOnboarding: true),
-        AppRoutes.main:       (_) => const MainScreen(),
+        AppRoutes.main: (_) => const MainScreen(),
       },
       home: initialScreen,
     );

@@ -37,13 +37,13 @@ class _AdminSettingsPageState extends State<AdminSettingsPage> {
 
     try {
       final newUrl = _urlController.text.trim();
-      
+
       // 1. Lưu cục bộ ở SharedPreferences để dùng ngay lập tức
       await _localStorage.saveSurveyUrl(newUrl);
 
       // 2. Gọi API Backend để lưu lên Database
       await GetIt.I<SubscriptionApiService>().updateSurveyUrl(newUrl);
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -87,7 +87,11 @@ class _AdminSettingsPageState extends State<AdminSettingsPage> {
         elevation: 0.5,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.primary, size: 20),
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: AppColors.primary,
+            size: 20,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -112,7 +116,11 @@ class _AdminSettingsPageState extends State<AdminSettingsPage> {
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.admin_panel_settings_rounded, color: AppColors.primary, size: 28),
+                      const Icon(
+                        Icons.admin_panel_settings_rounded,
+                        color: AppColors.primary,
+                        size: 28,
+                      ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
@@ -139,14 +147,17 @@ class _AdminSettingsPageState extends State<AdminSettingsPage> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                
+
                 // Form field
                 TextFormField(
                   controller: _urlController,
                   decoration: InputDecoration(
                     labelText: 'Link Form (Google Forms/Typeform)',
                     hintText: 'https://forms.gle/...',
-                    prefixIcon: const Icon(Icons.link_rounded, color: AppColors.primaryLight),
+                    prefixIcon: const Icon(
+                      Icons.link_rounded,
+                      color: AppColors.primaryLight,
+                    ),
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -155,15 +166,24 @@ class _AdminSettingsPageState extends State<AdminSettingsPage> {
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide(color: AppColors.primary.withOpacity(0.1), width: 1),
+                      borderSide: BorderSide(
+                        color: AppColors.primary.withOpacity(0.1),
+                        width: 1,
+                      ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                      borderSide: const BorderSide(
+                        color: AppColors.primary,
+                        width: 1.5,
+                      ),
                     ),
                     errorBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: AppColors.error, width: 1),
+                      borderSide: const BorderSide(
+                        color: AppColors.error,
+                        width: 1,
+                      ),
                     ),
                   ),
                   keyboardType: TextInputType.url,
@@ -172,7 +192,8 @@ class _AdminSettingsPageState extends State<AdminSettingsPage> {
                       return 'Vui lòng nhập đường dẫn URL';
                     }
                     final url = value.trim();
-                    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                    if (!url.startsWith('http://') &&
+                        !url.startsWith('https://')) {
                       return 'Đường dẫn phải bắt đầu bằng http:// hoặc https://';
                     }
                     return null;
@@ -192,16 +213,23 @@ class _AdminSettingsPageState extends State<AdminSettingsPage> {
                 // Save button
                 ElevatedButton.icon(
                   onPressed: _isSaving ? null : _saveConfig,
-                  icon: _isSaving 
+                  icon: _isSaving
                       ? const SizedBox(
-                          width: 20, 
-                          height: 20, 
-                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
                         )
                       : const Icon(Icons.save_rounded, color: Colors.white),
                   label: const Text(
                     'Lưu cấu hình',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,

@@ -10,26 +10,37 @@ class WardrobeApiService {
   WardrobeApiService(this._apiService);
 
   /// Lấy danh sách tủ đồ từ backend
-  Future<List<ClothingItem>> getItems({String? category, String? color, String? closetId}) async {
+  Future<List<ClothingItem>> getItems({
+    String? category,
+    String? color,
+    String? closetId,
+  }) async {
     int retries = 3;
     int delayMs = 1000;
 
     for (int attempt = 1; attempt <= retries; attempt++) {
       try {
         final queryParams = <String, dynamic>{};
-        if (category != null && category.isNotEmpty) queryParams['category'] = category;
+        if (category != null && category.isNotEmpty)
+          queryParams['category'] = category;
         if (color != null && color.isNotEmpty) queryParams['color'] = color;
-        if (closetId != null && closetId.isNotEmpty) queryParams['closetId'] = closetId;
+        if (closetId != null && closetId.isNotEmpty)
+          queryParams['closetId'] = closetId;
 
-        final response = await _apiService.get('/api/Wardrobe', queryParameters: queryParams);
-        
+        final response = await _apiService.get(
+          '/api/Wardrobe',
+          queryParameters: queryParams,
+        );
+
         if (response.statusCode == 200) {
           final List<dynamic> data = response.data;
           return data.map((json) => ClothingItem.fromJson(json)).toList();
         }
-        
+
         if (attempt < retries) {
-          print('Lấy danh sách tủ đồ thất bại (status: ${response.statusCode}), đang thử lại lần $attempt...');
+          print(
+            'Lấy danh sách tủ đồ thất bại (status: ${response.statusCode}), đang thử lại lần $attempt...',
+          );
           await Future.delayed(Duration(milliseconds: delayMs * attempt));
           continue;
         }
@@ -58,7 +69,9 @@ class WardrobeApiService {
           return ClothingItem.fromJson(response.data);
         }
         if (attempt < retries) {
-          print('Lấy chi tiết item thất bại (status: ${response.statusCode}), đang thử lại lần $attempt...');
+          print(
+            'Lấy chi tiết item thất bại (status: ${response.statusCode}), đang thử lại lần $attempt...',
+          );
           await Future.delayed(Duration(milliseconds: delayMs * attempt));
           continue;
         }
@@ -78,16 +91,19 @@ class WardrobeApiService {
   /// Upload ảnh và tạo item mới vào tủ đồ
   Future<ClothingItem?> uploadAndCreateItem({
     required File imageFile,
-    required String category, // 0 = Tops, 1 = Bottoms, 2 = Outerwear, 3 = Shoes, 4 = Accessories
+    required String
+    category, // 0 = Tops, 1 = Bottoms, 2 = Outerwear, 3 = Shoes, 4 = Accessories
     String? name,
     String? brand,
   }) async {
     try {
       // Auto-compress the image if it exceeds 500 KB to avoid HTTP 413 Payload Too Large
-      File fileToUpload = await ImageCompressionHelper.compressIfNeeded(imageFile);
-      
+      File fileToUpload = await ImageCompressionHelper.compressIfNeeded(
+        imageFile,
+      );
+
       String fileName = fileToUpload.path.split(Platform.pathSeparator).last;
-      
+
       FormData formData = FormData.fromMap({
         "file": await MultipartFile.fromFile(
           fileToUpload.path,
@@ -98,8 +114,11 @@ class WardrobeApiService {
         if (brand != null) "brand": brand,
       });
 
-      final response = await _apiService.post('/api/Wardrobe/upload-and-create', data: formData);
-      
+      final response = await _apiService.post(
+        '/api/Wardrobe/upload-and-create',
+        data: formData,
+      );
+
       // Clean up temp file if created
       if (fileToUpload.path != imageFile.path) {
         try {
@@ -108,7 +127,7 @@ class WardrobeApiService {
           // Ignore temp file deletion errors
         }
       }
-      
+
       if (response.statusCode == 200 || response.statusCode == 201) {
         return ClothingItem.fromJson(response.data);
       }

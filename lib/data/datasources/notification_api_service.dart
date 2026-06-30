@@ -61,7 +61,10 @@ class NotificationApiService {
       if (response.statusCode == 200) {
         final List<dynamic> list = response.data as List<dynamic>? ?? [];
         return list
-            .map((json) => NotificationModel.fromJson(json as Map<String, dynamic>))
+            .map(
+              (json) =>
+                  NotificationModel.fromJson(json as Map<String, dynamic>),
+            )
             .toList();
       }
       throw Exception('Không thể tải danh sách thông báo.');
@@ -125,9 +128,7 @@ class NotificationApiService {
     try {
       final response = await _apiService.post(
         '/api/notifications/bulk-delete',
-        data: {
-          'notificationIds': ids,
-        },
+        data: {'notificationIds': ids},
       );
       if (response.statusCode != 200 && response.statusCode != 204) {
         throw Exception('Không thể xóa hàng loạt thông báo.');

@@ -5,10 +5,7 @@ import '../../../core/theme/app_colors.dart';
 class SurveyPage extends StatefulWidget {
   final String surveyUrl;
 
-  const SurveyPage({
-    super.key,
-    required this.surveyUrl,
-  });
+  const SurveyPage({super.key, required this.surveyUrl});
 
   @override
   State<SurveyPage> createState() => _SurveyPageState();
@@ -88,7 +85,9 @@ class _SurveyPageState extends State<SurveyPage> {
           TextButton(
             onPressed: () {
               Navigator.of(context).pop(); // Close dialog
-              Navigator.of(context).pop(true); // Close WebView page returning success
+              Navigator.of(
+                context,
+              ).pop(true); // Close WebView page returning success
             },
             child: const Text(
               'Xác nhận',
@@ -141,9 +140,7 @@ class _SurveyPageState extends State<SurveyPage> {
             ),
           if (_isLoading && _loadingProgress < 0.3)
             const Center(
-              child: CircularProgressIndicator(
-                color: AppColors.primary,
-              ),
+              child: CircularProgressIndicator(color: AppColors.primary),
             ),
         ],
       ),

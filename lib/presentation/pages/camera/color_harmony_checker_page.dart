@@ -11,14 +11,16 @@ class ColorHarmonyCheckerPage extends StatefulWidget {
   const ColorHarmonyCheckerPage({super.key});
 
   @override
-  State<ColorHarmonyCheckerPage> createState() => _ColorHarmonyCheckerPageState();
+  State<ColorHarmonyCheckerPage> createState() =>
+      _ColorHarmonyCheckerPageState();
 }
 
 class _ColorHarmonyCheckerPageState extends State<ColorHarmonyCheckerPage>
     with SingleTickerProviderStateMixin {
   final _localStorage = GetIt.I<AuthLocalStorage>();
 
-  int _flowState = 0; // 0: Landing, 1: Camera Face Capture, 2: Scanning & Analysis
+  int _flowState =
+      0; // 0: Landing, 1: Camera Face Capture, 2: Scanning & Analysis
   CameraController? _cameraController;
   List<CameraDescription>? _cameras;
   bool _isCameraInitialized = false;
@@ -87,7 +89,8 @@ class _ColorHarmonyCheckerPageState extends State<ColorHarmonyCheckerPage>
   }
 
   Future<void> _takePhoto() async {
-    if (_cameraController == null || !_cameraController!.value.isInitialized) return;
+    if (_cameraController == null || !_cameraController!.value.isInitialized)
+      return;
     try {
       final file = await _cameraController!.takePicture();
       setState(() {
@@ -104,8 +107,10 @@ class _ColorHarmonyCheckerPageState extends State<ColorHarmonyCheckerPage>
     _laserController.repeat(reverse: true);
     _analysisStep = 0;
     _analysisStatus = "Đang nhận diện cấu trúc khuôn mặt...";
-    
-    _analysisTimer = Timer.periodic(const Duration(milliseconds: 1100), (timer) async {
+
+    _analysisTimer = Timer.periodic(const Duration(milliseconds: 1100), (
+      timer,
+    ) async {
       _analysisStep++;
       if (_analysisStep == 1) {
         setState(() {
@@ -122,11 +127,12 @@ class _ColorHarmonyCheckerPageState extends State<ColorHarmonyCheckerPage>
       } else if (_analysisStep >= 4) {
         timer.cancel();
         _laserController.stop();
-        
+
         final skinTones = ['sang', 'trung_binh', 'ngam', 'toi'];
         final chosenSkinTone = (skinTones..shuffle()).first;
-        final chosenColorPref = chosenSkinTone == 'sang' || chosenSkinTone == 'toi' ? 'lanh' : 'am';
-        
+        final chosenColorPref =
+            chosenSkinTone == 'sang' || chosenSkinTone == 'toi' ? 'lanh' : 'am';
+
         if (mounted) {
           Navigator.pop(context, {
             'skinTone': chosenSkinTone,
@@ -247,7 +253,11 @@ class _ColorHarmonyCheckerPageState extends State<ColorHarmonyCheckerPage>
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                       shadows: [
-                        Shadow(color: Colors.black87, blurRadius: 4, offset: Offset(0, 2)),
+                        Shadow(
+                          color: Colors.black87,
+                          blurRadius: 4,
+                          offset: Offset(0, 2),
+                        ),
                       ],
                     ),
                   ),
@@ -258,7 +268,11 @@ class _ColorHarmonyCheckerPageState extends State<ColorHarmonyCheckerPage>
                       color: Colors.white70,
                       fontSize: 12,
                       shadows: [
-                        Shadow(color: Colors.black87, blurRadius: 4, offset: Offset(0, 1)),
+                        Shadow(
+                          color: Colors.black87,
+                          blurRadius: 4,
+                          offset: Offset(0, 1),
+                        ),
                       ],
                     ),
                   ),
@@ -301,20 +315,18 @@ class _ColorHarmonyCheckerPageState extends State<ColorHarmonyCheckerPage>
       body: Stack(
         fit: StackFit.expand,
         children: [
-          Image.file(
-            File(_capturedFile!.path),
-            fit: BoxFit.cover,
-          ),
+          Image.file(File(_capturedFile!.path), fit: BoxFit.cover),
           Positioned.fill(
-            child: Container(
-              color: Colors.black.withOpacity(0.4),
-            ),
+            child: Container(color: Colors.black.withOpacity(0.4)),
           ),
           AnimatedBuilder(
             animation: _laserAnimation,
             builder: (context, child) {
-              final double topOffset = MediaQuery.of(context).size.height * 0.15 + 
-                   (_laserAnimation.value * MediaQuery.of(context).size.height * 0.6);
+              final double topOffset =
+                  MediaQuery.of(context).size.height * 0.15 +
+                  (_laserAnimation.value *
+                      MediaQuery.of(context).size.height *
+                      0.6);
               return Positioned(
                 top: topOffset,
                 left: 0,
@@ -345,7 +357,10 @@ class _ColorHarmonyCheckerPageState extends State<ColorHarmonyCheckerPage>
                 ),
                 const SizedBox(height: 32),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.black.withOpacity(0.75),
                     borderRadius: BorderRadius.circular(16),
@@ -379,9 +394,7 @@ class _ColorHarmonyCheckerPageState extends State<ColorHarmonyCheckerPage>
             return SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
               child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: constraints.maxHeight,
-                ),
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
                 child: IntrinsicHeight(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -502,7 +515,6 @@ class _ColorHarmonyCheckerPageState extends State<ColorHarmonyCheckerPage>
   }
 }
 
-
 class _TonePreviewCard extends StatelessWidget {
   final String title;
   final String subtitle;
@@ -552,10 +564,7 @@ class _TonePreviewCard extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.center,
-                colors: [
-                  Colors.black.withOpacity(0.22),
-                  Colors.transparent,
-                ],
+                colors: [Colors.black.withOpacity(0.22), Colors.transparent],
               ),
             ),
           ),

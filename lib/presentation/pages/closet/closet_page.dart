@@ -22,10 +22,7 @@ import '../../../../data/datasources/gemini_api_service.dart';
 import 'canvas_outfit_page.dart';
 import '../outfit/outfit_page.dart';
 
-enum ClosetViewMode {
-  closet,
-  items,
-}
+enum ClosetViewMode { closet, items }
 
 class ClosetPage extends StatefulWidget {
   final VoidCallback? onMenuPressed;
@@ -36,8 +33,7 @@ class ClosetPage extends StatefulWidget {
   State<ClosetPage> createState() => _ClosetPageState();
 }
 
-class _ClosetPageState extends State<ClosetPage>
-    with TickerProviderStateMixin {
+class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
   final WardrobeApiService _apiService = GetIt.I<WardrobeApiService>();
   final OutfitApiService _outfitApiService = GetIt.I<OutfitApiService>();
   final ClosetApiService _closetApiService = GetIt.I<ClosetApiService>();
@@ -109,7 +105,9 @@ class _ClosetPageState extends State<ClosetPage>
     _tabController = TabController(length: 2, vsync: this);
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging) {
-        if (_tabController.index == 1 && _outfits.isEmpty && !_isLoadingOutfits) {
+        if (_tabController.index == 1 &&
+            _outfits.isEmpty &&
+            !_isLoadingOutfits) {
           _fetchOutfits();
         }
       }
@@ -196,9 +194,9 @@ class _ClosetPageState extends State<ClosetPage>
     } catch (e) {
       if (!mounted) return;
       setState(() => _isLoadingOutfits = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Không thể tải trang phục: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Không thể tải trang phục: $e')));
     }
   }
 
@@ -263,7 +261,9 @@ class _ClosetPageState extends State<ClosetPage>
                             }
                           },
                           icon: Icon(
-                            _selectedClosetId != null ? Icons.arrow_back_rounded : Icons.menu_rounded,
+                            _selectedClosetId != null
+                                ? Icons.arrow_back_rounded
+                                : Icons.menu_rounded,
                             color: AppColors.primary,
                           ),
                         ),
@@ -373,7 +373,10 @@ class _ClosetPageState extends State<ClosetPage>
 
                 // ── Tab Bar ──────────────────────────────────────────────
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 4,
+                  ),
                   child: Container(
                     decoration: BoxDecoration(
                       color: AppColors.primary.withOpacity(0.08),
@@ -417,10 +420,7 @@ class _ClosetPageState extends State<ClosetPage>
                 Expanded(
                   child: TabBarView(
                     controller: _tabController,
-                    children: [
-                      _buildWardrobeTab(),
-                      _buildOutfitCollageTab(),
-                    ],
+                    children: [_buildWardrobeTab(), _buildOutfitCollageTab()],
                   ),
                 ),
               ],
@@ -433,7 +433,9 @@ class _ClosetPageState extends State<ClosetPage>
   }
 
   Widget _buildCabinetOverlay() {
-    if (!_showCabinet || _cabinetController == null || _cabinetOpacityAnimation == null) {
+    if (!_showCabinet ||
+        _cabinetController == null ||
+        _cabinetOpacityAnimation == null) {
       return const SizedBox.shrink();
     }
 
@@ -456,7 +458,9 @@ class _ClosetPageState extends State<ClosetPage>
                 final height = constraints.maxHeight;
 
                 // Slide translation values using a smooth spring curve
-                final curvedValue = Curves.easeInOutQuart.transform(slideProgress);
+                final curvedValue = Curves.easeInOutQuart.transform(
+                  slideProgress,
+                );
                 final leftSlide = -halfWidth * curvedValue;
                 final rightSlide = halfWidth * curvedValue;
 
@@ -509,13 +513,17 @@ class _ClosetPageState extends State<ClosetPage>
     required double height,
   }) {
     final goldColor = const Color(0xFFD4AF37);
-    final glassColor = const Color(0xFF1E2135).withOpacity(0.35); // Sleek translucent dark glass
+    final glassColor = const Color(
+      0xFF1E2135,
+    ).withOpacity(0.35); // Sleek translucent dark glass
     final metalFrameColor = const Color(0xFF3F4260);
 
     return GestureDetector(
       onTap: () {
         final controller = _cabinetController;
-        if (controller != null && !controller.isAnimating && controller.value == 0) {
+        if (controller != null &&
+            !controller.isAnimating &&
+            controller.value == 0) {
           controller.forward();
         }
       },
@@ -526,8 +534,14 @@ class _ClosetPageState extends State<ClosetPage>
             decoration: BoxDecoration(
               color: glassColor,
               border: Border(
-                left: BorderSide(color: isLeft ? metalFrameColor : goldColor.withOpacity(0.4), width: isLeft ? 4 : 1.5),
-                right: BorderSide(color: !isLeft ? metalFrameColor : goldColor.withOpacity(0.4), width: !isLeft ? 4 : 1.5),
+                left: BorderSide(
+                  color: isLeft ? metalFrameColor : goldColor.withOpacity(0.4),
+                  width: isLeft ? 4 : 1.5,
+                ),
+                right: BorderSide(
+                  color: !isLeft ? metalFrameColor : goldColor.withOpacity(0.4),
+                  width: !isLeft ? 4 : 1.5,
+                ),
                 top: BorderSide(color: metalFrameColor, width: 3),
                 bottom: BorderSide(color: metalFrameColor, width: 4),
               ),
@@ -539,9 +553,15 @@ class _ClosetPageState extends State<ClosetPage>
                 Column(
                   children: [
                     const Spacer(flex: 1),
-                    Container(height: 1.5, color: Colors.white.withOpacity(0.08)),
+                    Container(
+                      height: 1.5,
+                      color: Colors.white.withOpacity(0.08),
+                    ),
                     const Spacer(flex: 1),
-                    Container(height: 1.5, color: Colors.white.withOpacity(0.08)),
+                    Container(
+                      height: 1.5,
+                      color: Colors.white.withOpacity(0.08),
+                    ),
                     const Spacer(flex: 1),
                   ],
                 ),
@@ -556,9 +576,22 @@ class _ClosetPageState extends State<ClosetPage>
                     height: 30,
                     decoration: BoxDecoration(
                       border: Border(
-                        top: BorderSide(color: goldColor.withOpacity(0.8), width: 2),
-                        left: isLeft ? BorderSide(color: goldColor.withOpacity(0.8), width: 2) : BorderSide.none,
-                        right: !isLeft ? BorderSide(color: goldColor.withOpacity(0.8), width: 2) : BorderSide.none,
+                        top: BorderSide(
+                          color: goldColor.withOpacity(0.8),
+                          width: 2,
+                        ),
+                        left: isLeft
+                            ? BorderSide(
+                                color: goldColor.withOpacity(0.8),
+                                width: 2,
+                              )
+                            : BorderSide.none,
+                        right: !isLeft
+                            ? BorderSide(
+                                color: goldColor.withOpacity(0.8),
+                                width: 2,
+                              )
+                            : BorderSide.none,
                       ),
                     ),
                   ),
@@ -572,9 +605,22 @@ class _ClosetPageState extends State<ClosetPage>
                     height: 30,
                     decoration: BoxDecoration(
                       border: Border(
-                        bottom: BorderSide(color: goldColor.withOpacity(0.8), width: 2),
-                        left: isLeft ? BorderSide(color: goldColor.withOpacity(0.8), width: 2) : BorderSide.none,
-                        right: !isLeft ? BorderSide(color: goldColor.withOpacity(0.8), width: 2) : BorderSide.none,
+                        bottom: BorderSide(
+                          color: goldColor.withOpacity(0.8),
+                          width: 2,
+                        ),
+                        left: isLeft
+                            ? BorderSide(
+                                color: goldColor.withOpacity(0.8),
+                                width: 2,
+                              )
+                            : BorderSide.none,
+                        right: !isLeft
+                            ? BorderSide(
+                                color: goldColor.withOpacity(0.8),
+                                width: 2,
+                              )
+                            : BorderSide.none,
                       ),
                     ),
                   ),
@@ -584,7 +630,10 @@ class _ClosetPageState extends State<ClosetPage>
                 Container(
                   margin: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    border: Border.all(color: goldColor.withOpacity(0.12), width: 1),
+                    border: Border.all(
+                      color: goldColor.withOpacity(0.12),
+                      width: 1,
+                    ),
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -605,7 +654,7 @@ class _ClosetPageState extends State<ClosetPage>
                           color: Colors.black.withOpacity(0.3),
                           blurRadius: 4,
                           offset: Offset(isLeft ? 2 : -2, 2),
-                        )
+                        ),
                       ],
                     ),
                     child: Center(
@@ -639,16 +688,18 @@ class _ClosetPageState extends State<ClosetPage>
     return PopupMenuButton<ClosetViewMode>(
       offset: const Offset(0, 40),
       color: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       onSelected: _setViewMode,
       itemBuilder: (BuildContext context) => <PopupMenuEntry<ClosetViewMode>>[
         PopupMenuItem<ClosetViewMode>(
           value: ClosetViewMode.closet,
           child: Row(
             children: const [
-              Icon(Icons.door_sliding_outlined, color: AppColors.primary, size: 20),
+              Icon(
+                Icons.door_sliding_outlined,
+                color: AppColors.primary,
+                size: 20,
+              ),
               SizedBox(width: 12),
               Text(
                 'Xem tủ đồ',
@@ -665,7 +716,11 @@ class _ClosetPageState extends State<ClosetPage>
           value: ClosetViewMode.items,
           child: Row(
             children: const [
-              Icon(Icons.checkroom_outlined, color: AppColors.primary, size: 20),
+              Icon(
+                Icons.checkroom_outlined,
+                color: AppColors.primary,
+                size: 20,
+              ),
               SizedBox(width: 12),
               Text(
                 'Xem các món đồ',
@@ -737,7 +792,9 @@ class _ClosetPageState extends State<ClosetPage>
           badgeText: 'AI',
           onTap: () {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Tính năng Tân trang AI đang được phát triển.')),
+              const SnackBar(
+                content: Text('Tính năng Tân trang AI đang được phát triển.'),
+              ),
             );
           },
         ),
@@ -765,7 +822,10 @@ class _ClosetPageState extends State<ClosetPage>
                   decoration: BoxDecoration(
                     color: Colors.white,
                     shape: BoxShape.circle,
-                    border: Border.all(color: AppColors.secondary.withOpacity(0.5), width: 1.2),
+                    border: Border.all(
+                      color: AppColors.secondary.withOpacity(0.5),
+                      width: 1.2,
+                    ),
                     boxShadow: [
                       BoxShadow(
                         color: AppColors.primary.withOpacity(0.04),
@@ -774,20 +834,21 @@ class _ClosetPageState extends State<ClosetPage>
                       ),
                     ],
                   ),
-                  child: Icon(
-                    icon,
-                    color: AppColors.primary,
-                    size: 24,
-                  ),
+                  child: Icon(icon, color: AppColors.primary, size: 24),
                 ),
                 if (badgeText != null)
                   Positioned(
                     top: -6,
                     right: -10,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 5,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
-                        color: badgeText == 'AI' ? const Color(0xFF8A2BE2) : AppColors.primaryLight,
+                        color: badgeText == 'AI'
+                            ? const Color(0xFF8A2BE2)
+                            : AppColors.primaryLight,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
@@ -848,15 +909,20 @@ class _ClosetPageState extends State<ClosetPage>
 
   Widget _buildCustomClosetCard(Map<String, dynamic> closet) {
     final String closetId = (closet['id'] ?? closet['Id'])?.toString() ?? '';
-    final String name = (closet['name'] ?? closet['Name'])?.toString() ?? 'Tủ đồ';
+    final String name =
+        (closet['name'] ?? closet['Name'])?.toString() ?? 'Tủ đồ';
     final int itemCount = closet['itemCount'] ?? closet['ItemCount'] ?? 0;
-    final List<dynamic> thumbnailUrls = closet['thumbnailUrls'] ?? closet['ThumbnailUrls'] ?? [];
+    final List<dynamic> thumbnailUrls =
+        closet['thumbnailUrls'] ?? closet['ThumbnailUrls'] ?? [];
 
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.secondary.withOpacity(0.4), width: 1),
+        border: Border.all(
+          color: AppColors.secondary.withOpacity(0.4),
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
             color: AppColors.primary.withOpacity(0.04),
@@ -922,7 +988,10 @@ class _ClosetPageState extends State<ClosetPage>
                         offset: const Offset(0, 28),
                         onSelected: (value) async {
                           if (value == 'rename') {
-                            await _renameCloset(closetId: closetId, currentName: name);
+                            await _renameCloset(
+                              closetId: closetId,
+                              currentName: name,
+                            );
                           } else if (value == 'delete') {
                             await _deleteCloset(closetId: closetId, name: name);
                           }
@@ -933,7 +1002,11 @@ class _ClosetPageState extends State<ClosetPage>
                             height: 44,
                             child: Row(
                               children: [
-                                Icon(Icons.edit_rounded, size: 18, color: AppColors.primary),
+                                Icon(
+                                  Icons.edit_rounded,
+                                  size: 18,
+                                  color: AppColors.primary,
+                                ),
                                 SizedBox(width: 10),
                                 Text(
                                   'Đổi tên',
@@ -951,7 +1024,11 @@ class _ClosetPageState extends State<ClosetPage>
                             height: 44,
                             child: Row(
                               children: [
-                                Icon(Icons.delete_outline_rounded, size: 18, color: Colors.redAccent),
+                                Icon(
+                                  Icons.delete_outline_rounded,
+                                  size: 18,
+                                  color: Colors.redAccent,
+                                ),
                                 SizedBox(width: 10),
                                 Text(
                                   'Xóa tủ đồ',
@@ -988,7 +1065,11 @@ class _ClosetPageState extends State<ClosetPage>
     );
   }
 
-  Widget _buildCustomCollageGrid(List<dynamic> urls, String closetId, int totalCount) {
+  Widget _buildCustomCollageGrid(
+    List<dynamic> urls,
+    String closetId,
+    int totalCount,
+  ) {
     return AspectRatio(
       aspectRatio: 1.0,
       child: Container(
@@ -1028,7 +1109,12 @@ class _ClosetPageState extends State<ClosetPage>
     );
   }
 
-  Widget _buildCustomCollageCell(List<dynamic> urls, int index, int totalCount, {bool isLast = false}) {
+  Widget _buildCustomCollageCell(
+    List<dynamic> urls,
+    int index,
+    int totalCount, {
+    bool isLast = false,
+  }) {
     if (index >= urls.length) {
       return Container(
         decoration: BoxDecoration(
@@ -1093,7 +1179,10 @@ class _ClosetPageState extends State<ClosetPage>
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.secondary.withOpacity(0.4), width: 1),
+        border: Border.all(
+          color: AppColors.secondary.withOpacity(0.4),
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
             color: AppColors.primary.withOpacity(0.04),
@@ -1328,7 +1417,9 @@ class _ClosetPageState extends State<ClosetPage>
       builder: (dialogContext) {
         return AlertDialog(
           backgroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           title: const Text(
             'Tạo tủ đồ mới',
             style: TextStyle(
@@ -1349,7 +1440,10 @@ class _ClosetPageState extends State<ClosetPage>
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Hủy', style: TextStyle(color: AppColors.primaryLight)),
+              child: const Text(
+                'Hủy',
+                style: TextStyle(color: AppColors.primaryLight),
+              ),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -1362,12 +1456,18 @@ class _ClosetPageState extends State<ClosetPage>
                     Navigator.pop(context); // Close loading dialog
                     if (success) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Đã tạo tủ đồ "$name" thành công!')),
+                        SnackBar(
+                          content: Text('Đã tạo tủ đồ "$name" thành công!'),
+                        ),
                       );
                       _fetchItems();
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Không thể tạo tủ đồ. Vui lòng thử lại!')),
+                        const SnackBar(
+                          content: Text(
+                            'Không thể tạo tủ đồ. Vui lòng thử lại!',
+                          ),
+                        ),
                       );
                     }
                   }
@@ -1375,7 +1475,9 @@ class _ClosetPageState extends State<ClosetPage>
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
               child: const Text('Tạo', style: TextStyle(color: Colors.white)),
             ),
@@ -1387,17 +1489,25 @@ class _ClosetPageState extends State<ClosetPage>
 
   /// Dùng cho nút 3 chấm trong card tủ đồ — đổi tên theo closetId cụ thể
 
-  Future<void> _renameCloset({required String closetId, required String currentName}) async {
+  Future<void> _renameCloset({
+    required String closetId,
+    required String currentName,
+  }) async {
     final textController = TextEditingController(text: currentName);
     final newName = await showDialog<String>(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
           backgroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           title: const Text(
             'Đổi tên tủ đồ',
-            style: TextStyle(fontWeight: FontWeight.w800, color: AppColors.primary),
+            style: TextStyle(
+              fontWeight: FontWeight.w800,
+              color: AppColors.primary,
+            ),
           ),
           content: TextField(
             controller: textController,
@@ -1412,7 +1522,10 @@ class _ClosetPageState extends State<ClosetPage>
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Hủy', style: TextStyle(color: AppColors.primaryLight)),
+              child: const Text(
+                'Hủy',
+                style: TextStyle(color: AppColors.primaryLight),
+              ),
             ),
             ElevatedButton(
               onPressed: () {
@@ -1421,7 +1534,9 @@ class _ClosetPageState extends State<ClosetPage>
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
               child: const Text('Lưu', style: TextStyle(color: Colors.white)),
             ),
@@ -1445,7 +1560,9 @@ class _ClosetPageState extends State<ClosetPage>
           _fetchItems();
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Đổi tên tủ đồ thất bại. Vui lòng thử lại!')),
+            const SnackBar(
+              content: Text('Đổi tên tủ đồ thất bại. Vui lòng thử lại!'),
+            ),
           );
         }
       }
@@ -1453,16 +1570,24 @@ class _ClosetPageState extends State<ClosetPage>
   }
 
   /// Dùng cho nút 3 chấm trong card tủ đồ — xóa theo closetId cụ thể
-  Future<void> _deleteCloset({required String closetId, required String name}) async {
+  Future<void> _deleteCloset({
+    required String closetId,
+    required String name,
+  }) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
           backgroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           title: const Text(
             'Xác nhận xóa tủ đồ',
-            style: TextStyle(fontWeight: FontWeight.w800, color: Colors.redAccent),
+            style: TextStyle(
+              fontWeight: FontWeight.w800,
+              color: Colors.redAccent,
+            ),
           ),
           content: Text(
             'Bạn có chắc chắn muốn xóa tủ đồ "$name" không?\n\nTất cả quần áo trong tủ đồ sẽ được tự động chuyển về tủ đồ chung (không bị xóa mất).',
@@ -1471,13 +1596,18 @@ class _ClosetPageState extends State<ClosetPage>
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext, false),
-              child: const Text('Hủy', style: TextStyle(color: AppColors.primaryLight)),
+              child: const Text(
+                'Hủy',
+                style: TextStyle(color: AppColors.primaryLight),
+              ),
             ),
             ElevatedButton(
               onPressed: () => Navigator.pop(dialogContext, true),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.redAccent,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
               child: const Text('Xóa', style: TextStyle(color: Colors.white)),
             ),
@@ -1505,7 +1635,9 @@ class _ClosetPageState extends State<ClosetPage>
           _fetchItems();
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Xóa tủ đồ thất bại. Vui lòng thử lại!')),
+            const SnackBar(
+              content: Text('Xóa tủ đồ thất bại. Vui lòng thử lại!'),
+            ),
           );
         }
       }
@@ -1513,15 +1645,33 @@ class _ClosetPageState extends State<ClosetPage>
   }
 
   void _showStyleStatsBottomSheet() {
-
     final int totalCount = _items.length;
-    final int topCount = _items.where((i) => i.category.toLowerCase() == 'top').length;
-    final int bottomCount = _items.where((i) => i.category.toLowerCase() == 'bottom').length;
-    final int dressCount = _items.where((i) => i.category.toLowerCase() == 'dress').length;
-    final int outerwearCount = _items.where((i) => i.category.toLowerCase() == 'outerwear').length;
-    final int shoesCount = _items.where((i) => i.category.toLowerCase() == 'shoes').length;
-    final int bagCount = _items.where((i) => i.category.toLowerCase() == 'bag').length;
-    final int otherCount = totalCount - (topCount + bottomCount + dressCount + outerwearCount + shoesCount + bagCount);
+    final int topCount = _items
+        .where((i) => i.category.toLowerCase() == 'top')
+        .length;
+    final int bottomCount = _items
+        .where((i) => i.category.toLowerCase() == 'bottom')
+        .length;
+    final int dressCount = _items
+        .where((i) => i.category.toLowerCase() == 'dress')
+        .length;
+    final int outerwearCount = _items
+        .where((i) => i.category.toLowerCase() == 'outerwear')
+        .length;
+    final int shoesCount = _items
+        .where((i) => i.category.toLowerCase() == 'shoes')
+        .length;
+    final int bagCount = _items
+        .where((i) => i.category.toLowerCase() == 'bag')
+        .length;
+    final int otherCount =
+        totalCount -
+        (topCount +
+            bottomCount +
+            dressCount +
+            outerwearCount +
+            shoesCount +
+            bagCount);
 
     showModalBottomSheet(
       context: context,
@@ -1696,8 +1846,8 @@ class _ClosetPageState extends State<ClosetPage>
           child: _isLoading
               ? const Center(child: CircularProgressIndicator())
               : _items.isEmpty
-                  ? _emptyState()
-                  : _buildWardrobeBody(),
+              ? _emptyState()
+              : _buildWardrobeBody(),
         ),
       ],
     );
@@ -1737,7 +1887,9 @@ class _ClosetPageState extends State<ClosetPage>
       final c = item.category.toLowerCase();
       return c == 'top' || c == 'dress' || c == 'outerwear';
     }).toList();
-    final bottomItems = _items.where((item) => item.category.toLowerCase() == 'bottom').toList();
+    final bottomItems = _items
+        .where((item) => item.category.toLowerCase() == 'bottom')
+        .toList();
     final shoesBags = _items.where((item) {
       final c = item.category.toLowerCase();
       return c == 'shoes' || c == 'bag';
@@ -1800,7 +1952,10 @@ class _ClosetPageState extends State<ClosetPage>
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.secondary.withOpacity(0.4), width: 1),
+        border: Border.all(
+          color: AppColors.secondary.withOpacity(0.4),
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
             color: AppColors.primary.withOpacity(0.05),
@@ -1824,9 +1979,14 @@ class _ClosetPageState extends State<ClosetPage>
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
               ),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
+              ),
               border: Border(
-                bottom: BorderSide(color: AppColors.secondary.withOpacity(0.3), width: 1),
+                bottom: BorderSide(
+                  color: AppColors.secondary.withOpacity(0.3),
+                  width: 1,
+                ),
               ),
             ),
             child: Row(
@@ -1838,7 +1998,10 @@ class _ClosetPageState extends State<ClosetPage>
                   decoration: BoxDecoration(
                     color: AppColors.primary.withOpacity(0.08),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.primary.withOpacity(0.12), width: 1),
+                    border: Border.all(
+                      color: AppColors.primary.withOpacity(0.12),
+                      width: 1,
+                    ),
                   ),
                   child: Center(
                     child: Text(icon, style: const TextStyle(fontSize: 18)),
@@ -1870,7 +2033,10 @@ class _ClosetPageState extends State<ClosetPage>
                 ),
                 // Item count badge
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.primary,
                     borderRadius: BorderRadius.circular(20),
@@ -1896,7 +2062,8 @@ class _ClosetPageState extends State<ClosetPage>
                 children: [
                   // Left bracket
                   Container(
-                    width: 6, height: 12,
+                    width: 6,
+                    height: 12,
                     decoration: BoxDecoration(
                       color: const Color(0xFFB0B0B0),
                       borderRadius: BorderRadius.circular(3),
@@ -1907,17 +2074,26 @@ class _ClosetPageState extends State<ClosetPage>
                       height: 5,
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                          colors: [Color(0xFFB8B8B8), Color(0xFFE8E8E8), Color(0xFFB8B8B8)],
+                          colors: [
+                            Color(0xFFB8B8B8),
+                            Color(0xFFE8E8E8),
+                            Color(0xFFB8B8B8),
+                          ],
                         ),
                         borderRadius: BorderRadius.circular(3),
                         boxShadow: const [
-                          BoxShadow(color: Colors.black12, blurRadius: 3, offset: Offset(0, 2))
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 3,
+                            offset: Offset(0, 2),
+                          ),
                         ],
                       ),
                     ),
                   ),
                   Container(
-                    width: 6, height: 12,
+                    width: 6,
+                    height: 12,
                     decoration: BoxDecoration(
                       color: const Color(0xFFB0B0B0),
                       borderRadius: BorderRadius.circular(3),
@@ -1934,18 +2110,30 @@ class _ClosetPageState extends State<ClosetPage>
               height: 4,
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFFC0C0C0), Color(0xFFE8E8E8), Color(0xFFC0C0C0)],
+                  colors: [
+                    Color(0xFFC0C0C0),
+                    Color(0xFFE8E8E8),
+                    Color(0xFFC0C0C0),
+                  ],
                 ),
                 borderRadius: BorderRadius.circular(2),
                 boxShadow: const [
-                  BoxShadow(color: Colors.black12, blurRadius: 2, offset: Offset(0, 1)),
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 2,
+                    offset: Offset(0, 1),
+                  ),
                 ],
               ),
             ),
 
           // ── Horizontal scroll strip ────────────────────────────────
           SizedBox(
-            height: isHanger ? 200 : isRack ? 140 : 160,
+            height: isHanger
+                ? 200
+                : isRack
+                ? 140
+                : 160,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               physics: const BouncingScrollPhysics(),
@@ -1959,7 +2147,11 @@ class _ClosetPageState extends State<ClosetPage>
                     onTap: () => _showItemDetails(item),
                     child: _buildCompactClothingCard(
                       item: item,
-                      cardWidth: isHanger ? 110.0 : isRack ? 100.0 : 110.0,
+                      cardWidth: isHanger
+                          ? 110.0
+                          : isRack
+                          ? 100.0
+                          : 110.0,
                       isHanger: isHanger,
                     ),
                   ),
@@ -1985,7 +2177,10 @@ class _ClosetPageState extends State<ClosetPage>
       decoration: BoxDecoration(
         color: const Color(0xFFF8F9FB),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.secondary.withOpacity(0.3), width: 0.8),
+        border: Border.all(
+          color: AppColors.secondary.withOpacity(0.3),
+          width: 0.8,
+        ),
         boxShadow: [
           BoxShadow(
             color: AppColors.primary.withOpacity(0.06),
@@ -2000,14 +2195,20 @@ class _ClosetPageState extends State<ClosetPage>
           // Item image
           Expanded(
             child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(13)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(13),
+              ),
               child: Stack(
                 fit: StackFit.expand,
                 children: [
                   if (item.imageUrl.isEmpty)
                     Container(
                       color: AppColors.secondary.withOpacity(0.3),
-                      child: const Icon(Icons.checkroom_rounded, color: AppColors.primary, size: 32),
+                      child: const Icon(
+                        Icons.checkroom_rounded,
+                        color: AppColors.primary,
+                        size: 32,
+                      ),
                     )
                   else
                     Container(
@@ -2016,11 +2217,12 @@ class _ClosetPageState extends State<ClosetPage>
                       child: Image.network(
                         item.imageUrl,
                         fit: BoxFit.contain,
-                        errorBuilder: (context, error, stackTrace) => const Icon(
-                          Icons.broken_image_outlined,
-                          color: AppColors.primaryLight,
-                          size: 28,
-                        ),
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(
+                              Icons.broken_image_outlined,
+                              color: AppColors.primaryLight,
+                              size: 28,
+                            ),
                       ),
                     ),
                 ],
@@ -2059,7 +2261,13 @@ class _ClosetPageState extends State<ClosetPage>
           children: [
             CircularProgressIndicator(color: AppColors.primary),
             const SizedBox(height: 16),
-            Text('Đang tải bộ phối...', style: TextStyle(color: AppColors.primaryLight, fontWeight: FontWeight.w600)),
+            Text(
+              'Đang tải bộ phối...',
+              style: TextStyle(
+                color: AppColors.primaryLight,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ],
         ),
       );
@@ -2093,7 +2301,11 @@ class _ClosetPageState extends State<ClosetPage>
             ),
             child: Row(
               children: [
-                const Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 22),
+                const Icon(
+                  Icons.auto_awesome_rounded,
+                  color: Colors.white,
+                  size: 22,
+                ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Column(
@@ -2119,7 +2331,10 @@ class _ClosetPageState extends State<ClosetPage>
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(20),
@@ -2155,7 +2370,11 @@ class _ClosetPageState extends State<ClosetPage>
               padding: EdgeInsets.fromLTRB(20, 20, 20, 10),
               child: Row(
                 children: [
-                  Icon(Icons.grid_view_rounded, size: 16, color: AppColors.primaryLight),
+                  Icon(
+                    Icons.grid_view_rounded,
+                    size: 16,
+                    color: AppColors.primaryLight,
+                  ),
                   SizedBox(width: 6),
                   Text(
                     'T\u1ea5t c\u1ea3 b\u1ed9 ph\u1ed1i',
@@ -2172,19 +2391,16 @@ class _ClosetPageState extends State<ClosetPage>
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 110),
             sliver: SliverGrid(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final outfit = _outfits[index + 1];
-                  return FadeInUp(
-                    delay: Duration(milliseconds: 45 * (index % 6)),
-                    child: GestureDetector(
-                      onTap: () => _showOutfitDetails(outfit),
-                      child: _outfitCollageCard(outfit),
-                    ),
-                  );
-                },
-                childCount: _outfits.length - 1,
-              ),
+              delegate: SliverChildBuilderDelegate((context, index) {
+                final outfit = _outfits[index + 1];
+                return FadeInUp(
+                  delay: Duration(milliseconds: 45 * (index % 6)),
+                  child: GestureDetector(
+                    onTap: () => _showOutfitDetails(outfit),
+                    child: _outfitCollageCard(outfit),
+                  ),
+                );
+              }, childCount: _outfits.length - 1),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 crossAxisSpacing: 12,
@@ -2200,8 +2416,12 @@ class _ClosetPageState extends State<ClosetPage>
   }
 
   Widget _buildFeaturedOutfitCard(Map<String, dynamic> outfit) {
-    final String title = outfit['Title']?.toString() ?? outfit['title']?.toString() ?? 'Bộ phối đồ';
-    final String? snapshotUrl = outfit['CanvasSnapshotUrl']?.toString() ??
+    final String title =
+        outfit['Title']?.toString() ??
+        outfit['title']?.toString() ??
+        'Bộ phối đồ';
+    final String? snapshotUrl =
+        outfit['CanvasSnapshotUrl']?.toString() ??
         outfit['canvasSnapshotUrl']?.toString() ??
         outfit['snapshotUrl']?.toString();
 
@@ -2240,13 +2460,19 @@ class _ClosetPageState extends State<ClosetPage>
                   snapshotUrl,
                   fit: BoxFit.contain,
                   errorBuilder: (context, error, stackTrace) => const Icon(
-                    Icons.broken_image_outlined, size: 60, color: AppColors.primaryLight,
+                    Icons.broken_image_outlined,
+                    size: 60,
+                    color: AppColors.primaryLight,
                   ),
                 ),
               )
             else
               const Center(
-                child: Icon(Icons.style_rounded, size: 90, color: AppColors.muted),
+                child: Icon(
+                  Icons.style_rounded,
+                  size: 90,
+                  color: AppColors.muted,
+                ),
               ),
             // Strong gradient overlay at bottom
             Positioned.fill(
@@ -2270,7 +2496,10 @@ class _ClosetPageState extends State<ClosetPage>
               top: 16,
               left: 16,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
                     colors: [Color(0xFFD4AF37), Color(0xFFF0C040)],
@@ -2317,7 +2546,11 @@ class _ClosetPageState extends State<ClosetPage>
                       fontWeight: FontWeight.w900,
                       color: Colors.white,
                       shadows: [
-                        Shadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2)),
+                        Shadow(
+                          color: Colors.black26,
+                          blurRadius: 4,
+                          offset: Offset(0, 2),
+                        ),
                       ],
                     ),
                     maxLines: 1,
@@ -2326,7 +2559,11 @@ class _ClosetPageState extends State<ClosetPage>
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      Icon(Icons.touch_app_rounded, size: 12, color: Colors.white.withOpacity(0.7)),
+                      Icon(
+                        Icons.touch_app_rounded,
+                        size: 12,
+                        color: Colors.white.withOpacity(0.7),
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         'Nhấn để xem chi tiết',
@@ -2348,11 +2585,18 @@ class _ClosetPageState extends State<ClosetPage>
   }
 
   Widget _outfitCollageCard(Map<String, dynamic> outfit) {
-    final String title = outfit['Title']?.toString() ?? outfit['title']?.toString() ?? 'Bộ phối đồ';
-    final String? snapshotUrl = outfit['CanvasSnapshotUrl']?.toString() ??
+    final String title =
+        outfit['Title']?.toString() ??
+        outfit['title']?.toString() ??
+        'Bộ phối đồ';
+    final String? snapshotUrl =
+        outfit['CanvasSnapshotUrl']?.toString() ??
         outfit['canvasSnapshotUrl']?.toString() ??
         outfit['snapshotUrl']?.toString();
-    final String createdAt = outfit['CreatedAt']?.toString() ?? outfit['createdAt']?.toString() ?? '';
+    final String createdAt =
+        outfit['CreatedAt']?.toString() ??
+        outfit['createdAt']?.toString() ??
+        '';
     String dateLabel = '';
     if (createdAt.isNotEmpty) {
       try {
@@ -2390,7 +2634,11 @@ class _ClosetPageState extends State<ClosetPage>
             // Outfit image
             if (snapshotUrl == null || snapshotUrl.isEmpty)
               const Center(
-                child: Icon(Icons.style_rounded, color: AppColors.primaryLight, size: 44),
+                child: Icon(
+                  Icons.style_rounded,
+                  color: AppColors.primaryLight,
+                  size: 44,
+                ),
               )
             else
               Positioned.fill(
@@ -2398,14 +2646,19 @@ class _ClosetPageState extends State<ClosetPage>
                   snapshotUrl,
                   fit: BoxFit.contain,
                   errorBuilder: (context, error, stackTrace) => const Center(
-                    child: Icon(Icons.broken_image_outlined, color: AppColors.primaryLight, size: 34),
+                    child: Icon(
+                      Icons.broken_image_outlined,
+                      color: AppColors.primaryLight,
+                      size: 34,
+                    ),
                   ),
                   loadingBuilder: (context, child, progress) {
                     if (progress == null) return child;
                     return Center(
                       child: CircularProgressIndicator(
                         value: progress.expectedTotalBytes != null
-                            ? progress.cumulativeBytesLoaded / progress.expectedTotalBytes!
+                            ? progress.cumulativeBytesLoaded /
+                                  progress.expectedTotalBytes!
                             : null,
                         strokeWidth: 2,
                         color: AppColors.primaryLight,
@@ -2443,9 +2696,7 @@ class _ClosetPageState extends State<ClosetPage>
                         fontWeight: FontWeight.w800,
                         color: Colors.white,
                         fontSize: 13,
-                        shadows: [
-                          Shadow(color: Colors.black26, blurRadius: 4),
-                        ],
+                        shadows: [Shadow(color: Colors.black26, blurRadius: 4)],
                       ),
                     ),
                     if (dateLabel.isNotEmpty)
@@ -2468,17 +2719,24 @@ class _ClosetPageState extends State<ClosetPage>
   }
 
   void _showOutfitDetails(Map<String, dynamic> outfit) {
-    final String title = outfit['Title']?.toString() ?? outfit['title']?.toString() ?? 'Bộ phối đồ';
-    final String? snapshotUrl = outfit['CanvasSnapshotUrl']?.toString() ??
+    final String title =
+        outfit['Title']?.toString() ??
+        outfit['title']?.toString() ??
+        'Bộ phối đồ';
+    final String? snapshotUrl =
+        outfit['CanvasSnapshotUrl']?.toString() ??
         outfit['canvasSnapshotUrl']?.toString() ??
         outfit['snapshotUrl']?.toString();
-    final String createdAt = outfit['CreatedAt']?.toString() ??
-        outfit['createdAt']?.toString() ?? '';
+    final String createdAt =
+        outfit['CreatedAt']?.toString() ??
+        outfit['createdAt']?.toString() ??
+        '';
     String dateLabel = '';
     if (createdAt.isNotEmpty) {
       try {
         final dt = DateTime.parse(createdAt).toLocal();
-        dateLabel = '${dt.day}/${dt.month}/${dt.year} lúc ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+        dateLabel =
+            '${dt.day}/${dt.month}/${dt.year} lúc ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
       } catch (_) {}
     }
 
@@ -2486,7 +2744,10 @@ class _ClosetPageState extends State<ClosetPage>
     final dynamic rawItems = outfit['Items'] ?? outfit['items'];
     List<Map<String, dynamic>> items = [];
     if (rawItems is List) {
-      items = rawItems.whereType<Map>().map((e) => Map<String, dynamic>.from(e)).toList();
+      items = rawItems
+          .whereType<Map>()
+          .map((e) => Map<String, dynamic>.from(e))
+          .toList();
     }
 
     showModalBottomSheet(
@@ -2506,7 +2767,10 @@ class _ClosetPageState extends State<ClosetPage>
             return SingleChildScrollView(
               controller: scrollController,
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 20,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -2536,7 +2800,10 @@ class _ClosetPageState extends State<ClosetPage>
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.close_rounded, color: AppColors.primary),
+                          icon: const Icon(
+                            Icons.close_rounded,
+                            color: AppColors.primary,
+                          ),
                           onPressed: () => Navigator.pop(context),
                         ),
                       ],
@@ -2566,11 +2833,13 @@ class _ClosetPageState extends State<ClosetPage>
                                   child: Image.network(
                                     snapshotUrl,
                                     fit: BoxFit.contain,
-                                    errorBuilder: (context, error, stackTrace) => const Icon(
-                                      Icons.broken_image_outlined,
-                                      size: 64,
-                                      color: AppColors.primaryLight,
-                                    ),
+                                    errorBuilder:
+                                        (context, error, stackTrace) =>
+                                            const Icon(
+                                              Icons.broken_image_outlined,
+                                              size: 64,
+                                              color: AppColors.primaryLight,
+                                            ),
                                   ),
                                 ),
                               ),
@@ -2584,13 +2853,18 @@ class _ClosetPageState extends State<ClosetPage>
                                   shadowColor: Colors.black.withOpacity(0.1),
                                   child: InkWell(
                                     borderRadius: BorderRadius.circular(30),
-                                    onTap: () => _downloadOutfitImage(snapshotUrl),
+                                    onTap: () =>
+                                        _downloadOutfitImage(snapshotUrl),
                                     child: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 14,
+                                        vertical: 8,
+                                      ),
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(30),
                                         border: Border.all(
-                                          color: AppColors.secondary.withOpacity(0.3),
+                                          color: AppColors.secondary
+                                              .withOpacity(0.3),
                                           width: 1,
                                         ),
                                       ),
@@ -2621,13 +2895,16 @@ class _ClosetPageState extends State<ClosetPage>
                           ),
                         ),
                       ),
-                    
+
                     const SizedBox(height: 24),
-                    
+
                     // Metadata Cards (matching _showItemDetails)
                     _detailRow('Tên bộ phối', title, Icons.style_rounded),
-                    _detailRow('Ngày tạo', dateLabel.isNotEmpty ? dateLabel : 'Không rõ', Icons.calendar_today_rounded),
-
+                    _detailRow(
+                      'Ngày tạo',
+                      dateLabel.isNotEmpty ? dateLabel : 'Không rõ',
+                      Icons.calendar_today_rounded,
+                    ),
 
                     // Items in outfit
                     if (items.isNotEmpty) ...[
@@ -2646,12 +2923,15 @@ class _ClosetPageState extends State<ClosetPage>
                         child: ListView.separated(
                           scrollDirection: Axis.horizontal,
                           itemCount: items.length,
-                          separatorBuilder: (context, index) => const SizedBox(width: 12),
+                          separatorBuilder: (context, index) =>
+                              const SizedBox(width: 12),
                           itemBuilder: (context, idx) {
                             final item = items[idx];
-                            final String? imgUrl = item['imageUrl']?.toString() ??
+                            final String? imgUrl =
+                                item['imageUrl']?.toString() ??
                                 item['image_url']?.toString();
-                            final String itemName = item['name']?.toString() ?? 'Món đồ';
+                            final String itemName =
+                                item['name']?.toString() ?? 'Món đồ';
                             return Column(
                               children: [
                                 Container(
@@ -2661,7 +2941,9 @@ class _ClosetPageState extends State<ClosetPage>
                                     color: AppColors.muted.withOpacity(0.2),
                                     borderRadius: BorderRadius.circular(16),
                                     border: Border.all(
-                                      color: AppColors.secondary.withOpacity(0.3),
+                                      color: AppColors.secondary.withOpacity(
+                                        0.3,
+                                      ),
                                       width: 1,
                                     ),
                                   ),
@@ -2670,14 +2952,28 @@ class _ClosetPageState extends State<ClosetPage>
                                     child: Center(
                                       child: Padding(
                                         padding: const EdgeInsets.all(6),
-                                        child: imgUrl != null && imgUrl.isNotEmpty
+                                        child:
+                                            imgUrl != null && imgUrl.isNotEmpty
                                             ? Image.network(
                                                 imgUrl,
                                                 fit: BoxFit.contain,
-                                                errorBuilder: (context, error, stackTrace) =>
-                                                    const Icon(Icons.checkroom_rounded, size: 24, color: AppColors.primaryLight),
+                                                errorBuilder:
+                                                    (
+                                                      context,
+                                                      error,
+                                                      stackTrace,
+                                                    ) => const Icon(
+                                                      Icons.checkroom_rounded,
+                                                      size: 24,
+                                                      color: AppColors
+                                                          .primaryLight,
+                                                    ),
                                               )
-                                            : const Icon(Icons.checkroom_rounded, size: 24, color: AppColors.primaryLight),
+                                            : const Icon(
+                                                Icons.checkroom_rounded,
+                                                size: 24,
+                                                color: AppColors.primaryLight,
+                                              ),
                                       ),
                                     ),
                                   ),
@@ -2711,13 +3007,22 @@ class _ClosetPageState extends State<ClosetPage>
                           foregroundColor: Colors.white,
                           elevation: 0,
                           padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
                         ),
                         icon: const Icon(Icons.auto_awesome_rounded, size: 18),
-                        label: const Text('Thử đồ bộ phối', style: TextStyle(height: 1.25, fontWeight: FontWeight.bold)),
+                        label: const Text(
+                          'Thử đồ bộ phối',
+                          style: TextStyle(
+                            height: 1.25,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                         onPressed: () {
                           Navigator.pop(context);
-                          OutfitPage.pendingTryOnOutfitSnapshotUrl = snapshotUrl;
+                          OutfitPage.pendingTryOnOutfitSnapshotUrl =
+                              snapshotUrl;
                           OutfitPage.pendingTryOnOutfitTitle = title;
                           widget.onNavigateTo?.call(4);
                         },
@@ -2729,13 +3034,24 @@ class _ClosetPageState extends State<ClosetPage>
                         Expanded(
                           child: OutlinedButton.icon(
                             style: OutlinedButton.styleFrom(
-                              side: const BorderSide(color: AppColors.primary, width: 1.5),
+                              side: const BorderSide(
+                                color: AppColors.primary,
+                                width: 1.5,
+                              ),
                               foregroundColor: AppColors.primary,
                               padding: const EdgeInsets.symmetric(vertical: 14),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
                             ),
                             icon: const Icon(Icons.edit_rounded, size: 18),
-                            label: const Text('Đổi tên', style: TextStyle(height: 1.25, fontWeight: FontWeight.bold)),
+                            label: const Text(
+                              'Đổi tên',
+                              style: TextStyle(
+                                height: 1.25,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                             onPressed: () {
                               Navigator.pop(context);
                               _renameOutfit(outfit);
@@ -2750,10 +3066,21 @@ class _ClosetPageState extends State<ClosetPage>
                               foregroundColor: const Color(0xFFE53935),
                               elevation: 0,
                               padding: const EdgeInsets.symmetric(vertical: 14),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
                             ),
-                            icon: const Icon(Icons.delete_forever_rounded, size: 18),
-                            label: const Text('Xóa', style: TextStyle(height: 1.25, fontWeight: FontWeight.bold)),
+                            icon: const Icon(
+                              Icons.delete_forever_rounded,
+                              size: 18,
+                            ),
+                            label: const Text(
+                              'Xóa',
+                              style: TextStyle(
+                                height: 1.25,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                             onPressed: () {
                               Navigator.pop(context);
                               _confirmDeleteOutfit(outfit);
@@ -2774,11 +3101,15 @@ class _ClosetPageState extends State<ClosetPage>
   }
 
   Future<void> _renameOutfit(Map<String, dynamic> outfit) async {
-    final String title = outfit['Title']?.toString() ?? outfit['title']?.toString() ?? '';
-    final String outfitId = outfit['Id']?.toString() ?? outfit['id']?.toString() ?? '';
+    final String title =
+        outfit['Title']?.toString() ?? outfit['title']?.toString() ?? '';
+    final String outfitId =
+        outfit['Id']?.toString() ?? outfit['id']?.toString() ?? '';
     if (outfitId.isEmpty) return;
 
-    final TextEditingController textController = TextEditingController(text: title);
+    final TextEditingController textController = TextEditingController(
+      text: title,
+    );
 
     final newTitle = await showDialog<String>(
       context: context,
@@ -2823,16 +3154,20 @@ class _ClosetPageState extends State<ClosetPage>
         _fetchOutfits();
       } catch (e) {
         Navigator.pop(context); // Close loading dialog
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Lỗi: Đổi tên thất bại. $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Lỗi: Đổi tên thất bại. $e')));
       }
     }
   }
 
   Future<void> _confirmDeleteOutfit(Map<String, dynamic> outfit) async {
-    final String title = outfit['Title']?.toString() ?? outfit['title']?.toString() ?? 'Bộ phối đồ';
-    final String outfitId = outfit['Id']?.toString() ?? outfit['id']?.toString() ?? '';
+    final String title =
+        outfit['Title']?.toString() ??
+        outfit['title']?.toString() ??
+        'Bộ phối đồ';
+    final String outfitId =
+        outfit['Id']?.toString() ?? outfit['id']?.toString() ?? '';
     if (outfitId.isEmpty) return;
 
     final confirm = await showDialog<bool>(
@@ -2847,7 +3182,9 @@ class _ClosetPageState extends State<ClosetPage>
               child: const Text('Hủy'),
             ),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+              ),
               onPressed: () => Navigator.pop(context, true),
               child: const Text('Xóa', style: TextStyle(color: Colors.white)),
             ),
@@ -2870,9 +3207,9 @@ class _ClosetPageState extends State<ClosetPage>
         _fetchOutfits();
       } catch (e) {
         Navigator.pop(context); // Close loading dialog
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Lỗi: Xóa thất bại. $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Lỗi: Xóa thất bại. $e')));
       }
     }
   }
@@ -2908,13 +3245,17 @@ class _ClosetPageState extends State<ClosetPage>
         if (result != null && result['isSuccess'] == true) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Lưu thành công! Đã lưu ảnh bộ phối vào Thư viện. 📲'),
+              content: Text(
+                'Lưu thành công! Đã lưu ảnh bộ phối vào Thư viện. 📲',
+              ),
               backgroundColor: Colors.green,
               behavior: SnackBarBehavior.floating,
             ),
           );
         } else {
-          throw Exception(result?['errorMessage'] ?? 'Không thể lưu ảnh vào thư viện.');
+          throw Exception(
+            result?['errorMessage'] ?? 'Không thể lưu ảnh vào thư viện.',
+          );
         }
       }
     } catch (e) {
@@ -2977,7 +3318,10 @@ class _ClosetPageState extends State<ClosetPage>
               children: [
                 const CircularProgressIndicator(color: AppColors.primary),
                 const SizedBox(width: 20),
-                Text(message, style: const TextStyle(fontWeight: FontWeight.w600)),
+                Text(
+                  message,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
               ],
             ),
           ),
@@ -3026,7 +3370,10 @@ class _ClosetPageState extends State<ClosetPage>
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close_rounded, color: AppColors.primary),
+                    icon: const Icon(
+                      Icons.close_rounded,
+                      color: AppColors.primary,
+                    ),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ],
@@ -3056,15 +3403,21 @@ class _ClosetPageState extends State<ClosetPage>
                               child: Padding(
                                 padding: const EdgeInsets.all(16),
                                 child: item.imageUrl.isEmpty
-                                    ? const Icon(Icons.image_not_supported_outlined, size: 64, color: AppColors.primaryLight)
+                                    ? const Icon(
+                                        Icons.image_not_supported_outlined,
+                                        size: 64,
+                                        color: AppColors.primaryLight,
+                                      )
                                     : Image.network(
                                         item.imageUrl,
                                         fit: BoxFit.contain,
-                                        errorBuilder: (context, error, stackTrace) => const Icon(
-                                          Icons.broken_image_outlined,
-                                          size: 64,
-                                          color: AppColors.primaryLight,
-                                        ),
+                                        errorBuilder:
+                                            (context, error, stackTrace) =>
+                                                const Icon(
+                                                  Icons.broken_image_outlined,
+                                                  size: 64,
+                                                  color: AppColors.primaryLight,
+                                                ),
                                       ),
                               ),
                             ),
@@ -3072,9 +3425,23 @@ class _ClosetPageState extends State<ClosetPage>
                         ),
                       ),
                       const SizedBox(height: 24),
-                      _detailRow('Tên món đồ', item.name.isEmpty ? 'Chưa đặt tên' : item.name, Icons.label_rounded),
-                      _detailRow('Thương hiệu', item.brand?.isNotEmpty == true ? item.brand! : 'Chưa có thương hiệu', Icons.stars_rounded),
-                      _detailRow('Phân loại', _categoryLabel[item.category] ?? item.category, Icons.category_rounded),
+                      _detailRow(
+                        'Tên món đồ',
+                        item.name.isEmpty ? 'Chưa đặt tên' : item.name,
+                        Icons.label_rounded,
+                      ),
+                      _detailRow(
+                        'Thương hiệu',
+                        item.brand?.isNotEmpty == true
+                            ? item.brand!
+                            : 'Chưa có thương hiệu',
+                        Icons.stars_rounded,
+                      ),
+                      _detailRow(
+                        'Phân loại',
+                        _categoryLabel[item.category] ?? item.category,
+                        Icons.category_rounded,
+                      ),
                       _closetSelectorRow(item),
                       const SizedBox(height: 32),
                       Row(
@@ -3082,26 +3449,40 @@ class _ClosetPageState extends State<ClosetPage>
                           Expanded(
                             child: ElevatedButton.icon(
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.secondary.withOpacity(0.4),
+                                backgroundColor: AppColors.secondary
+                                    .withOpacity(0.4),
                                 foregroundColor: AppColors.primary,
                                 elevation: 0,
-                                padding: const EdgeInsets.symmetric(vertical: 14),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
                               ),
                               icon: const Icon(Icons.style_rounded, size: 18),
-                              label: const Text('Phối đồ', style: TextStyle(height: 1.25, fontWeight: FontWeight.bold)),
+                              label: const Text(
+                                'Phối đồ',
+                                style: TextStyle(
+                                  height: 1.25,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                               onPressed: () {
                                 Navigator.pop(context);
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) => CanvasOutfitPage(initialItem: item),
-                                    fullscreenDialog: true,
-                                  ),
-                                ).then((saved) {
-                                  if (saved == true && mounted) {
-                                    _fetchOutfits();
-                                  }
-                                });
+                                Navigator.of(context)
+                                    .push(
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            CanvasOutfitPage(initialItem: item),
+                                        fullscreenDialog: true,
+                                      ),
+                                    )
+                                    .then((saved) {
+                                      if (saved == true && mounted) {
+                                        _fetchOutfits();
+                                      }
+                                    });
                               },
                             ),
                           ),
@@ -3112,11 +3493,24 @@ class _ClosetPageState extends State<ClosetPage>
                                 backgroundColor: AppColors.primary,
                                 foregroundColor: Colors.white,
                                 elevation: 0,
-                                padding: const EdgeInsets.symmetric(vertical: 14),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
                               ),
-                              icon: const Icon(Icons.auto_awesome_rounded, size: 18),
-                              label: const Text('Thử đồ AI', style: TextStyle(height: 1.25, fontWeight: FontWeight.bold)),
+                              icon: const Icon(
+                                Icons.auto_awesome_rounded,
+                                size: 18,
+                              ),
+                              label: const Text(
+                                'Thử đồ AI',
+                                style: TextStyle(
+                                  height: 1.25,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                               onPressed: () {
                                 Navigator.pop(context);
                                 OutfitPage.pendingTryOnGarment = item;
@@ -3132,13 +3526,26 @@ class _ClosetPageState extends State<ClosetPage>
                           Expanded(
                             child: OutlinedButton.icon(
                               style: OutlinedButton.styleFrom(
-                                side: const BorderSide(color: AppColors.primary, width: 1.5),
+                                side: const BorderSide(
+                                  color: AppColors.primary,
+                                  width: 1.5,
+                                ),
                                 foregroundColor: AppColors.primary,
-                                padding: const EdgeInsets.symmetric(vertical: 14),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
                               ),
                               icon: const Icon(Icons.edit_rounded, size: 18),
-                              label: const Text('Chỉnh sửa', style: TextStyle(height: 1.25, fontWeight: FontWeight.bold)),
+                              label: const Text(
+                                'Chỉnh sửa',
+                                style: TextStyle(
+                                  height: 1.25,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                               onPressed: () {
                                 Navigator.pop(context);
                                 _showEditDialog(item);
@@ -3152,11 +3559,24 @@ class _ClosetPageState extends State<ClosetPage>
                                 backgroundColor: const Color(0xFFFFECEB),
                                 foregroundColor: const Color(0xFFE53935),
                                 elevation: 0,
-                                padding: const EdgeInsets.symmetric(vertical: 14),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
                               ),
-                              icon: const Icon(Icons.delete_forever_rounded, size: 18),
-                              label: const Text('Xóa', style: TextStyle(height: 1.25, fontWeight: FontWeight.bold)),
+                              icon: const Icon(
+                                Icons.delete_forever_rounded,
+                                size: 18,
+                              ),
+                              label: const Text(
+                                'Xóa',
+                                style: TextStyle(
+                                  height: 1.25,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                               onPressed: () {
                                 Navigator.pop(context);
                                 _confirmDelete(item);
@@ -3237,7 +3657,9 @@ class _ClosetPageState extends State<ClosetPage>
         orElse: () => {},
       );
       if (matchingCloset.isNotEmpty) {
-        currentClosetName = (matchingCloset['name'] ?? matchingCloset['Name'])?.toString() ?? 'Chưa xếp vào tủ đồ';
+        currentClosetName =
+            (matchingCloset['name'] ?? matchingCloset['Name'])?.toString() ??
+            'Chưa xếp vào tủ đồ';
       }
     }
 
@@ -3260,7 +3682,11 @@ class _ClosetPageState extends State<ClosetPage>
               color: AppColors.primary.withOpacity(0.08),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(Icons.folder_open_rounded, color: AppColors.primary, size: 18),
+            child: const Icon(
+              Icons.folder_open_rounded,
+              color: AppColors.primary,
+              size: 18,
+            ),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -3288,16 +3714,24 @@ class _ClosetPageState extends State<ClosetPage>
             ),
           ),
           PopupMenuButton<String?>(
-            icon: const Icon(Icons.swap_horiz_rounded, color: AppColors.primaryLight),
+            icon: const Icon(
+              Icons.swap_horiz_rounded,
+              color: AppColors.primaryLight,
+            ),
             onSelected: (String? newClosetId) async {
               Navigator.pop(context); // Close the bottom sheet
               _showLoadingDialog('Đang chuyển tủ đồ...');
-              final success = await _closetApiService.assignItemToCloset(item.id, newClosetId);
+              final success = await _closetApiService.assignItemToCloset(
+                item.id,
+                newClosetId,
+              );
               if (mounted) {
                 Navigator.pop(context); // Close loading dialog
                 if (success) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Đã cập nhật tủ đồ của món đồ!')),
+                    const SnackBar(
+                      content: Text('Đã cập nhật tủ đồ của món đồ!'),
+                    ),
                   );
                   _fetchItems();
                 } else {
@@ -3317,12 +3751,10 @@ class _ClosetPageState extends State<ClosetPage>
               );
               for (var closet in _userClosets) {
                 final id = (closet['id'] ?? closet['Id'])?.toString();
-                final name = (closet['name'] ?? closet['Name'])?.toString() ?? 'Tủ đồ';
+                final name =
+                    (closet['name'] ?? closet['Name'])?.toString() ?? 'Tủ đồ';
                 entries.add(
-                  PopupMenuItem<String?>(
-                    value: id,
-                    child: Text(name),
-                  ),
+                  PopupMenuItem<String?>(value: id, child: Text(name)),
                 );
               }
               return entries;
@@ -3339,14 +3771,18 @@ class _ClosetPageState extends State<ClosetPage>
       builder: (context) {
         return AlertDialog(
           title: const Text('Xác nhận xóa'),
-          content: Text('Bạn có chắc chắn muốn xóa "${item.name}" khỏi tủ đồ không?'),
+          content: Text(
+            'Bạn có chắc chắn muốn xóa "${item.name}" khỏi tủ đồ không?',
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
               child: const Text('Hủy'),
             ),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+              ),
               onPressed: () => Navigator.pop(context, true),
               child: const Text('Xóa', style: TextStyle(color: Colors.white)),
             ),
@@ -3364,16 +3800,18 @@ class _ClosetPageState extends State<ClosetPage>
         // Giảm số lượng tủ đồ cục bộ
         final localStorage = GetIt.I<AuthLocalStorage>();
         final currentCount = localStorage.getWardrobeItemCount();
-        await localStorage.saveWardrobeItemCount(currentCount > 0 ? currentCount - 1 : 0);
+        await localStorage.saveWardrobeItemCount(
+          currentCount > 0 ? currentCount - 1 : 0,
+        );
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Đã xóa món đồ khỏi tủ đồ thành công!')),
         );
         _fetchItems();
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Lỗi: Xóa thất bại.')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Lỗi: Xóa thất bại.')));
       }
     }
   }
@@ -3391,7 +3829,7 @@ class _ClosetPageState extends State<ClosetPage>
       'Giày': 'Shoes',
       'Túi': 'Bag',
       'Phụ kiện': 'Accessory',
-      'Khác': 'Other'
+      'Khác': 'Other',
     };
 
     String currentCatName = 'Khác';
@@ -3441,7 +3879,10 @@ class _ClosetPageState extends State<ClosetPage>
                             ),
                           ),
                           IconButton(
-                            icon: const Icon(Icons.close_rounded, color: AppColors.primary),
+                            icon: const Icon(
+                              Icons.close_rounded,
+                              color: AppColors.primary,
+                            ),
                             onPressed: () => Navigator.pop(context),
                           ),
                         ],
@@ -3451,22 +3892,39 @@ class _ClosetPageState extends State<ClosetPage>
                         initialValue: name,
                         decoration: InputDecoration(
                           labelText: 'Tên món đồ',
-                          labelStyle: const TextStyle(color: AppColors.textMuted, fontSize: 13),
-                          prefixIcon: const Icon(Icons.label_outline_rounded, color: AppColors.primaryLight, size: 20),
+                          labelStyle: const TextStyle(
+                            color: AppColors.textMuted,
+                            fontSize: 13,
+                          ),
+                          prefixIcon: const Icon(
+                            Icons.label_outline_rounded,
+                            color: AppColors.primaryLight,
+                            size: 20,
+                          ),
                           filled: true,
                           fillColor: AppColors.primary.withOpacity(0.03),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 14,
+                          ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide(color: AppColors.primary.withOpacity(0.15)),
+                            borderSide: BorderSide(
+                              color: AppColors.primary.withOpacity(0.15),
+                            ),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide(color: AppColors.primary.withOpacity(0.15)),
+                            borderSide: BorderSide(
+                              color: AppColors.primary.withOpacity(0.15),
+                            ),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
-                            borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                            borderSide: const BorderSide(
+                              color: AppColors.primary,
+                              width: 1.5,
+                            ),
                           ),
                         ),
                         onChanged: (val) => name = val,
@@ -3476,22 +3934,39 @@ class _ClosetPageState extends State<ClosetPage>
                         initialValue: brand,
                         decoration: InputDecoration(
                           labelText: 'Thương hiệu',
-                          labelStyle: const TextStyle(color: AppColors.textMuted, fontSize: 13),
-                          prefixIcon: const Icon(Icons.stars_outlined, color: AppColors.primaryLight, size: 20),
+                          labelStyle: const TextStyle(
+                            color: AppColors.textMuted,
+                            fontSize: 13,
+                          ),
+                          prefixIcon: const Icon(
+                            Icons.stars_outlined,
+                            color: AppColors.primaryLight,
+                            size: 20,
+                          ),
                           filled: true,
                           fillColor: AppColors.primary.withOpacity(0.03),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 14,
+                          ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide(color: AppColors.primary.withOpacity(0.15)),
+                            borderSide: BorderSide(
+                              color: AppColors.primary.withOpacity(0.15),
+                            ),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide(color: AppColors.primary.withOpacity(0.15)),
+                            borderSide: BorderSide(
+                              color: AppColors.primary.withOpacity(0.15),
+                            ),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
-                            borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                            borderSide: const BorderSide(
+                              color: AppColors.primary,
+                              width: 1.5,
+                            ),
                           ),
                         ),
                         onChanged: (val) => brand = val,
@@ -3501,22 +3976,39 @@ class _ClosetPageState extends State<ClosetPage>
                         value: currentCatName,
                         decoration: InputDecoration(
                           labelText: 'Loại trang phục',
-                          labelStyle: const TextStyle(color: AppColors.textMuted, fontSize: 13),
-                          prefixIcon: const Icon(Icons.category_outlined, color: AppColors.primaryLight, size: 20),
+                          labelStyle: const TextStyle(
+                            color: AppColors.textMuted,
+                            fontSize: 13,
+                          ),
+                          prefixIcon: const Icon(
+                            Icons.category_outlined,
+                            color: AppColors.primaryLight,
+                            size: 20,
+                          ),
                           filled: true,
                           fillColor: AppColors.primary.withOpacity(0.03),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 14,
+                          ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide(color: AppColors.primary.withOpacity(0.15)),
+                            borderSide: BorderSide(
+                              color: AppColors.primary.withOpacity(0.15),
+                            ),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide(color: AppColors.primary.withOpacity(0.15)),
-                        ),
+                            borderSide: BorderSide(
+                              color: AppColors.primary.withOpacity(0.15),
+                            ),
+                          ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
-                            borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                            borderSide: const BorderSide(
+                              color: AppColors.primary,
+                              width: 1.5,
+                            ),
                           ),
                         ),
                         items: categoryOptions.keys.map((String key) {
@@ -3540,13 +4032,23 @@ class _ClosetPageState extends State<ClosetPage>
                           Expanded(
                             child: OutlinedButton(
                               style: OutlinedButton.styleFrom(
-                                side: const BorderSide(color: AppColors.primary, width: 1.5),
+                                side: const BorderSide(
+                                  color: AppColors.primary,
+                                  width: 1.5,
+                                ),
                                 foregroundColor: AppColors.primary,
-                                padding: const EdgeInsets.symmetric(vertical: 14),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
                               ),
                               onPressed: () => Navigator.pop(context),
-                              child: const Text('Hủy', style: TextStyle(fontWeight: FontWeight.bold)),
+                              child: const Text(
+                                'Hủy',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -3556,8 +4058,12 @@ class _ClosetPageState extends State<ClosetPage>
                                 backgroundColor: AppColors.primary,
                                 foregroundColor: Colors.white,
                                 elevation: 0,
-                                padding: const EdgeInsets.symmetric(vertical: 14),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
                               ),
                               onPressed: () {
                                 Navigator.pop(context, {
@@ -3566,7 +4072,10 @@ class _ClosetPageState extends State<ClosetPage>
                                   'category': category,
                                 });
                               },
-                              child: const Text('Lưu', style: TextStyle(fontWeight: FontWeight.bold)),
+                              child: const Text(
+                                'Lưu',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
                             ),
                           ),
                         ],
@@ -3587,9 +4096,9 @@ class _ClosetPageState extends State<ClosetPage>
       Navigator.pop(context);
 
       if (updated != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Cập nhật thành công!')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Cập nhật thành công!')));
         _fetchItems();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -3606,7 +4115,9 @@ class _ClosetPageState extends State<ClosetPage>
     String detectedColor = '';
     bool isAnalyzing = true;
 
-    final TextEditingController nameController = TextEditingController(text: name);
+    final TextEditingController nameController = TextEditingController(
+      text: name,
+    );
 
     final Map<String, String> categoryOptions = {
       'Áo': 'Top',
@@ -3616,7 +4127,7 @@ class _ClosetPageState extends State<ClosetPage>
       'Giày': 'Shoes',
       'Túi': 'Bag',
       'Phụ kiện': 'Accessory',
-      'Khác': 'Other'
+      'Khác': 'Other',
     };
 
     final Map<String, String> reverseCategoryMap = {
@@ -3627,7 +4138,7 @@ class _ClosetPageState extends State<ClosetPage>
       'Shoes': 'Giày',
       'Bag': 'Túi',
       'Accessory': 'Phụ kiện',
-      'Other': 'Khác'
+      'Other': 'Khác',
     };
 
     return await showModalBottomSheet<Map<String, String>>(
@@ -3642,7 +4153,9 @@ class _ClosetPageState extends State<ClosetPage>
           builder: (context, setModalState) {
             if (isAnalyzing) {
               isAnalyzing = false;
-              GetIt.I<GeminiApiService>().analyzeClothingImage(imageFile).then((result) {
+              GetIt.I<GeminiApiService>().analyzeClothingImage(imageFile).then((
+                result,
+              ) {
                 if (result != null && context.mounted) {
                   setModalState(() {
                     name = result['name'] ?? 'Món đồ mới';
@@ -3674,14 +4187,25 @@ class _ClosetPageState extends State<ClosetPage>
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Phân loại đồ', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.primary)),
+                    const Text(
+                      'Phân loại đồ',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primary,
+                      ),
+                    ),
                     const SizedBox(height: 20),
                     Center(
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(16),
                         child: Stack(
                           children: [
-                            Image.file(imageFile, height: 120, fit: BoxFit.cover),
+                            Image.file(
+                              imageFile,
+                              height: 120,
+                              fit: BoxFit.cover,
+                            ),
                             if (isAiRunning)
                               const Positioned.fill(
                                 child: _AiScannerOverlay(height: 120),
@@ -3691,7 +4215,7 @@ class _ClosetPageState extends State<ClosetPage>
                       ),
                     ),
                     const SizedBox(height: 16),
-                    
+
                     if (isAiRunning)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 12),
@@ -3701,7 +4225,10 @@ class _ClosetPageState extends State<ClosetPage>
                             const SizedBox(
                               width: 14,
                               height: 14,
-                              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryLight),
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: AppColors.primaryLight,
+                              ),
                             ),
                             const SizedBox(width: 8),
                             const _AiStatusText(),
@@ -3714,7 +4241,11 @@ class _ClosetPageState extends State<ClosetPage>
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(Icons.palette_rounded, size: 14, color: AppColors.primaryLight),
+                            const Icon(
+                              Icons.palette_rounded,
+                              size: 14,
+                              color: AppColors.primaryLight,
+                            ),
                             const SizedBox(width: 6),
                             Text(
                               'AI nhận diện màu sắc: $detectedColor',
@@ -3766,12 +4297,24 @@ class _ClosetPageState extends State<ClosetPage>
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                         onPressed: () {
-                          Navigator.pop(context, {'name': name, 'category': category});
+                          Navigator.pop(context, {
+                            'name': name,
+                            'category': category,
+                          });
                         },
-                        child: const Text('Lưu & Tách nền', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                        child: const Text(
+                          'Lưu & Tách nền',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -3816,14 +4359,18 @@ class _ClosetPageState extends State<ClosetPage>
               ),
             ),
             const SizedBox(height: 20),
-            
+
             // Header
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Row(
                   children: [
-                    Icon(Icons.info_outline_rounded, color: AppColors.primary, size: 22),
+                    Icon(
+                      Icons.info_outline_rounded,
+                      color: AppColors.primary,
+                      size: 22,
+                    ),
                     SizedBox(width: 8),
                     Text(
                       'Lưu ý chụp ảnh tách nền',
@@ -3837,7 +4384,10 @@ class _ClosetPageState extends State<ClosetPage>
                 ),
                 IconButton(
                   onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.close_rounded, color: AppColors.primary),
+                  icon: const Icon(
+                    Icons.close_rounded,
+                    color: AppColors.primary,
+                  ),
                 ),
               ],
             ),
@@ -3852,7 +4402,10 @@ class _ClosetPageState extends State<ClosetPage>
                     decoration: BoxDecoration(
                       color: Colors.green.shade50.withOpacity(0.6),
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.green.shade200, width: 1),
+                      border: Border.all(
+                        color: Colors.green.shade200,
+                        width: 1,
+                      ),
                     ),
                     child: Stack(
                       children: [
@@ -3860,16 +4413,27 @@ class _ClosetPageState extends State<ClosetPage>
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.checkroom_rounded, size: 36, color: Colors.green.shade700),
+                              Icon(
+                                Icons.checkroom_rounded,
+                                size: 36,
+                                color: Colors.green.shade700,
+                              ),
                               const SizedBox(height: 6),
                               const Text(
                                 'Ảnh phẳng / Treo',
-                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.green),
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.green,
+                                ),
                               ),
                               const SizedBox(height: 2),
                               Text(
                                 'Nền trơn, rõ nét',
-                                style: TextStyle(fontSize: 9, color: Colors.green.shade800),
+                                style: TextStyle(
+                                  fontSize: 9,
+                                  color: Colors.green.shade800,
+                                ),
                               ),
                             ],
                           ),
@@ -3877,7 +4441,11 @@ class _ClosetPageState extends State<ClosetPage>
                         const Positioned(
                           top: 8,
                           right: 8,
-                          child: Icon(Icons.check_circle_rounded, color: Colors.green, size: 18),
+                          child: Icon(
+                            Icons.check_circle_rounded,
+                            color: Colors.green,
+                            size: 18,
+                          ),
                         ),
                       ],
                     ),
@@ -3898,16 +4466,27 @@ class _ClosetPageState extends State<ClosetPage>
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.photo_filter_rounded, size: 36, color: Colors.red.shade700),
+                              Icon(
+                                Icons.photo_filter_rounded,
+                                size: 36,
+                                color: Colors.red.shade700,
+                              ),
                               const SizedBox(height: 6),
                               Text(
                                 'Không nên chọn',
-                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.red.shade700),
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.red.shade700,
+                                ),
                               ),
                               const SizedBox(height: 2),
                               Text(
                                 'Nền rối, nhiều đồ vật',
-                                style: TextStyle(fontSize: 9, color: Colors.red.shade800),
+                                style: TextStyle(
+                                  fontSize: 9,
+                                  color: Colors.red.shade800,
+                                ),
                               ),
                             ],
                           ),
@@ -3915,7 +4494,11 @@ class _ClosetPageState extends State<ClosetPage>
                         const Positioned(
                           top: 8,
                           right: 8,
-                          child: Icon(Icons.cancel_rounded, color: Colors.red, size: 18),
+                          child: Icon(
+                            Icons.cancel_rounded,
+                            color: Colors.red,
+                            size: 18,
+                          ),
                         ),
                       ],
                     ),
@@ -3938,15 +4521,32 @@ class _ClosetPageState extends State<ClosetPage>
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.check_circle_rounded, color: Colors.green, size: 16),
+                      const Icon(
+                        Icons.check_circle_rounded,
+                        color: Colors.green,
+                        size: 16,
+                      ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: RichText(
                           text: const TextSpan(
-                            style: TextStyle(fontSize: 12, color: AppColors.primary, height: 1.4),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.primary,
+                              height: 1.4,
+                            ),
                             children: [
-                              TextSpan(text: 'Nên: ', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
-                              TextSpan(text: 'Trải phẳng quần áo trên sàn đơn sắc hoặc treo trên móc trước tường trơn. Chụp thẳng từ trên xuống hoặc chính diện, đủ ánh sáng.'),
+                              TextSpan(
+                                text: 'Nên: ',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.green,
+                                ),
+                              ),
+                              TextSpan(
+                                text:
+                                    'Trải phẳng quần áo trên sàn đơn sắc hoặc treo trên móc trước tường trơn. Chụp thẳng từ trên xuống hoặc chính diện, đủ ánh sáng.',
+                              ),
                             ],
                           ),
                         ),
@@ -3960,15 +4560,32 @@ class _ClosetPageState extends State<ClosetPage>
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.cancel_rounded, color: Colors.red, size: 16),
+                      const Icon(
+                        Icons.cancel_rounded,
+                        color: Colors.red,
+                        size: 16,
+                      ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: RichText(
                           text: const TextSpan(
-                            style: TextStyle(fontSize: 12, color: AppColors.primary, height: 1.4),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.primary,
+                              height: 1.4,
+                            ),
                             children: [
-                              TextSpan(text: 'Tránh: ', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
-                              TextSpan(text: 'Chụp quần áo bị nhăn nheo, gấp nếp. Tránh hậu cảnh có quá nhiều đồ đạc xung quanh hoặc có màu nền trùng với màu quần áo.'),
+                              TextSpan(
+                                text: 'Tránh: ',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.red,
+                                ),
+                              ),
+                              TextSpan(
+                                text:
+                                    'Chụp quần áo bị nhăn nheo, gấp nếp. Tránh hậu cảnh có quá nhiều đồ đạc xung quanh hoặc có màu nền trùng với màu quần áo.',
+                              ),
                             ],
                           ),
                         ),
@@ -3987,17 +4604,33 @@ class _ClosetPageState extends State<ClosetPage>
                   child: OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      side: const BorderSide(color: AppColors.primaryLight, width: 1.5),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      side: const BorderSide(
+                        color: AppColors.primaryLight,
+                        width: 1.5,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                     ),
                     onPressed: () {
                       Navigator.pop(context);
-                      _pickAndAddClothesSource(ImageSource.camera, closetId: closetId);
+                      _pickAndAddClothesSource(
+                        ImageSource.camera,
+                        closetId: closetId,
+                      );
                     },
-                    icon: const Icon(Icons.camera_alt_rounded, color: AppColors.primaryLight, size: 18),
+                    icon: const Icon(
+                      Icons.camera_alt_rounded,
+                      color: AppColors.primaryLight,
+                      size: 18,
+                    ),
                     label: const Text(
                       'Chụp ảnh mới',
-                      style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primaryLight, fontSize: 13),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primaryLight,
+                        fontSize: 13,
+                      ),
                     ),
                   ),
                 ),
@@ -4007,17 +4640,30 @@ class _ClosetPageState extends State<ClosetPage>
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       backgroundColor: AppColors.primary,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                       elevation: 0,
                     ),
                     onPressed: () {
                       Navigator.pop(context);
-                      _pickAndAddClothesSource(ImageSource.gallery, closetId: closetId);
+                      _pickAndAddClothesSource(
+                        ImageSource.gallery,
+                        closetId: closetId,
+                      );
                     },
-                    icon: const Icon(Icons.photo_library_rounded, color: Colors.white, size: 18),
+                    icon: const Icon(
+                      Icons.photo_library_rounded,
+                      color: Colors.white,
+                      size: 18,
+                    ),
                     label: const Text(
                       'Chọn từ thư viện',
-                      style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 13),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        fontSize: 13,
+                      ),
                     ),
                   ),
                 ),
@@ -4029,7 +4675,10 @@ class _ClosetPageState extends State<ClosetPage>
     );
   }
 
-  Future<void> _pickAndAddClothesSource(ImageSource source, {String? closetId}) async {
+  Future<void> _pickAndAddClothesSource(
+    ImageSource source, {
+    String? closetId,
+  }) async {
     try {
       final XFile? image = await _picker.pickImage(source: source);
       if (image == null) return;
@@ -4061,7 +4710,10 @@ class _ClosetPageState extends State<ClosetPage>
                 children: [
                   CircularProgressIndicator(color: AppColors.primary),
                   SizedBox(height: 16),
-                  Text('Đang tách nền & lưu vào tủ đồ...', style: TextStyle(fontWeight: FontWeight.w600)),
+                  Text(
+                    'Đang tách nền & lưu vào tủ đồ...',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
                 ],
               ),
             ),
@@ -4070,14 +4722,18 @@ class _ClosetPageState extends State<ClosetPage>
       ).then((_) => isDialogOpen = false);
 
       final bgRemovalService = GetIt.I<BgRemovalService>();
-      final Uint8List? resultBytes = await bgRemovalService.removeBackground(File(image.path));
+      final Uint8List? resultBytes = await bgRemovalService.removeBackground(
+        File(image.path),
+      );
 
       // Trừ 1 credit xóa nền
       await localStorage.updateCredits(bgCredits: bgCredits - 1);
 
       File fileToUpload = File(image.path);
       if (resultBytes != null) {
-        final tempFile = File('${Directory.systemTemp.path}/transparent_${DateTime.now().millisecondsSinceEpoch}.png');
+        final tempFile = File(
+          '${Directory.systemTemp.path}/transparent_${DateTime.now().millisecondsSinceEpoch}.png',
+        );
         await tempFile.writeAsBytes(resultBytes);
         fileToUpload = tempFile;
       }
@@ -4095,7 +4751,10 @@ class _ClosetPageState extends State<ClosetPage>
       if (newItem != null) {
         final targetClosetId = closetId ?? _selectedClosetId;
         if (targetClosetId != null) {
-          await _closetApiService.assignItemToCloset(newItem.id, targetClosetId);
+          await _closetApiService.assignItemToCloset(
+            newItem.id,
+            targetClosetId,
+          );
         }
         // Tăng số lượng tủ đồ cục bộ
         final currentCount = localStorage.getWardrobeItemCount();
@@ -4195,7 +4854,10 @@ class _ClosetPageState extends State<ClosetPage>
                     ),
                     const SizedBox(height: 14),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.primary.withOpacity(0.06),
                         borderRadius: BorderRadius.circular(10),
@@ -4258,7 +4920,8 @@ class _ClosetPageState extends State<ClosetPage>
         String errorMsg = e.toString();
         if (e is DioException) {
           if (e.response?.statusCode == 413) {
-            errorMsg = 'Ảnh tải lên quá lớn (giới hạn 30MB). Vui lòng chọn hoặc chụp ảnh nhẹ hơn.';
+            errorMsg =
+                'Ảnh tải lên quá lớn (giới hạn 30MB). Vui lòng chọn hoặc chụp ảnh nhẹ hơn.';
           } else {
             final data = e.response?.data;
             if (data is Map) {
@@ -4269,8 +4932,10 @@ class _ClosetPageState extends State<ClosetPage>
               }
             } else if (data != null) {
               final dataStr = data.toString();
-              if (dataStr.contains('<html') || dataStr.contains('<!DOCTYPE html>')) {
-                errorMsg = 'Không thể kết nối đến hệ thống. Vui lòng thử lại sau.';
+              if (dataStr.contains('<html') ||
+                  dataStr.contains('<!DOCTYPE html>')) {
+                errorMsg =
+                    'Không thể kết nối đến hệ thống. Vui lòng thử lại sau.';
               } else {
                 errorMsg = dataStr;
                 if (errorMsg.length > 250) {
@@ -4280,9 +4945,9 @@ class _ClosetPageState extends State<ClosetPage>
             }
           }
         }
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(errorMsg)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(errorMsg)));
       }
     }
   }
@@ -4320,35 +4985,56 @@ class _ClosetPageState extends State<ClosetPage>
 class _InteractiveClothingItemCard extends StatefulWidget {
   final ClothingItem item;
   final Map<String, String> categoryLabel;
-  const _InteractiveClothingItemCard({required this.item, required this.categoryLabel});
+  const _InteractiveClothingItemCard({
+    required this.item,
+    required this.categoryLabel,
+  });
 
   @override
-  State<_InteractiveClothingItemCard> createState() => _InteractiveClothingItemCardState();
+  State<_InteractiveClothingItemCard> createState() =>
+      _InteractiveClothingItemCardState();
 }
 
-class _InteractiveClothingItemCardState extends State<_InteractiveClothingItemCard> {
+class _InteractiveClothingItemCardState
+    extends State<_InteractiveClothingItemCard> {
   bool _isPressed = false;
 
   Color? _parseColor(String colorTag) {
     final clean = colorTag.trim().toLowerCase();
     switch (clean) {
-      case 'black': return Colors.black;
-      case 'white': return Colors.white;
+      case 'black':
+        return Colors.black;
+      case 'white':
+        return Colors.white;
       case 'gray':
-      case 'grey': return Colors.grey;
-      case 'red': return Colors.red;
-      case 'blue': return Colors.blue;
-      case 'green': return Colors.green;
-      case 'yellow': return Colors.amber;
-      case 'pink': return Colors.pink;
-      case 'purple': return Colors.purple;
-      case 'orange': return Colors.orange;
-      case 'brown': return Colors.brown;
-      case 'beige': return const Color(0xFFF5F5DC);
-      case 'navy': return const Color(0xFF000080);
-      case 'cream': return const Color(0xFFFFFDD0);
-      case 'khaki': return const Color(0xFFF0E68C);
-      default: return null;
+      case 'grey':
+        return Colors.grey;
+      case 'red':
+        return Colors.red;
+      case 'blue':
+        return Colors.blue;
+      case 'green':
+        return Colors.green;
+      case 'yellow':
+        return Colors.amber;
+      case 'pink':
+        return Colors.pink;
+      case 'purple':
+        return Colors.purple;
+      case 'orange':
+        return Colors.orange;
+      case 'brown':
+        return Colors.brown;
+      case 'beige':
+        return const Color(0xFFF5F5DC);
+      case 'navy':
+        return const Color(0xFF000080);
+      case 'cream':
+        return const Color(0xFFFFFDD0);
+      case 'khaki':
+        return const Color(0xFFF0E68C);
+      default:
+        return null;
     }
   }
 
@@ -4415,13 +5101,14 @@ class _InteractiveClothingItemCardState extends State<_InteractiveClothingItemCa
                         child: Image.network(
                           imageUrl,
                           fit: BoxFit.contain,
-                          errorBuilder: (context, error, stackTrace) => Container(
-                            color: AppColors.secondary,
-                            child: const Icon(
-                              Icons.broken_image_outlined,
-                              color: AppColors.primary,
-                            ),
-                          ),
+                          errorBuilder: (context, error, stackTrace) =>
+                              Container(
+                                color: AppColors.secondary,
+                                child: const Icon(
+                                  Icons.broken_image_outlined,
+                                  color: AppColors.primary,
+                                ),
+                              ),
                         ),
                       ),
                     Positioned(
@@ -4469,7 +5156,10 @@ class _InteractiveClothingItemCardState extends State<_InteractiveClothingItemCa
                     const SizedBox(height: 6),
                     Row(
                       children: colorsToShow.map((c) {
-                        final isLight = c == Colors.white || c == const Color(0xFFFFFDD0) || c == const Color(0xFFF5F5DC);
+                        final isLight =
+                            c == Colors.white ||
+                            c == const Color(0xFFFFFDD0) ||
+                            c == const Color(0xFFF5F5DC);
                         return Container(
                           width: 10,
                           height: 10,
@@ -4477,7 +5167,12 @@ class _InteractiveClothingItemCardState extends State<_InteractiveClothingItemCa
                           decoration: BoxDecoration(
                             color: c,
                             shape: BoxShape.circle,
-                            border: isLight ? Border.all(color: Colors.grey.shade300, width: 0.8) : null,
+                            border: isLight
+                                ? Border.all(
+                                    color: Colors.grey.shade300,
+                                    width: 0.8,
+                                  )
+                                : null,
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withOpacity(0.08),
@@ -4508,7 +5203,8 @@ class _AiScannerOverlay extends StatefulWidget {
   State<_AiScannerOverlay> createState() => _AiScannerOverlayState();
 }
 
-class _AiScannerOverlayState extends State<_AiScannerOverlay> with SingleTickerProviderStateMixin {
+class _AiScannerOverlayState extends State<_AiScannerOverlay>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
 
@@ -4620,7 +5316,8 @@ class HangerHookPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color(0xFFD4AF37) // Golden hook
+      ..color =
+          const Color(0xFFD4AF37) // Golden hook
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
 
@@ -4636,10 +5333,7 @@ class HangerHookPainter extends CustomPainter {
       clockwise: false,
     );
     // Draw hook neck
-    path.quadraticBezierTo(
-      cx, cy,
-      cx, cy + 8,
-    );
+    path.quadraticBezierTo(cx, cy, cx, cy + 8);
     // Draw shoulder triangle (hanger base)
     path.moveTo(cx, cy + 8);
     path.lineTo(cx - 16, cy + 16);

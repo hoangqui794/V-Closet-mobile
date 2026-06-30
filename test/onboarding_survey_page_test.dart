@@ -19,20 +19,22 @@ void main() {
       'is_onboarding_completed': false,
     });
     final prefs = await SharedPreferences.getInstance();
-    
+
     // Load mock .env data
     dotenv.testLoad(fileInput: 'API_URL=http://localhost\nDEBUG_MODE=true');
-    
+
     final dio = Dio();
     final apiService = ApiService(dio);
     final localStorage = AuthLocalStorage(prefs);
     final userApiService = UserApiService(apiService);
-    
+
     GetIt.I.registerSingleton<AuthLocalStorage>(localStorage);
     GetIt.I.registerSingleton<UserApiService>(userApiService);
   });
 
-  testWidgets('StyleDnaQuizPage onboarding renders and does not crash', (WidgetTester tester) async {
+  testWidgets('StyleDnaQuizPage onboarding renders and does not crash', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: AppTheme.lightTheme,
@@ -40,7 +42,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    
+
     expect(find.text('Chào mừng bạn!'), findsOneWidget);
   });
 }

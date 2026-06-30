@@ -15,10 +15,7 @@ class AffiliateApiService {
     String? search,
   }) async {
     try {
-      final queryParams = <String, dynamic>{
-        'page': page,
-        'pageSize': pageSize,
-      };
+      final queryParams = <String, dynamic>{'page': page, 'pageSize': pageSize};
       if (category != null && category.isNotEmpty) {
         queryParams['category'] = category;
       }

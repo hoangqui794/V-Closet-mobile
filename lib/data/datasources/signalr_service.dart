@@ -21,12 +21,16 @@ class SignalRService {
   Stream<int> get onUnreadCountChanged => _unreadCountController.stream;
 
   // Stream để các widget lắng nghe thông báo mới (raw Map từ JSON)
-  final _notificationController = StreamController<Map<String, dynamic>>.broadcast();
-  Stream<Map<String, dynamic>> get onNewNotification => _notificationController.stream;
+  final _notificationController =
+      StreamController<Map<String, dynamic>>.broadcast();
+  Stream<Map<String, dynamic>> get onNewNotification =>
+      _notificationController.stream;
 
   // Stream để các widget lắng nghe cập nhật trạng thái thanh toán mới
-  final _paymentUpdateController = StreamController<Map<String, dynamic>>.broadcast();
-  Stream<Map<String, dynamic>> get onPaymentUpdate => _paymentUpdateController.stream;
+  final _paymentUpdateController =
+      StreamController<Map<String, dynamic>>.broadcast();
+  Stream<Map<String, dynamic>> get onPaymentUpdate =>
+      _paymentUpdateController.stream;
 
   void initSignalR() {
     final token = _localStorage.getAccessToken();
@@ -43,9 +47,7 @@ class SignalRService {
     _hubConnection = HubConnectionBuilder()
         .withUrl(
           hubUrl,
-          options: HttpConnectionOptions(
-            accessTokenFactory: () async => token,
-          ),
+          options: HttpConnectionOptions(accessTokenFactory: () async => token),
         )
         .withAutomaticReconnect()
         .build();
@@ -104,7 +106,8 @@ class SignalRService {
 
   Future<void> _startConnection() async {
     try {
-      if (_hubConnection != null && _hubConnection!.state == HubConnectionState.Disconnected) {
+      if (_hubConnection != null &&
+          _hubConnection!.state == HubConnectionState.Disconnected) {
         await _hubConnection!.start();
         debugPrint("SignalR: Kết nối thành công tới Hub!");
       }
@@ -114,9 +117,19 @@ class SignalRService {
   }
 
   Future<void> disconnect() async {
-    if (_hubConnection != null && _hubConnection!.state != HubConnectionState.Disconnected) {
-      await _hubConnection!.stop();
-      debugPrint("SignalR: Đã ngắt kết nối Hub.");
+    try {
+      if (_hubConnection != null &&
+          _hubConnection!.state != HubConnectionState.Disconnected) {
+        await _hubConnection!.stop().timeout(
+              const Duration(milliseconds: 1500),
+              onTimeout: () {
+                debugPrint("SignalR: Ngắt kết nối Hub quá hạn (timeout).");
+              },
+            );
+        debugPrint("SignalR: Đã ngắt kết nối Hub.");
+      }
+    } catch (e) {
+      debugPrint("SignalR: Lỗi khi ngắt kết nối Hub: $e");
     }
   }
 
@@ -136,12 +149,17 @@ class SignalRService {
       barrierDismissible: false,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           title: const Row(
             children: [
               Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 28),
               SizedBox(width: 8),
-              Text('Cảnh báo bảo mật', style: TextStyle(fontWeight: FontWeight.bold)),
+              Text(
+                'Cảnh báo bảo mật',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
             ],
           ),
           content: Text(message),
@@ -156,7 +174,10 @@ class SignalRService {
                   (Route<dynamic> route) => false,
                 );
               },
-              child: const Text('Đồng ý', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: const Text(
+                'Đồng ý',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
             ),
           ],
         );

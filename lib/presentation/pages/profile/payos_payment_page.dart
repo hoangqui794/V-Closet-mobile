@@ -63,7 +63,7 @@ class _PayOSPaymentPageState extends State<PayOSPaymentPage> {
               final uri = Uri.parse(url);
               final status = uri.queryParameters['status'] ?? 'unknown';
               debugPrint("PayOS Captured scheme status: $status");
-              
+
               if (mounted) {
                 Navigator.of(context).pop(status);
               }
@@ -123,7 +123,8 @@ class _PayOSPaymentPageState extends State<PayOSPaymentPage> {
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.close_rounded, color: AppColors.primary),
-          onPressed: () => Navigator.of(context).pop(), // Trả về null khi bấm nút đóng
+          onPressed: () =>
+              Navigator.of(context).pop(), // Trả về null khi bấm nút đóng
         ),
       ),
       body: Stack(
@@ -143,9 +144,7 @@ class _PayOSPaymentPageState extends State<PayOSPaymentPage> {
             ),
           if (_isLoading && _loadingProgress < 0.3)
             const Center(
-              child: CircularProgressIndicator(
-                color: AppColors.primary,
-              ),
+              child: CircularProgressIndicator(color: AppColors.primary),
             ),
         ],
       ),

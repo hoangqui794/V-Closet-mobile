@@ -143,7 +143,9 @@ class SubscriptionApiService {
       if (response.statusCode == 200) {
         final List<dynamic> list = response.data as List<dynamic>? ?? [];
         return list
-            .map((json) => SubscriptionPlan.fromJson(json as Map<String, dynamic>))
+            .map(
+              (json) => SubscriptionPlan.fromJson(json as Map<String, dynamic>),
+            )
             .where((plan) => plan.isActive)
             .toList();
       }
@@ -180,9 +182,13 @@ class SubscriptionApiService {
     await localStorage.saveOutfitLimit(mySub.outfitLimit);
 
     final serverPlan = mySub.planType ?? 'free';
-    await localStorage.saveSubscription(serverPlan, mySub.bgRemovalCredits, mySub.tryOnCredits);
+    await localStorage.saveSubscription(
+      serverPlan,
+      mySub.bgRemovalCredits,
+      mySub.tryOnCredits,
+    );
     await localStorage.saveHasCompletedSurvey(mySub.hasCompletedSurvey);
-    
+
     // Lưu link khảo sát động từ BE
     if (mySub.surveyUrl != null && mySub.surveyUrl!.isNotEmpty) {
       await localStorage.saveSurveyUrl(mySub.surveyUrl!);
@@ -215,7 +221,12 @@ class SubscriptionApiService {
       final response = await _apiService.get('/api/subscriptions/transactions');
       if (response.statusCode == 200) {
         final List<dynamic> list = response.data as List<dynamic>? ?? [];
-        return list.map((json) => PaymentTransaction.fromJson(json as Map<String, dynamic>)).toList();
+        return list
+            .map(
+              (json) =>
+                  PaymentTransaction.fromJson(json as Map<String, dynamic>),
+            )
+            .toList();
       }
       throw Exception('Không thể tải lịch sử giao dịch.');
     } on DioException catch (e) {
@@ -225,7 +236,11 @@ class SubscriptionApiService {
 
   /// POST /api/subscriptions/purchase
   /// Trả về URL thanh toán PayOS/MoMo/VNPay
-  Future<String> purchase(String planId, {String paymentGateway = 'momo', String? couponCode}) async {
+  Future<String> purchase(
+    String planId, {
+    String paymentGateway = 'momo',
+    String? couponCode,
+  }) async {
     try {
       final payload = <String, dynamic>{
         'planId': planId,
@@ -241,7 +256,8 @@ class SubscriptionApiService {
       );
       if (response.statusCode == 200) {
         final data = response.data as Map<String, dynamic>;
-        final paymentUrl = (data['payUrl'] ?? data['paymentUrl']) as String? ?? '';
+        final paymentUrl =
+            (data['payUrl'] ?? data['paymentUrl']) as String? ?? '';
         if (paymentUrl.isEmpty) {
           throw Exception('Không nhận được liên kết thanh toán từ hệ thống.');
         }

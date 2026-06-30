@@ -38,14 +38,14 @@ class ApiService {
           return handler.next(options);
         },
         onError: (DioException error, handler) async {
-          final isAuthApi = error.requestOptions.path.contains('/api/auth/refresh-token') ||
-                            error.requestOptions.path.contains('/api/auth/login');
-
           // Nếu gặp lỗi 401
           if (error.response?.statusCode == 401) {
-            if (isAuthApi) {
-              // Nếu là chính API login hoặc refresh-token mà trả về 401 thì văng app liền
+            if (error.requestOptions.path.contains('/api/auth/refresh-token')) {
+              // Nếu là API refresh-token mà trả về 401 thì văng app liền
               await _logoutAndRedirectToLogin();
+              return handler.next(error);
+            } else if (error.requestOptions.path.contains('/api/auth/login')) {
+              // Nếu là chính API login trả về 401, trả lỗi về cho UI xử lý (không văng app)
               return handler.next(error);
             } else {
               // Nếu không phải API login/refresh, thử refresh token
@@ -86,19 +86,32 @@ class ApiService {
                   _isRefreshing = true;
                   try {
                     // Tạo một Dio instance tạm thời để gọi refresh token tránh vòng lặp vô hạn
-                    final refreshDio = Dio(BaseOptions(baseUrl: _dio.options.baseUrl));
-                    refreshDio.interceptors.add(LogInterceptor(requestBody: true, responseBody: true));
-                    
-                    final response = await refreshDio.post('/api/auth/refresh-token', data: {
-                      'accessToken': accessToken,
-                      'refreshToken': refreshToken,
-                    });
+                    final refreshDio = Dio(
+                      BaseOptions(baseUrl: _dio.options.baseUrl),
+                    );
+                    refreshDio.interceptors.add(
+                      LogInterceptor(requestBody: true, responseBody: true),
+                    );
+
+                    final response = await refreshDio.post(
+                      '/api/auth/refresh-token',
+                      data: {
+                        'accessToken': accessToken,
+                        'refreshToken': refreshToken,
+                      },
+                    );
 
                     if (response.statusCode == 200) {
                       final data = response.data as Map<String, dynamic>;
-                      final newAccess = (data['AccessToken'] ?? data['accessToken']) as String? ?? '';
-                      final newRefresh = (data['RefreshToken'] ?? data['refreshToken']) as String? ?? '';
-                      
+                      final newAccess =
+                          (data['AccessToken'] ?? data['accessToken'])
+                              as String? ??
+                          '';
+                      final newRefresh =
+                          (data['RefreshToken'] ?? data['refreshToken'])
+                              as String? ??
+                          '';
+
                       // Parse userId linh hoạt (hỗ trợ cả int và String Guid từ JWT)
                       int userId = 0;
                       final rawUserId = data['UserId'] ?? data['userId'];
@@ -110,9 +123,13 @@ class ApiService {
                           if (parts.length >= 2) {
                             final payload = parts[1];
                             final normalized = base64Url.normalize(payload);
-                            final decoded = utf8.decode(base64Url.decode(normalized));
-                            final jwtPayload = json.decode(decoded) as Map<String, dynamic>;
-                            final nameid = jwtPayload['nameid'] ?? jwtPayload['sub'];
+                            final decoded = utf8.decode(
+                              base64Url.decode(normalized),
+                            );
+                            final jwtPayload =
+                                json.decode(decoded) as Map<String, dynamic>;
+                            final nameid =
+                                jwtPayload['nameid'] ?? jwtPayload['sub'];
                             if (nameid != null) {
                               userId = int.tryParse(nameid.toString()) ?? 0;
                             }
@@ -122,14 +139,26 @@ class ApiService {
                         }
                       }
 
-                      final email        = (data['Email']         ?? data['email'])         as String? ?? '';
-                      final displayName  = (data['DisplayName']   ?? data['displayName'])   as String? ?? '';
-                      final role         = (data['Role']          ?? data['role'])          as String? ?? 'Customer';
-                      final avatarUrl    = (data['AvatarUrl']      ?? data['avatarUrl'])     as String?;
+                      final email =
+                          (data['Email'] ?? data['email']) as String? ?? '';
+                      final displayName =
+                          (data['DisplayName'] ?? data['displayName'])
+                              as String? ??
+                          '';
+                      final role =
+                          (data['Role'] ?? data['role']) as String? ??
+                          'Customer';
+                      final avatarUrl =
+                          (data['AvatarUrl'] ?? data['avatarUrl']) as String?;
                       final isOnboardingCompleted =
-                          (data['IsOnboardingCompleted'] ?? data['isOnboardingCompleted']) as bool? ?? false;
+                          (data['IsOnboardingCompleted'] ??
+                                  data['isOnboardingCompleted'])
+                              as bool? ??
+                          false;
                       final isPasswordSet =
-                          (data['IsPasswordSet'] ?? data['isPasswordSet']) as bool? ?? true;
+                          (data['IsPasswordSet'] ?? data['isPasswordSet'])
+                              as bool? ??
+                          true;
 
                       if (newAccess.isNotEmpty && newRefresh.isNotEmpty) {
                         // Lưu token và thông tin user mới
@@ -170,12 +199,14 @@ class ApiService {
                         throw Exception('Token returned from server is empty.');
                       }
                     } else {
-                      throw Exception('Refresh token failed with status ${response.statusCode}');
+                      throw Exception(
+                        'Refresh token failed with status ${response.statusCode}',
+                      );
                     }
                   } catch (e) {
                     // Nếu refresh token thất bại (user bị khoá / token hết hạn hoàn toàn)
                     print('Lỗi làm mới token: $e');
-                    
+
                     // Giải phóng toàn bộ completer với null
                     for (final completer in _refreshCompleters) {
                       completer.complete(null);
@@ -194,7 +225,10 @@ class ApiService {
               } else {
                 // Không có LocalStorage đăng ký
                 WidgetsBinding.instance.addPostFrameCallback((_) {
-                  navigatorKey.currentState?.pushNamedAndRemoveUntil('/login', (route) => false);
+                  navigatorKey.currentState?.pushNamedAndRemoveUntil(
+                    '/login',
+                    (route) => false,
+                  );
                 });
                 return handler.next(error);
               }
@@ -279,20 +313,27 @@ class ApiService {
       if (GetIt.I.isRegistered<AuthLocalStorage>()) {
         await GetIt.I<AuthLocalStorage>().clearSession();
       }
-      
+
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final context = navigatorKey.currentContext;
         if (context != null) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Tài khoản đã bị khoá hoặc phiên đăng nhập hết hạn!'),
+              content: Text(
+                'Tài khoản đã bị khoá hoặc phiên đăng nhập hết hạn!',
+              ),
               backgroundColor: Colors.red,
               duration: Duration(seconds: 3),
             ),
           );
-          Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+          Navigator.of(
+            context,
+          ).pushNamedAndRemoveUntil('/login', (route) => false);
         } else {
-          navigatorKey.currentState?.pushNamedAndRemoveUntil('/login', (route) => false);
+          navigatorKey.currentState?.pushNamedAndRemoveUntil(
+            '/login',
+            (route) => false,
+          );
         }
       });
     } finally {

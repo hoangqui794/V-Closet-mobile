@@ -35,8 +35,6 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
   final OutfitApiService _outfitApiService = GetIt.I<OutfitApiService>();
   final ImagePicker _picker = ImagePicker();
 
-
-
   // Selected state
   String? _selectedModelUrl;
   File? _selectedModelFile;
@@ -47,8 +45,8 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
   bool _pickFromOutfits = false;
 
   // Selected saved outfit snapshot as garment
-  String? _selectedOutfitSnapshotUrl;  // URL ảnh snapshot bộ phối đồ đã chọn
-  String? _selectedOutfitTitle;         // Tên bộ phối đồ đã chọn
+  String? _selectedOutfitSnapshotUrl; // URL ảnh snapshot bộ phối đồ đã chọn
+  String? _selectedOutfitTitle; // Tên bộ phối đồ đã chọn
 
   // Wardrobe list state
   List<ClothingItem> _wardrobeItems = [];
@@ -78,27 +76,27 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
     {
       'name': 'Mẫu Nữ 1',
       'url': 'assets/images/mau_nu_1.jpg',
-      'gender': 'female'
+      'gender': 'female',
     },
     {
       'name': 'Mẫu Nữ 2',
       'url': 'assets/images/mau_nu_2.jpg',
-      'gender': 'female'
+      'gender': 'female',
     },
     {
       'name': 'Mẫu Nữ 3',
       'url': 'assets/images/mau_nu_3.jpg',
-      'gender': 'female'
+      'gender': 'female',
     },
     {
       'name': 'Mẫu Nam 1',
       'url': 'assets/images/mau_nam_1.jpg',
-      'gender': 'male'
+      'gender': 'male',
     },
     {
       'name': 'Mẫu Nam 2',
       'url': 'assets/images/mau_nam_2.jpg',
-      'gender': 'male'
+      'gender': 'male',
     },
   ];
 
@@ -113,15 +111,16 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
       duration: const Duration(seconds: 2),
       vsync: this,
     );
-    _scanAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _scanController, curve: Curves.easeInOut),
-    )..addStatusListener((status) {
-        if (status == AnimationStatus.completed) {
-          _scanController.reverse();
-        } else if (status == AnimationStatus.dismissed) {
-          _scanController.forward();
-        }
-      });
+    _scanAnimation =
+        Tween<double>(begin: 0.0, end: 1.0).animate(
+          CurvedAnimation(parent: _scanController, curve: Curves.easeInOut),
+        )..addStatusListener((status) {
+          if (status == AnimationStatus.completed) {
+            _scanController.reverse();
+          } else if (status == AnimationStatus.dismissed) {
+            _scanController.forward();
+          }
+        });
 
     // Default select first model
     _selectedModelUrl = _sampleModels[0]['url'];
@@ -178,9 +177,9 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
       });
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Không thể chọn ảnh: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Không thể chọn ảnh: $e')));
     }
   }
 
@@ -211,14 +210,18 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
               ),
             ),
             const SizedBox(height: 20),
-            
+
             // Header
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Row(
                   children: [
-                    Icon(Icons.info_outline_rounded, color: AppColors.primary, size: 22),
+                    Icon(
+                      Icons.info_outline_rounded,
+                      color: AppColors.primary,
+                      size: 22,
+                    ),
                     SizedBox(width: 8),
                     Text(
                       'Lưu ý chọn ảnh người mẫu',
@@ -232,7 +235,10 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                 ),
                 IconButton(
                   onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.close_rounded, color: AppColors.primary),
+                  icon: const Icon(
+                    Icons.close_rounded,
+                    color: AppColors.primary,
+                  ),
                 ),
               ],
             ),
@@ -247,7 +253,10 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                     decoration: BoxDecoration(
                       color: Colors.green.shade50.withOpacity(0.6),
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.green.shade200, width: 1),
+                      border: Border.all(
+                        color: Colors.green.shade200,
+                        width: 1,
+                      ),
                     ),
                     child: Stack(
                       children: [
@@ -255,16 +264,27 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.accessibility_new_rounded, size: 36, color: Colors.green.shade700),
+                              Icon(
+                                Icons.accessibility_new_rounded,
+                                size: 36,
+                                color: Colors.green.shade700,
+                              ),
                               const SizedBox(height: 6),
                               const Text(
                                 'Chuẩn chính diện',
-                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.green),
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.green,
+                                ),
                               ),
                               const SizedBox(height: 2),
                               Text(
                                 'Đứng thẳng, rõ thân',
-                                style: TextStyle(fontSize: 9, color: Colors.green.shade800),
+                                style: TextStyle(
+                                  fontSize: 9,
+                                  color: Colors.green.shade800,
+                                ),
                               ),
                             ],
                           ),
@@ -272,7 +292,11 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                         const Positioned(
                           top: 8,
                           right: 8,
-                          child: Icon(Icons.check_circle_rounded, color: Colors.green, size: 18),
+                          child: Icon(
+                            Icons.check_circle_rounded,
+                            color: Colors.green,
+                            size: 18,
+                          ),
                         ),
                       ],
                     ),
@@ -293,16 +317,27 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.person_off_rounded, size: 36, color: Colors.red.shade700),
+                              Icon(
+                                Icons.person_off_rounded,
+                                size: 36,
+                                color: Colors.red.shade700,
+                              ),
                               const SizedBox(height: 6),
                               Text(
                                 'Không nên chọn',
-                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.red.shade700),
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.red.shade700,
+                                ),
                               ),
                               const SizedBox(height: 2),
                               Text(
                                 'Nghiêng, bị che khuất',
-                                style: TextStyle(fontSize: 9, color: Colors.red.shade800),
+                                style: TextStyle(
+                                  fontSize: 9,
+                                  color: Colors.red.shade800,
+                                ),
                               ),
                             ],
                           ),
@@ -310,7 +345,11 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                         const Positioned(
                           top: 8,
                           right: 8,
-                          child: Icon(Icons.cancel_rounded, color: Colors.red, size: 18),
+                          child: Icon(
+                            Icons.cancel_rounded,
+                            color: Colors.red,
+                            size: 18,
+                          ),
                         ),
                       ],
                     ),
@@ -333,15 +372,32 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.check_circle_rounded, color: Colors.green, size: 16),
+                      const Icon(
+                        Icons.check_circle_rounded,
+                        color: Colors.green,
+                        size: 16,
+                      ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: RichText(
                           text: const TextSpan(
-                            style: TextStyle(fontSize: 12, color: AppColors.primary, height: 1.4),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.primary,
+                              height: 1.4,
+                            ),
                             children: [
-                              TextSpan(text: 'Nên: ', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
-                              TextSpan(text: 'Chọn ảnh chụp chính diện, đứng thẳng, rõ thân người. Mặc quần áo ôm sát sườn hoặc thon gọn (áo phông mỏng, quần/váy ôm).'),
+                              TextSpan(
+                                text: 'Nên: ',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.green,
+                                ),
+                              ),
+                              TextSpan(
+                                text:
+                                    'Chọn ảnh chụp chính diện, đứng thẳng, rõ thân người. Mặc quần áo ôm sát sườn hoặc thon gọn (áo phông mỏng, quần/váy ôm).',
+                              ),
                             ],
                           ),
                         ),
@@ -355,15 +411,32 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.cancel_rounded, color: Colors.red, size: 16),
+                      const Icon(
+                        Icons.cancel_rounded,
+                        color: Colors.red,
+                        size: 16,
+                      ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: RichText(
                           text: const TextSpan(
-                            style: TextStyle(fontSize: 12, color: AppColors.primary, height: 1.4),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.primary,
+                              height: 1.4,
+                            ),
                             children: [
-                              TextSpan(text: 'Tránh: ', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
-                              TextSpan(text: 'Ảnh đứng nghiêng/chụp xéo góc, tay khoanh trước ngực, tay che người hoặc tay đút túi. Không mặc quần áo quá phồng, quá rộng hoặc áo khoác phao dày.'),
+                              TextSpan(
+                                text: 'Tránh: ',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.red,
+                                ),
+                              ),
+                              TextSpan(
+                                text:
+                                    'Ảnh đứng nghiêng/chụp xéo góc, tay khoanh trước ngực, tay che người hoặc tay đút túi. Không mặc quần áo quá phồng, quá rộng hoặc áo khoác phao dày.',
+                              ),
                             ],
                           ),
                         ),
@@ -382,17 +455,30 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                   child: OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      side: const BorderSide(color: AppColors.primaryLight, width: 1.5),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      side: const BorderSide(
+                        color: AppColors.primaryLight,
+                        width: 1.5,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                     ),
                     onPressed: () {
                       Navigator.pop(context);
                       _pickModelImage(ImageSource.camera);
                     },
-                    icon: const Icon(Icons.camera_alt_rounded, color: AppColors.primaryLight, size: 18),
+                    icon: const Icon(
+                      Icons.camera_alt_rounded,
+                      color: AppColors.primaryLight,
+                      size: 18,
+                    ),
                     label: const Text(
                       'Chụp ảnh mới',
-                      style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primaryLight, fontSize: 13),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primaryLight,
+                        fontSize: 13,
+                      ),
                     ),
                   ),
                 ),
@@ -402,17 +488,27 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       backgroundColor: AppColors.primary,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                       elevation: 0,
                     ),
                     onPressed: () {
                       Navigator.pop(context);
                       _pickModelImage(ImageSource.gallery);
                     },
-                    icon: const Icon(Icons.photo_library_rounded, color: Colors.white, size: 18),
+                    icon: const Icon(
+                      Icons.photo_library_rounded,
+                      color: Colors.white,
+                      size: 18,
+                    ),
                     label: const Text(
                       'Chọn từ thư viện',
-                      style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 13),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        fontSize: 13,
+                      ),
                     ),
                   ),
                 ),
@@ -462,10 +558,13 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
       }
 
       // Auto-set the best Fashn AI tryon category
-      final selectedCats = _selectedGarments.map((g) => g.category.toLowerCase()).toList();
+      final selectedCats = _selectedGarments
+          .map((g) => g.category.toLowerCase())
+          .toList();
       if (selectedCats.contains('dress')) {
         _selectedCategory = 'one-pieces';
-      } else if (selectedCats.contains('top') && selectedCats.contains('bottom')) {
+      } else if (selectedCats.contains('top') &&
+          selectedCats.contains('bottom')) {
         _selectedCategory = 'auto';
       } else if (selectedCats.contains('top')) {
         _selectedCategory = 'tops';
@@ -477,11 +576,13 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
     });
   }
 
-  Future<Uint8List> _generateCollageBytes({List<ClothingItem>? targetItems}) async {
+  Future<Uint8List> _generateCollageBytes({
+    List<ClothingItem>? targetItems,
+  }) async {
     final itemsToUse = targetItems ?? _selectedGarments;
     final dio = Dio();
     final Map<String, ui.Image> decodedImages = {};
-    
+
     for (final item in itemsToUse) {
       try {
         final url = item.originalImageUrl ?? item.imageUrl;
@@ -490,7 +591,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
           options: Options(responseType: ResponseType.bytes),
         );
         final bytes = response.data as List<int>;
-        
+
         final codec = await ui.instantiateImageCodec(Uint8List.fromList(bytes));
         final frame = await codec.getNextFrame();
         decodedImages[item.id] = frame.image;
@@ -498,28 +599,34 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
         debugPrint('Lỗi tải/giải mã ảnh ${item.name}: $e');
       }
     }
-    
+
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(recorder);
     const canvasWidth = 600.0;
     const canvasHeight = 800.0;
-    
+
     // Fill background
     final paintBg = Paint()..color = const Color(0xFFF3F3F3);
-    canvas.drawRect(const Rect.fromLTWH(0, 0, canvasWidth, canvasHeight), paintBg);
-    
+    canvas.drawRect(
+      const Rect.fromLTWH(0, 0, canvasWidth, canvasHeight),
+      paintBg,
+    );
+
     // Draw each item based on its category
     for (final item in itemsToUse) {
       final img = decodedImages[item.id];
       if (img == null) continue;
-      
+
       final targetRect = _targetRectForCategory(item.category.toLowerCase());
-      
+
       _paintImageFit(canvas, img, targetRect);
     }
-    
+
     final picture = recorder.endRecording();
-    final img = await picture.toImage(canvasWidth.toInt(), canvasHeight.toInt());
+    final img = await picture.toImage(
+      canvasWidth.toInt(),
+      canvasHeight.toInt(),
+    );
     final byteData = await img.toByteData(format: ui.ImageByteFormat.png);
     return byteData!.buffer.asUint8List();
   }
@@ -549,20 +656,20 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
   void _paintImageFit(Canvas canvas, ui.Image img, Rect rect) {
     final double srcWidth = img.width.toDouble();
     final double srcHeight = img.height.toDouble();
-    
+
     final double destWidth = rect.width;
     final double destHeight = rect.height;
-    
+
     final double scale = (destWidth / srcWidth < destHeight / srcHeight)
         ? destWidth / srcWidth
         : destHeight / srcHeight;
-        
+
     final double w = srcWidth * scale;
     final double h = srcHeight * scale;
-    
+
     final double x = rect.left + (destWidth - w) / 2;
     final double y = rect.top + (destHeight - h) / 2;
-    
+
     canvas.drawImageRect(
       img,
       Rect.fromLTWH(0, 0, srcWidth, srcHeight),
@@ -608,17 +715,20 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
       // Check if we need to run via the files upload API
       final bool isCustomModel = _selectedModelFile != null;
       final bool isOutfitSnapshot = _selectedOutfitSnapshotUrl != null;
-      final bool isLocalModel = modelUrlToUse != null && modelUrlToUse.startsWith('assets/');
+      final bool isLocalModel =
+          modelUrlToUse != null && modelUrlToUse.startsWith('assets/');
 
       if (isMultiGarment || isCustomModel || isOutfitSnapshot || isLocalModel) {
         // We will call the /api/TryOn/run-files endpoint using FormData
-        
+
         // 1. Prepare model file bytes
         List<int> modelBytes;
         String modelFilename;
-        
+
         if (isCustomModel) {
-          setState(() => _loadingMessage = 'Đang chuẩn bị ảnh người mẫu của bạn...');
+          setState(
+            () => _loadingMessage = 'Đang chuẩn bị ảnh người mẫu của bạn...',
+          );
           modelBytes = await _selectedModelFile!.readAsBytes();
           final pathLower = _selectedModelFile!.path.toLowerCase();
           final ext = pathLower.endsWith('.png') ? '.png' : '.jpg';
@@ -648,7 +758,9 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
           );
           garmentBytes = snapshotResponse.data as List<int>;
         } else if (isMultiGarment) {
-          setState(() => _loadingMessage = 'Đang ghép ảnh phối đồ (Flat Lay)...');
+          setState(
+            () => _loadingMessage = 'Đang ghép ảnh phối đồ (Flat Lay)...',
+          );
           garmentBytes = await _generateCollageBytes();
         } else {
           setState(() => _loadingMessage = 'Đang tải thông tin trang phục...');
@@ -661,8 +773,10 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
         }
 
         // 3. Upload and trigger prediction
-        setState(() => _loadingMessage = 'Đang gửi dữ liệu phối đồ lên Cloud...');
-        
+        setState(
+          () => _loadingMessage = 'Đang gửi dữ liệu phối đồ lên Cloud...',
+        );
+
         final uploadFormData = FormData.fromMap({
           "modelFile": MultipartFile.fromBytes(
             modelBytes,
@@ -675,12 +789,12 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
           "category": _selectedCategory,
           "restoreBackground": _restoreBackground.toString(),
         });
-        
+
         final response = await GetIt.I<Dio>().post(
           '/api/tryon/run-files',
           data: uploadFormData,
         );
-        
+
         if (response.statusCode == 200 && response.data != null) {
           _predictionId = response.data['predictionId'] as String?;
           // Trừ 1 credit thử đồ AI
@@ -714,7 +828,8 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
       String msg = e.toString();
       if (e is DioException) {
         if (e.response?.statusCode == 413) {
-          msg = 'Dung lượng ảnh quá lớn (giới hạn 30MB). Vui lòng chọn hoặc chụp ảnh nhẹ hơn.';
+          msg =
+              'Dung lượng ảnh quá lớn (giới hạn 30MB). Vui lòng chọn hoặc chụp ảnh nhẹ hơn.';
         } else {
           final errorData = e.response?.data;
           if (errorData is Map) {
@@ -725,7 +840,8 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
             }
           } else if (errorData != null) {
             final errorStr = errorData.toString();
-            if (errorStr.contains('<html') || errorStr.contains('<!DOCTYPE html>')) {
+            if (errorStr.contains('<html') ||
+                errorStr.contains('<!DOCTYPE html>')) {
               msg = 'Máy chủ AI tạm thời không phản hồi. Vui lòng thử lại sau.';
             } else {
               msg = errorStr;
@@ -799,7 +915,8 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
           debugPrint('Try-on failed error: $error');
           setState(() {
             _isGenerating = false;
-            _errorMessage = 'Thử đồ thất bại do lỗi xử lý AI. Vui lòng thử lại sau.';
+            _errorMessage =
+                'Thử đồ thất bại do lỗi xử lý AI. Vui lòng thử lại sau.';
           });
         }
       } catch (e) {
@@ -811,7 +928,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
   // Save AI Try-On image to mobile gallery
   Future<void> _saveImageToGallery(String imageUrl) async {
     setState(() => _isSavingImage = true);
-    
+
     // Show download starting SnackBar
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -840,13 +957,17 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
           ScaffoldMessenger.of(context).hideCurrentSnackBar();
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Lưu thành công! Đã lưu ảnh thử đồ ảo vào Thư viện.'),
+              content: Text(
+                'Lưu thành công! Đã lưu ảnh thử đồ ảo vào Thư viện.',
+              ),
               backgroundColor: Colors.green,
             ),
           );
         }
       } else {
-        throw Exception(result?['errorMessage'] ?? 'Không thể lưu ảnh vào thư viện.');
+        throw Exception(
+          result?['errorMessage'] ?? 'Không thể lưu ảnh vào thư viện.',
+        );
       }
     } catch (e) {
       debugPrint('Save image exception: $e');
@@ -872,10 +993,14 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
       // Filter out non-wearables like bags and shoes for standard tryon
       return _wardrobeItems.where((item) {
         final cat = item.category.toLowerCase();
-        return cat == 'top' || cat == 'bottom' || cat == 'dress' || cat == 'outerwear' || cat == 'other';
+        return cat == 'top' ||
+            cat == 'bottom' ||
+            cat == 'dress' ||
+            cat == 'outerwear' ||
+            cat == 'other';
       }).toList();
     }
-    
+
     final Map<String, String> filterMap = {
       'Áo': 'top',
       'Quần/Váy': 'bottom',
@@ -883,18 +1008,21 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
       'Áo khoác': 'outerwear',
       'Khác': 'other',
     };
-    
+
     final targetCat = filterMap[_wardrobeFilter];
-    return _wardrobeItems.where((item) => item.category.toLowerCase() == targetCat).toList();
+    return _wardrobeItems
+        .where((item) => item.category.toLowerCase() == targetCat)
+        .toList();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (OutfitPage.pendingTryOnGarment != null || OutfitPage.pendingTryOnOutfitSnapshotUrl != null) {
+    if (OutfitPage.pendingTryOnGarment != null ||
+        OutfitPage.pendingTryOnOutfitSnapshotUrl != null) {
       final garment = OutfitPage.pendingTryOnGarment;
       final outfitSnapshotUrl = OutfitPage.pendingTryOnOutfitSnapshotUrl;
       final outfitTitle = OutfitPage.pendingTryOnOutfitTitle;
-      
+
       OutfitPage.pendingTryOnGarment = null;
       OutfitPage.pendingTryOnOutfitSnapshotUrl = null;
       OutfitPage.pendingTryOnOutfitTitle = null;
@@ -948,10 +1076,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                     widget.onMenuPressed?.call();
                   }
                 },
-                icon: const Icon(
-                  Icons.menu_rounded,
-                  color: AppColors.primary,
-                ),
+                icon: const Icon(Icons.menu_rounded, color: AppColors.primary),
               ),
             ),
           ),
@@ -965,9 +1090,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
           ),
         ),
       ),
-      body: SafeArea(
-        child: _buildVirtualTryOnRoom(),
-      ),
+      body: SafeArea(child: _buildVirtualTryOnRoom()),
     );
   }
 
@@ -1011,8 +1134,6 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
     );
   }
 
-
-
   Widget _buildModelSelector() {
     return SizedBox(
       height: 110,
@@ -1030,7 +1151,9 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: _selectedModelFile != null ? AppColors.primaryLight : Colors.grey.shade300,
+                  color: _selectedModelFile != null
+                      ? AppColors.primaryLight
+                      : Colors.grey.shade300,
                   width: _selectedModelFile != null ? 2.0 : 1,
                 ),
               ),
@@ -1042,9 +1165,22 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                   : const Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.add_a_photo_outlined, color: AppColors.primary, size: 24),
+                        Icon(
+                          Icons.add_a_photo_outlined,
+                          color: AppColors.primary,
+                          size: 24,
+                        ),
                         SizedBox(height: 4),
-                        Text('Tải ảnh\ncủa bạn', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.primary, height: 1.2), textAlign: TextAlign.center),
+                        Text(
+                          'Tải ảnh\ncủa bạn',
+                          style: TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary,
+                            height: 1.2,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
                       ],
                     ),
             ),
@@ -1052,7 +1188,8 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
 
           // PRE-DEFINED SAMPLE MODELS
           ..._sampleModels.map((model) {
-            final isSelected = _selectedModelUrl == model['url'] && _selectedModelFile == null;
+            final isSelected =
+                _selectedModelUrl == model['url'] && _selectedModelFile == null;
             final isFemale = model['gender'] == 'female';
             return GestureDetector(
               onTap: () {
@@ -1068,16 +1205,20 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: isSelected ? AppColors.primaryLight : Colors.grey.shade200,
+                    color: isSelected
+                        ? AppColors.primaryLight
+                        : Colors.grey.shade200,
                     width: isSelected ? 2.0 : 1.2,
                   ),
-                  boxShadow: isSelected ? [
-                    BoxShadow(
-                      color: AppColors.primary.withOpacity(0.12),
-                      blurRadius: 8,
-                      offset: const Offset(0, 3),
-                    )
-                  ] : [],
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: AppColors.primary.withOpacity(0.12),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
+                          ),
+                        ]
+                      : [],
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(14),
@@ -1094,19 +1235,30 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                               model['url']!,
                               fit: BoxFit.cover,
                               alignment: Alignment.topCenter,
-                              loadingBuilder: (context, child, loadingProgress) {
-                                if (loadingProgress == null) return child;
-                                return Container(
-                                  color: Colors.grey.shade100,
-                                  child: const Center(
-                                    child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+                              loadingBuilder:
+                                  (context, child, loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return Container(
+                                      color: Colors.grey.shade100,
+                                      child: const Center(
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: AppColors.primary,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                              errorBuilder: (context, error, stackTrace) =>
+                                  Container(
+                                    color: Colors.grey.shade100,
+                                    child: const Center(
+                                      child: Icon(
+                                        Icons.person,
+                                        color: Colors.grey,
+                                        size: 36,
+                                      ),
+                                    ),
                                   ),
-                                );
-                              },
-                              errorBuilder: (context, error, stackTrace) => Container(
-                                color: Colors.grey.shade100,
-                                child: const Center(child: Icon(Icons.person, color: Colors.grey, size: 36)),
-                              ),
                             ),
                       Positioned(
                         bottom: 0,
@@ -1118,21 +1270,32 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                             gradient: LinearGradient(
                               begin: Alignment.bottomCenter,
                               end: Alignment.topCenter,
-                              colors: [Colors.black.withOpacity(0.75), Colors.transparent],
+                              colors: [
+                                Colors.black.withOpacity(0.75),
+                                Colors.transparent,
+                              ],
                             ),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(
-                                isFemale ? Icons.female_rounded : Icons.male_rounded,
-                                color: isFemale ? Colors.pinkAccent : Colors.lightBlueAccent,
+                                isFemale
+                                    ? Icons.female_rounded
+                                    : Icons.male_rounded,
+                                color: isFemale
+                                    ? Colors.pinkAccent
+                                    : Colors.lightBlueAccent,
                                 size: 12,
                               ),
                               const SizedBox(width: 2),
                               Text(
                                 model['name']!,
-                                style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.bold,
+                                ),
                                 textAlign: TextAlign.center,
                               ),
                             ],
@@ -1146,9 +1309,13 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                           child: CircleAvatar(
                             radius: 10,
                             backgroundColor: AppColors.primaryLight,
-                            child: Icon(Icons.check_rounded, size: 12, color: Colors.white),
+                            child: Icon(
+                              Icons.check_rounded,
+                              size: 12,
+                              color: Colors.white,
+                            ),
                           ),
-                        )
+                        ),
                     ],
                   ),
                 ),
@@ -1166,7 +1333,12 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
     if (_isLoadingOutfits) {
       return const SizedBox(
         height: 108,
-        child: Center(child: CircularProgressIndicator(color: AppColors.primary, strokeWidth: 2)),
+        child: Center(
+          child: CircularProgressIndicator(
+            color: AppColors.primary,
+            strokeWidth: 2,
+          ),
+        ),
       );
     }
 
@@ -1188,11 +1360,19 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Chưa có trang phục nào',
-                      style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: Colors.grey)),
+                  const Text(
+                    'Chưa có trang phục nào',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                      color: Colors.grey,
+                    ),
+                  ),
                   const SizedBox(height: 2),
-                  Text('Tạo trang phục trong tab Tủ đồ trước',
-                      style: TextStyle(fontSize: 11, color: Colors.grey.shade400)),
+                  Text(
+                    'Tạo trang phục trong tab Tủ đồ trước',
+                    style: TextStyle(fontSize: 11, color: Colors.grey.shade400),
+                  ),
                 ],
               ),
             ),
@@ -1209,11 +1389,19 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
         children: [
           Row(
             children: [
-              const Icon(Icons.style_rounded, size: 14, color: AppColors.primary),
+              const Icon(
+                Icons.style_rounded,
+                size: 14,
+                color: AppColors.primary,
+              ),
               const SizedBox(width: 5),
               const Text(
                 'Chọn từ trang phục đã lưu',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primary),
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.primary,
+                ),
               ),
               const Spacer(),
               if (_selectedOutfitSnapshotUrl != null)
@@ -1225,9 +1413,20 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.close_rounded, size: 13, color: Colors.red.shade400),
+                      Icon(
+                        Icons.close_rounded,
+                        size: 13,
+                        color: Colors.red.shade400,
+                      ),
                       const SizedBox(width: 2),
-                      Text('Bỏ chọn', style: TextStyle(fontSize: 11, color: Colors.red.shade400, fontWeight: FontWeight.w600)),
+                      Text(
+                        'Bỏ chọn',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.red.shade400,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -1242,11 +1441,13 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
               itemCount: _savedOutfits.length,
               itemBuilder: (context, index) {
                 final outfit = _savedOutfits[index];
-                final snapshotUrl = outfit['CanvasSnapshotUrl'] as String? ??
+                final snapshotUrl =
+                    outfit['CanvasSnapshotUrl'] as String? ??
                     outfit['canvasSnapshotUrl'] as String? ??
                     outfit['snapshotUrl'] as String? ??
                     '';
-                final title = outfit['Title'] as String? ??
+                final title =
+                    outfit['Title'] as String? ??
                     outfit['title'] as String? ??
                     'Bộ phối đồ';
                 final isSelected = _selectedOutfitSnapshotUrl == snapshotUrl;
@@ -1272,12 +1473,26 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(
-                        color: isSelected ? AppColors.primaryLight : Colors.grey.shade200,
+                        color: isSelected
+                            ? AppColors.primaryLight
+                            : Colors.grey.shade200,
                         width: isSelected ? 2.5 : 1,
                       ),
                       boxShadow: isSelected
-                          ? [BoxShadow(color: AppColors.primary.withOpacity(0.18), blurRadius: 8, offset: const Offset(0, 4))]
-                          : [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 4, offset: const Offset(0, 2))],
+                          ? [
+                              BoxShadow(
+                                color: AppColors.primary.withOpacity(0.18),
+                                blurRadius: 8,
+                                offset: const Offset(0, 4),
+                              ),
+                            ]
+                          : [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.04),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                     ),
                     child: Stack(
                       children: [
@@ -1296,21 +1511,35 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                                       width: 86,
                                       height: 110,
                                       color: Colors.grey.shade100,
-                                      child: const Center(child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary)),
+                                      child: const Center(
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: AppColors.primary,
+                                        ),
+                                      ),
                                     );
                                   },
-                                  errorBuilder: (context, error, stack) => Container(
-                                    width: 86,
-                                    height: 110,
-                                    color: Colors.grey.shade100,
-                                    child: const Icon(Icons.broken_image_outlined, color: Colors.grey, size: 28),
-                                  ),
+                                  errorBuilder: (context, error, stack) =>
+                                      Container(
+                                        width: 86,
+                                        height: 110,
+                                        color: Colors.grey.shade100,
+                                        child: const Icon(
+                                          Icons.broken_image_outlined,
+                                          color: Colors.grey,
+                                          size: 28,
+                                        ),
+                                      ),
                                 )
                               : Container(
                                   width: 86,
                                   height: 110,
                                   color: Colors.grey.shade100,
-                                  child: const Icon(Icons.style_rounded, color: Colors.grey, size: 30),
+                                  child: const Icon(
+                                    Icons.style_rounded,
+                                    color: Colors.grey,
+                                    size: 30,
+                                  ),
                                 ),
                         ),
                         // Title overlay at bottom
@@ -1319,18 +1548,30 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                           left: 0,
                           right: 0,
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 4,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
-                              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(12)),
+                              borderRadius: const BorderRadius.vertical(
+                                bottom: Radius.circular(12),
+                              ),
                               gradient: LinearGradient(
                                 begin: Alignment.bottomCenter,
                                 end: Alignment.topCenter,
-                                colors: [Colors.black.withOpacity(0.72), Colors.transparent],
+                                colors: [
+                                  Colors.black.withOpacity(0.72),
+                                  Colors.transparent,
+                                ],
                               ),
                             ),
                             child: Text(
                               title,
-                              style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 9,
+                                fontWeight: FontWeight.bold,
+                              ),
                               maxLines: 2,
                               textAlign: TextAlign.center,
                               overflow: TextOverflow.ellipsis,
@@ -1345,7 +1586,11 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                             child: CircleAvatar(
                               radius: 10,
                               backgroundColor: AppColors.primaryLight,
-                              child: Icon(Icons.check_rounded, size: 12, color: Colors.white),
+                              child: Icon(
+                                Icons.check_rounded,
+                                size: 12,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
                       ],
@@ -1359,12 +1604,20 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
             const SizedBox(height: 6),
             Row(
               children: [
-                const Icon(Icons.check_circle_rounded, color: AppColors.primaryLight, size: 14),
+                const Icon(
+                  Icons.check_circle_rounded,
+                  color: AppColors.primaryLight,
+                  size: 14,
+                ),
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(
                     'Đã chọn: "$_selectedOutfitTitle" — ảnh này sẽ được dùng làm trang phục thử đồ AI',
-                    style: const TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w600),
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
                     maxLines: 2,
                   ),
                 ),
@@ -1396,16 +1649,26 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
         ),
         child: Column(
           children: [
-            const Icon(Icons.dry_cleaning_rounded, size: 48, color: Colors.grey),
+            const Icon(
+              Icons.dry_cleaning_rounded,
+              size: 48,
+              color: Colors.grey,
+            ),
             const SizedBox(height: 10),
-            const Text('Tủ đồ trống!', style: TextStyle(fontWeight: FontWeight.bold)),
+            const Text(
+              'Tủ đồ trống!',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 4),
-            const Text('Hãy thêm đồ ở tab Tủ đồ trước.', style: TextStyle(fontSize: 12, color: Colors.grey)),
+            const Text(
+              'Hãy thêm đồ ở tab Tủ đồ trước.',
+              style: TextStyle(fontSize: 12, color: Colors.grey),
+            ),
             const SizedBox(height: 12),
             ElevatedButton(
               onPressed: _fetchWardrobe,
               child: const Text('Tải lại tủ đồ'),
-            )
+            ),
           ],
         ),
       );
@@ -1419,21 +1682,39 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
           height: 38,
           child: ListView(
             scrollDirection: Axis.horizontal,
-            children: ['Tất cả', 'Áo', 'Quần/Váy', 'Đầm/Váy liền', 'Áo khoác', 'Khác'].map((filter) {
-              final active = _wardrobeFilter == filter;
-              return Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: ChoiceChip(
-                  selected: active,
-                  onSelected: (_) {
-                    setState(() => _wardrobeFilter = filter);
-                  },
-                  label: Text(filter, style: TextStyle(fontSize: 12, fontWeight: active ? FontWeight.bold : FontWeight.normal)),
-                  selectedColor: AppColors.accent,
-                  labelStyle: TextStyle(color: active ? AppColors.primary : Colors.black87),
-                ),
-              );
-            }).toList(),
+            children:
+                [
+                  'Tất cả',
+                  'Áo',
+                  'Quần/Váy',
+                  'Đầm/Váy liền',
+                  'Áo khoác',
+                  'Khác',
+                ].map((filter) {
+                  final active = _wardrobeFilter == filter;
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: ChoiceChip(
+                      selected: active,
+                      onSelected: (_) {
+                        setState(() => _wardrobeFilter = filter);
+                      },
+                      label: Text(
+                        filter,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: active
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                        ),
+                      ),
+                      selectedColor: AppColors.accent,
+                      labelStyle: TextStyle(
+                        color: active ? AppColors.primary : Colors.black87,
+                      ),
+                    ),
+                  );
+                }).toList(),
           ),
         ),
         const SizedBox(height: 12),
@@ -1472,7 +1753,9 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(
-                      color: isSelected ? AppColors.primaryLight : Colors.grey.shade200,
+                      color: isSelected
+                          ? AppColors.primaryLight
+                          : Colors.grey.shade200,
                       width: isSelected ? 2.5 : 1,
                     ),
                     boxShadow: [
@@ -1482,7 +1765,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                             : Colors.black.withOpacity(0.04),
                         blurRadius: 8,
                         offset: const Offset(0, 4),
-                      )
+                      ),
                     ],
                   ),
                   child: Stack(
@@ -1491,32 +1774,49 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                         children: [
                           Expanded(
                             child: ClipRRect(
-                              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                              borderRadius: const BorderRadius.vertical(
+                                top: Radius.circular(12),
+                              ),
                               child: Image.network(
                                 item.originalImageUrl ?? item.imageUrl,
                                 width: double.infinity,
                                 fit: BoxFit.contain,
-                                loadingBuilder: (context, child, loadingProgress) {
-                                  if (loadingProgress == null) return child;
-                                  return Container(
-                                    color: Colors.grey.shade50,
-                                    child: const Center(
-                                      child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+                                loadingBuilder:
+                                    (context, child, loadingProgress) {
+                                      if (loadingProgress == null) return child;
+                                      return Container(
+                                        color: Colors.grey.shade50,
+                                        child: const Center(
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            color: AppColors.primary,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                errorBuilder: (context, error, stackTrace) =>
+                                    Container(
+                                      color: Colors.grey.shade100,
+                                      child: const Icon(
+                                        Icons.broken_image_outlined,
+                                        color: Colors.grey,
+                                        size: 30,
+                                      ),
                                     ),
-                                  );
-                                },
-                                errorBuilder: (context, error, stackTrace) => Container(
-                                  color: Colors.grey.shade100,
-                                  child: const Icon(Icons.broken_image_outlined, color: Colors.grey, size: 30),
-                                ),
                               ),
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 5),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 5,
+                            ),
                             child: Text(
                               item.name.isEmpty ? 'Không tên' : item.name,
-                              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600),
+                              style: const TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                              ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               textAlign: TextAlign.center,
@@ -1531,7 +1831,11 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                           child: CircleAvatar(
                             radius: 10,
                             backgroundColor: AppColors.primaryLight,
-                            child: const Icon(Icons.check_rounded, size: 12, color: Colors.white),
+                            child: const Icon(
+                              Icons.check_rounded,
+                              size: 12,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                     ],
@@ -1539,7 +1843,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                 ),
               );
             },
-          )
+          ),
       ],
     );
   }
@@ -1547,13 +1851,20 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
   // Helper: chuyển category tiếng Anh sang tiếng Việt
   String _categoryLabel(String cat) {
     switch (cat.toLowerCase()) {
-      case 'top': return 'Áo';
-      case 'bottom': return 'Quần/Váy';
-      case 'dress': return 'Đầm';
-      case 'outerwear': return 'Áo khoác';
-      case 'bag': return 'Túi';
-      case 'shoes': return 'Giày';
-      default: return 'Khác';
+      case 'top':
+        return 'Áo';
+      case 'bottom':
+        return 'Quần/Váy';
+      case 'dress':
+        return 'Đầm';
+      case 'outerwear':
+        return 'Áo khoác';
+      case 'bag':
+        return 'Túi';
+      case 'shoes':
+        return 'Giày';
+      default:
+        return 'Khác';
     }
   }
 
@@ -1576,15 +1887,23 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
             children: [
               Text(
                 'Đã chọn (${_selectedGarments.length} món)',
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.primary),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                  color: AppColors.primary,
+                ),
               ),
               GestureDetector(
                 onTap: () => setState(() => _selectedGarments.clear()),
                 child: const Text(
                   'Xóa tất cả',
-                  style: TextStyle(color: Colors.red, fontSize: 12, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              )
+              ),
             ],
           ),
           const SizedBox(height: 12),
@@ -1600,7 +1919,10 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                   margin: const EdgeInsets.only(right: 10),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: AppColors.primaryLight.withOpacity(0.6), width: 1.5),
+                    border: Border.all(
+                      color: AppColors.primaryLight.withOpacity(0.6),
+                      width: 1.5,
+                    ),
                   ),
                   child: Stack(
                     clipBehavior: Clip.none,
@@ -1613,8 +1935,10 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                           fit: BoxFit.contain,
                           width: double.infinity,
                           height: double.infinity,
-                          errorBuilder: (context, e, s) =>
-                              const Icon(Icons.broken_image_outlined, color: Colors.grey),
+                          errorBuilder: (context, e, s) => const Icon(
+                            Icons.broken_image_outlined,
+                            color: Colors.grey,
+                          ),
                         ),
                       ),
                       // Nhãn loại (tiếng Việt) ở dưới
@@ -1625,12 +1949,18 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                         child: Container(
                           decoration: BoxDecoration(
                             color: Colors.black.withOpacity(0.55),
-                            borderRadius: const BorderRadius.vertical(bottom: Radius.circular(12)),
+                            borderRadius: const BorderRadius.vertical(
+                              bottom: Radius.circular(12),
+                            ),
                           ),
                           padding: const EdgeInsets.symmetric(vertical: 3),
                           child: Text(
                             _categoryLabel(item.category),
-                            style: const TextStyle(fontSize: 9, color: Colors.white, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                              fontSize: 9,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
                             textAlign: TextAlign.center,
                           ),
                         ),
@@ -1640,7 +1970,8 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                         top: -6,
                         right: -6,
                         child: GestureDetector(
-                          onTap: () => setState(() => _selectedGarments.removeAt(idx)),
+                          onTap: () =>
+                              setState(() => _selectedGarments.removeAt(idx)),
                           child: Container(
                             width: 26,
                             height: 26,
@@ -1648,10 +1979,18 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                               color: Colors.red,
                               shape: BoxShape.circle,
                               boxShadow: [
-                                BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2)),
+                                BoxShadow(
+                                  color: Colors.black26,
+                                  blurRadius: 4,
+                                  offset: Offset(0, 2),
+                                ),
                               ],
                             ),
-                            child: const Icon(Icons.close_rounded, size: 16, color: Colors.white),
+                            child: const Icon(
+                              Icons.close_rounded,
+                              size: 16,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),
@@ -1676,13 +2015,17 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                   Expanded(
                     child: Text(
                       'Hệ thống sẽ tự động ghép các món đồ thành 1 ảnh Flat Lay trước khi mặc thử lên người mẫu.',
-                      style: TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w500),
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
                 ],
               ),
-            )
-          ]
+            ),
+          ],
         ],
       ),
     );
@@ -1702,21 +2045,40 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Vùng mặc thử:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.primary)),
+              const Text(
+                'Vùng mặc thử:',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                  color: AppColors.primary,
+                ),
+              ),
               DropdownButton<String>(
                 value: _selectedCategory,
                 underline: const SizedBox(),
-                style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primary,
+                ),
                 items: const [
-                  DropdownMenuItem(value: 'auto', child: Text('Tự động nhận diện')),
+                  DropdownMenuItem(
+                    value: 'auto',
+                    child: Text('Tự động nhận diện'),
+                  ),
                   DropdownMenuItem(value: 'tops', child: Text('Áo (Tops)')),
-                  DropdownMenuItem(value: 'bottoms', child: Text('Quần/Váy (Bottoms)')),
-                  DropdownMenuItem(value: 'one-pieces', child: Text('Đầm/Váy liền')),
+                  DropdownMenuItem(
+                    value: 'bottoms',
+                    child: Text('Quần/Váy (Bottoms)'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'one-pieces',
+                    child: Text('Đầm/Váy liền'),
+                  ),
                 ],
                 onChanged: (val) {
                   if (val != null) setState(() => _selectedCategory = val);
                 },
-              )
+              ),
             ],
           ),
           const Divider(),
@@ -1727,17 +2089,27 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
               const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Giữ nguyên hậu cảnh:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.primary)),
-                  Text('Giúp ảnh chân thực, tự nhiên hơn', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                  Text(
+                    'Giữ nguyên hậu cảnh:',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                  Text(
+                    'Giúp ảnh chân thực, tự nhiên hơn',
+                    style: TextStyle(fontSize: 10, color: Colors.grey),
+                  ),
                 ],
               ),
               Switch(
                 value: _restoreBackground,
                 activeThumbColor: AppColors.primary,
                 onChanged: (val) => setState(() => _restoreBackground = val),
-              )
+              ),
             ],
-          )
+          ),
         ],
       ),
     );
@@ -1792,11 +2164,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(
-          icon,
-          size: 16,
-          color: AppColors.primaryLight.withOpacity(0.8),
-        ),
+        Icon(icon, size: 16, color: AppColors.primaryLight.withOpacity(0.8)),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
@@ -1840,7 +2208,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                           color: AppColors.primary.withOpacity(0.12),
                           blurRadius: 30,
                           offset: const Offset(0, 10),
-                        )
+                        ),
                       ],
                     ),
                     child: ClipRRect(
@@ -1853,9 +2221,15 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                             Image.file(_selectedModelFile!, fit: BoxFit.cover)
                           else if (_selectedModelUrl != null)
                             _selectedModelUrl!.startsWith('assets/')
-                                ? Image.asset(_selectedModelUrl!, fit: BoxFit.cover)
-                                : Image.network(_selectedModelUrl!, fit: BoxFit.cover),
-                          
+                                ? Image.asset(
+                                    _selectedModelUrl!,
+                                    fit: BoxFit.cover,
+                                  )
+                                : Image.network(
+                                    _selectedModelUrl!,
+                                    fit: BoxFit.cover,
+                                  ),
+
                           // Semi-transparent overlay
                           Container(color: Colors.black45),
                         ],
@@ -1881,13 +2255,16 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                                   color: Colors.black54,
                                   offset: Offset(0, 4),
                                   blurRadius: 12,
-                                )
-                              ]
+                                ),
+                              ],
                             ),
                           ),
                           const SizedBox(height: 6),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.white24,
                               borderRadius: BorderRadius.circular(20),
@@ -1903,11 +2280,11 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                                     color: Colors.black38,
                                     offset: Offset(0, 1),
                                     blurRadius: 3,
-                                  )
-                                ]
+                                  ),
+                                ],
                               ),
                             ),
-                          )
+                          ),
                         ],
                       ),
                     ),
@@ -1918,7 +2295,9 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                     animation: _scanAnimation,
                     builder: (context, child) {
                       return Positioned(
-                        top: _scanAnimation.value * 300 + 10, // Moves up and down the container
+                        top:
+                            _scanAnimation.value * 300 +
+                            10, // Moves up and down the container
                         left: 20,
                         right: 20,
                         child: Container(
@@ -1931,7 +2310,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                                 color: Colors.greenAccent.withOpacity(0.8),
                                 blurRadius: 16,
                                 spreadRadius: 3,
-                              )
+                              ),
                             ],
                           ),
                         ),
@@ -1940,7 +2319,8 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                   ),
 
                   // Garment badge overlap (overlapping stack for multiple garments)
-                  if (_selectedGarments.isNotEmpty || _selectedOutfitSnapshotUrl != null)
+                  if (_selectedGarments.isNotEmpty ||
+                      _selectedOutfitSnapshotUrl != null)
                     Positioned(
                       bottom: 12,
                       right: 12,
@@ -1950,22 +2330,31 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                         decoration: BoxDecoration(
                           color: Colors.white,
                           shape: BoxShape.circle,
-                          border: Border.all(color: AppColors.primaryLight, width: 2),
+                          border: Border.all(
+                            color: AppColors.primaryLight,
+                            width: 2,
+                          ),
                           boxShadow: const [
                             BoxShadow(
                               color: Colors.black26,
                               blurRadius: 6,
                               offset: Offset(2, 2),
-                            )
+                            ),
                           ],
                         ),
                         child: ClipOval(
                           child: _selectedOutfitSnapshotUrl != null
-                              ? Image.network(_selectedOutfitSnapshotUrl!, fit: BoxFit.cover)
-                              : Image.network(_selectedGarments.first.imageUrl, fit: BoxFit.cover),
+                              ? Image.network(
+                                  _selectedOutfitSnapshotUrl!,
+                                  fit: BoxFit.cover,
+                                )
+                              : Image.network(
+                                  _selectedGarments.first.imageUrl,
+                                  fit: BoxFit.cover,
+                                ),
                         ),
                       ),
-                    )
+                    ),
                 ],
               ),
               const SizedBox(height: 24),
@@ -1977,11 +2366,11 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                   fontSize: 38,
                   fontWeight: FontWeight.w900,
                   color: AppColors.primary,
-                  letterSpacing: 2
+                  letterSpacing: 2,
                 ),
               ),
               const SizedBox(height: 8),
-              
+
               Text(
                 _loadingMessage,
                 style: const TextStyle(
@@ -1995,18 +2384,27 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
               const SizedBox(height: 6),
               const Text(
                 'Tiến trình AI thường mất khoảng 10-15 giây để hoàn tất.',
-                style: TextStyle(color: Colors.grey, fontSize: 11, height: 1.25),
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 11,
+                  height: 1.25,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
-              
+
               // Cancel processing button
               OutlinedButton.icon(
                 style: OutlinedButton.styleFrom(
                   side: const BorderSide(color: Colors.red),
                   foregroundColor: Colors.red,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
                 ),
                 onPressed: () {
                   setState(() {
@@ -2021,7 +2419,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                   'Hủy bỏ yêu cầu',
                   style: TextStyle(fontWeight: FontWeight.bold, height: 1.25),
                 ),
-              )
+              ),
             ],
           ),
         ),
@@ -2048,7 +2446,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                       color: AppColors.primary.withOpacity(0.1),
                       blurRadius: 24,
                       offset: const Offset(0, 8),
-                    )
+                    ),
                   ],
                 ),
                 child: ClipRRect(
@@ -2072,7 +2470,9 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
                   ),
                   onPressed: _isSavingImage
                       ? null
@@ -2100,7 +2500,9 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                     side: const BorderSide(color: AppColors.primary),
                     foregroundColor: AppColors.primary,
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
                   ),
                   onPressed: () {
                     // Reset to try again
@@ -2110,7 +2512,10 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                     });
                   },
                   icon: const Icon(Icons.refresh_rounded),
-                  label: const Text('Thử đồ khác', style: TextStyle(fontWeight: FontWeight.bold)),
+                  label: const Text(
+                    'Thử đồ khác',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
               ),
             ],
@@ -2140,7 +2545,11 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
         children: [
           const Text(
             'Chọn người mẫu thử đồ',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.primary),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              color: AppColors.primary,
+            ),
           ),
           const SizedBox(height: 6),
           const Text(
@@ -2152,7 +2561,11 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
           const SizedBox(height: 24),
           const Text(
             'Xem trước người mẫu',
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.primary),
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: AppColors.primary,
+            ),
           ),
           const SizedBox(height: 10),
           Center(
@@ -2167,32 +2580,33 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                     color: Colors.black.withOpacity(0.04),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
-                  )
+                  ),
                 ],
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(23),
                 child: _selectedModelFile != null
-                    ? Image.file(
-                        _selectedModelFile!,
-                        fit: BoxFit.fitWidth,
-                      )
+                    ? Image.file(_selectedModelFile!, fit: BoxFit.fitWidth)
                     : _selectedModelUrl != null
-                        ? _selectedModelUrl!.startsWith('assets/')
-                            ? Image.asset(
-                                _selectedModelUrl!,
-                                fit: BoxFit.fitWidth,
-                              )
-                            : Image.network(
-                                _selectedModelUrl!,
-                                fit: BoxFit.fitWidth,
-                              )
-                        : const SizedBox(
-                            height: 200,
-                            child: Center(
-                              child: Icon(Icons.person, size: 72, color: Colors.grey),
-                            ),
+                    ? _selectedModelUrl!.startsWith('assets/')
+                          ? Image.asset(
+                              _selectedModelUrl!,
+                              fit: BoxFit.fitWidth,
+                            )
+                          : Image.network(
+                              _selectedModelUrl!,
+                              fit: BoxFit.fitWidth,
+                            )
+                    : const SizedBox(
+                        height: 200,
+                        child: Center(
+                          child: Icon(
+                            Icons.person,
+                            size: 72,
+                            color: Colors.grey,
                           ),
+                        ),
+                      ),
               ),
             ),
           ),
@@ -2210,7 +2624,11 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
         children: [
           const Text(
             'Chọn trang phục thử đồ',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.primary),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              color: AppColors.primary,
+            ),
           ),
           const SizedBox(height: 6),
           const Text(
@@ -2218,7 +2636,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
             style: TextStyle(fontSize: 13, color: Colors.grey, height: 1.35),
           ),
           const SizedBox(height: 16),
-          
+
           // Toggle Picker Type
           Row(
             children: [
@@ -2228,17 +2646,23 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     decoration: BoxDecoration(
-                      color: !_pickFromOutfits ? AppColors.primary.withOpacity(0.08) : Colors.transparent,
+                      color: !_pickFromOutfits
+                          ? AppColors.primary.withOpacity(0.08)
+                          : Colors.transparent,
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
-                        color: !_pickFromOutfits ? AppColors.primaryLight : Colors.grey.shade300,
+                        color: !_pickFromOutfits
+                            ? AppColors.primaryLight
+                            : Colors.grey.shade300,
                       ),
                     ),
                     child: Text(
                       'Tủ đồ cá nhân',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: !_pickFromOutfits ? AppColors.primary : Colors.grey.shade600,
+                        color: !_pickFromOutfits
+                            ? AppColors.primary
+                            : Colors.grey.shade600,
                         fontSize: 13,
                       ),
                       textAlign: TextAlign.center,
@@ -2253,17 +2677,23 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     decoration: BoxDecoration(
-                      color: _pickFromOutfits ? AppColors.primary.withOpacity(0.08) : Colors.transparent,
+                      color: _pickFromOutfits
+                          ? AppColors.primary.withOpacity(0.08)
+                          : Colors.transparent,
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
-                        color: _pickFromOutfits ? AppColors.primaryLight : Colors.grey.shade300,
+                        color: _pickFromOutfits
+                            ? AppColors.primaryLight
+                            : Colors.grey.shade300,
                       ),
                     ),
                     child: Text(
                       'Trang phục phối sẵn',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: _pickFromOutfits ? AppColors.primary : Colors.grey.shade600,
+                        color: _pickFromOutfits
+                            ? AppColors.primary
+                            : Colors.grey.shade600,
                         fontSize: 13,
                       ),
                       textAlign: TextAlign.center,
@@ -2274,7 +2704,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
             ],
           ),
           const SizedBox(height: 20),
-          
+
           _pickFromOutfits ? _buildOutfitPicker() : _buildGarmentSelector(),
           _buildSelectedGarmentsPreview(),
           const SizedBox(height: 20),
@@ -2294,10 +2724,14 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
         children: [
           const Text(
             'Xác nhận thông tin & Cấu hình',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.primary),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              color: AppColors.primary,
+            ),
           ),
           const SizedBox(height: 16),
-          
+
           // Selection Summary card
           Container(
             padding: const EdgeInsets.all(16),
@@ -2310,7 +2744,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                   color: Colors.black.withOpacity(0.02),
                   blurRadius: 8,
                   offset: const Offset(0, 4),
-                )
+                ),
               ],
             ),
             child: Row(
@@ -2321,7 +2755,11 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                     children: [
                       const Text(
                         'Người mẫu',
-                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey),
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey,
+                        ),
                       ),
                       const SizedBox(height: 8),
                       Container(
@@ -2334,31 +2772,47 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(11),
                           child: _selectedModelFile != null
-                              ? Image.file(_selectedModelFile!, fit: BoxFit.cover, alignment: Alignment.topCenter)
+                              ? Image.file(
+                                  _selectedModelFile!,
+                                  fit: BoxFit.cover,
+                                  alignment: Alignment.topCenter,
+                                )
                               : _selectedModelUrl != null
-                                  ? _selectedModelUrl!.startsWith('assets/')
-                                      ? Image.asset(_selectedModelUrl!, fit: BoxFit.cover, alignment: Alignment.topCenter)
-                                      : Image.network(_selectedModelUrl!, fit: BoxFit.cover, alignment: Alignment.topCenter)
-                                  : const Icon(Icons.person, color: Colors.grey),
+                              ? _selectedModelUrl!.startsWith('assets/')
+                                    ? Image.asset(
+                                        _selectedModelUrl!,
+                                        fit: BoxFit.cover,
+                                        alignment: Alignment.topCenter,
+                                      )
+                                    : Image.network(
+                                        _selectedModelUrl!,
+                                        fit: BoxFit.cover,
+                                        alignment: Alignment.topCenter,
+                                      )
+                              : const Icon(Icons.person, color: Colors.grey),
                         ),
                       ),
                     ],
                   ),
                 ),
-                
+
                 // Icon Arrow/Link
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 8),
                   child: Icon(Icons.add_rounded, color: Colors.grey, size: 20),
                 ),
-                
+
                 // Garments Preview
                 Expanded(
                   child: Column(
                     children: [
                       const Text(
                         'Trang phục',
-                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey),
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey,
+                        ),
                       ),
                       const SizedBox(height: 8),
                       Container(
@@ -2371,10 +2825,19 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(11),
                           child: isOutfitSnapshot
-                              ? Image.network(_selectedOutfitSnapshotUrl!, fit: BoxFit.cover)
+                              ? Image.network(
+                                  _selectedOutfitSnapshotUrl!,
+                                  fit: BoxFit.cover,
+                                )
                               : _selectedGarments.isNotEmpty
-                                  ? Image.network(_selectedGarments.first.imageUrl, fit: BoxFit.contain)
-                                  : const Icon(Icons.checkroom_rounded, color: Colors.grey),
+                              ? Image.network(
+                                  _selectedGarments.first.imageUrl,
+                                  fit: BoxFit.contain,
+                                )
+                              : const Icon(
+                                  Icons.checkroom_rounded,
+                                  color: Colors.grey,
+                                ),
                         ),
                       ),
                     ],
@@ -2383,11 +2846,15 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
               ],
             ),
           ),
-          
+
           const SizedBox(height: 24),
           const Text(
             'Cấu hình AI',
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.primary),
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: AppColors.primary,
+            ),
           ),
           const SizedBox(height: 10),
           _buildTryOnConfig(),
@@ -2398,10 +2865,13 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
             Center(
               child: Text(
                 _errorMessage!,
-                style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w600),
+                style: const TextStyle(
+                  color: Colors.red,
+                  fontWeight: FontWeight.w600,
+                ),
                 textAlign: TextAlign.center,
               ),
-            )
+            ),
           ],
         ],
       ),
@@ -2430,7 +2900,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
   Widget _stepNode(int stepIndex, String title) {
     final bool isActive = _activeStep == stepIndex;
     final bool isCompleted = _activeStep > stepIndex;
-    
+
     return Expanded(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -2443,30 +2913,38 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
               color: isCompleted
                   ? AppColors.primary
                   : isActive
-                      ? AppColors.primaryLight
-                      : Colors.grey.shade100,
+                  ? AppColors.primaryLight
+                  : Colors.grey.shade100,
               shape: BoxShape.circle,
               border: Border.all(
                 color: isActive ? AppColors.primary : Colors.grey.shade300,
                 width: isActive ? 2 : 1,
               ),
-              boxShadow: isActive ? [
-                BoxShadow(
-                  color: AppColors.primaryLight.withOpacity(0.3),
-                  blurRadius: 8,
-                  spreadRadius: 1,
-                )
-              ] : [],
+              boxShadow: isActive
+                  ? [
+                      BoxShadow(
+                        color: AppColors.primaryLight.withOpacity(0.3),
+                        blurRadius: 8,
+                        spreadRadius: 1,
+                      ),
+                    ]
+                  : [],
             ),
             child: Center(
               child: isCompleted
-                  ? const Icon(Icons.check_rounded, size: 16, color: Colors.white)
+                  ? const Icon(
+                      Icons.check_rounded,
+                      size: 16,
+                      color: Colors.white,
+                    )
                   : Text(
                       '${stepIndex + 1}',
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
-                        color: isActive || isCompleted ? Colors.white : Colors.grey.shade600,
+                        color: isActive || isCompleted
+                            ? Colors.white
+                            : Colors.grey.shade600,
                       ),
                     ),
             ),
@@ -2499,7 +2977,8 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
   Widget _buildWizardNavigationButtons() {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
-      color: AppColors.background, // Match screen background so it blends perfectly
+      color: AppColors
+          .background, // Match screen background so it blends perfectly
       child: Row(
         children: [
           if (_activeStep > 0)
@@ -2509,13 +2988,22 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                 child: OutlinedButton(
                   style: OutlinedButton.styleFrom(
                     padding: EdgeInsets.zero,
-                    side: const BorderSide(color: AppColors.primaryLight, width: 1.5),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    side: const BorderSide(
+                      color: AppColors.primaryLight,
+                      width: 1.5,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                   onPressed: () => setState(() => _activeStep--),
                   child: const Text(
                     'Quay lại',
-                    style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primaryLight, fontSize: 13),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primaryLight,
+                      fontSize: 13,
+                    ),
                   ),
                 ),
               ),
@@ -2529,15 +3017,24 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                       style: ElevatedButton.styleFrom(
                         padding: EdgeInsets.zero,
                         backgroundColor: AppColors.primary,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                         elevation: 0,
                       ),
-                      onPressed: (_activeStep == 1 && _selectedGarments.isEmpty && _selectedOutfitSnapshotUrl == null)
+                      onPressed:
+                          (_activeStep == 1 &&
+                              _selectedGarments.isEmpty &&
+                              _selectedOutfitSnapshotUrl == null)
                           ? null
                           : () => setState(() => _activeStep++),
                       child: const Text(
                         'Tiếp tục',
-                        style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 13),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontSize: 13,
+                        ),
                       ),
                     ),
                   )
@@ -2546,32 +3043,52 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
                       gradient: LinearGradient(
-                        colors: (_selectedGarments.isEmpty && _selectedOutfitSnapshotUrl == null)
+                        colors:
+                            (_selectedGarments.isEmpty &&
+                                _selectedOutfitSnapshotUrl == null)
                             ? [Colors.grey.shade400, Colors.grey.shade400]
                             : [AppColors.primary, AppColors.primaryLight],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
-                      boxShadow: (_selectedGarments.isEmpty && _selectedOutfitSnapshotUrl == null) ? [] : [
-                        BoxShadow(
-                          color: AppColors.primary.withOpacity(0.2),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        )
-                      ],
+                      boxShadow:
+                          (_selectedGarments.isEmpty &&
+                              _selectedOutfitSnapshotUrl == null)
+                          ? []
+                          : [
+                              BoxShadow(
+                                color: AppColors.primary.withOpacity(0.2),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
                     ),
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.transparent,
                         shadowColor: Colors.transparent,
                         padding: EdgeInsets.zero,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                      onPressed: (_selectedGarments.isEmpty && _selectedOutfitSnapshotUrl == null) ? null : _startTryOn,
-                      icon: const Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 16),
+                      onPressed:
+                          (_selectedGarments.isEmpty &&
+                              _selectedOutfitSnapshotUrl == null)
+                          ? null
+                          : _startTryOn,
+                      icon: const Icon(
+                        Icons.auto_awesome_rounded,
+                        color: Colors.white,
+                        size: 16,
+                      ),
                       label: const Text(
                         'Bắt đầu thử đồ AI',
-                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),
@@ -2583,13 +3100,27 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
 
   Widget _buildBeforeImage() {
     if (_selectedModelFile != null) {
-      return Image.file(_selectedModelFile!, fit: BoxFit.cover, alignment: Alignment.topCenter);
+      return Image.file(
+        _selectedModelFile!,
+        fit: BoxFit.cover,
+        alignment: Alignment.topCenter,
+      );
     } else if (_selectedModelUrl != null) {
       return _selectedModelUrl!.startsWith('assets/')
-          ? Image.asset(_selectedModelUrl!, fit: BoxFit.cover, alignment: Alignment.topCenter)
-          : Image.network(_selectedModelUrl!, fit: BoxFit.cover, alignment: Alignment.topCenter);
+          ? Image.asset(
+              _selectedModelUrl!,
+              fit: BoxFit.cover,
+              alignment: Alignment.topCenter,
+            )
+          : Image.network(
+              _selectedModelUrl!,
+              fit: BoxFit.cover,
+              alignment: Alignment.topCenter,
+            );
     }
-    return const Center(child: Icon(Icons.person, size: 72, color: Colors.grey));
+    return const Center(
+      child: Icon(Icons.person, size: 72, color: Colors.grey),
+    );
   }
 
   Widget _buildAfterImage() {
@@ -2599,7 +3130,9 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
       alignment: Alignment.topCenter,
       loadingBuilder: (context, child, loadingProgress) {
         if (loadingProgress == null) return child;
-        return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+        return const Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
+        );
       },
     );
   }
@@ -2651,10 +3184,7 @@ class _BeforeAfterSliderState extends State<BeforeAfterSlider> {
                 top: 0,
                 bottom: 0,
                 left: width * _clipFactor - 1.5,
-                child: Container(
-                  width: 3,
-                  color: Colors.white,
-                ),
+                child: Container(width: 3, color: Colors.white),
               ),
 
               // Slider Handle (Thumb)
@@ -2675,15 +3205,23 @@ class _BeforeAfterSliderState extends State<BeforeAfterSlider> {
                           color: Colors.black.withOpacity(0.25),
                           blurRadius: 8,
                           offset: const Offset(0, 3),
-                        )
+                        ),
                       ],
                     ),
                     child: const Center(
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.chevron_left_rounded, size: 14, color: Colors.white),
-                          Icon(Icons.chevron_right_rounded, size: 14, color: Colors.white),
+                          Icon(
+                            Icons.chevron_left_rounded,
+                            size: 14,
+                            color: Colors.white,
+                          ),
+                          Icon(
+                            Icons.chevron_right_rounded,
+                            size: 14,
+                            color: Colors.white,
+                          ),
                         ],
                       ),
                     ),
@@ -2696,14 +3234,21 @@ class _BeforeAfterSliderState extends State<BeforeAfterSlider> {
                 top: 12,
                 left: 12,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.black.withOpacity(0.6),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Text(
                     'Trước',
-                    style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
@@ -2713,14 +3258,21 @@ class _BeforeAfterSliderState extends State<BeforeAfterSlider> {
                 top: 12,
                 right: 12,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.primary.withOpacity(0.85),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Text(
                     'Sau',
-                    style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
@@ -2756,7 +3308,8 @@ class FadeInScale extends StatefulWidget {
   State<FadeInScale> createState() => _FadeInScaleState();
 }
 
-class _FadeInScaleState extends State<FadeInScale> with SingleTickerProviderStateMixin {
+class _FadeInScaleState extends State<FadeInScale>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
   late Animation<double> _opacityAnimation;
@@ -2768,12 +3321,14 @@ class _FadeInScaleState extends State<FadeInScale> with SingleTickerProviderStat
       vsync: this,
       duration: const Duration(milliseconds: 600),
     );
-    _scaleAnimation = Tween<double>(begin: 0.85, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
-    );
-    _opacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeIn),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 0.85,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
+    _opacityAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
     _controller.forward();
   }
 
@@ -2787,10 +3342,7 @@ class _FadeInScaleState extends State<FadeInScale> with SingleTickerProviderStat
   Widget build(BuildContext context) {
     return FadeTransition(
       opacity: _opacityAnimation,
-      child: ScaleTransition(
-        scale: _scaleAnimation,
-        child: widget.child,
-      ),
+      child: ScaleTransition(scale: _scaleAnimation, child: widget.child),
     );
   }
 }
