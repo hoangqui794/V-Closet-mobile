@@ -9,7 +9,15 @@ import '../../pages/camera/color_harmony_checker_page.dart';
 class StyleDnaCard extends StatelessWidget {
   final String? gender;
   final VoidCallback? onRefresh;
-  const StyleDnaCard({super.key, this.gender, this.onRefresh});
+  final GlobalKey? personalColorKey;
+  final Future<void> Function()? onPersonalColorTap;
+  const StyleDnaCard({
+    super.key,
+    this.gender,
+    this.onRefresh,
+    this.personalColorKey,
+    this.onPersonalColorTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -114,52 +122,55 @@ class StyleDnaCard extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               InkWell(
-                onTap: () async {
-                  final result = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const PersonalColorDetailPage(),
-                    ),
-                  );
-
-                  if (result == 'retake') {
-                    if (context.mounted) {
-                      final checkResult = await Navigator.push(
+                key: personalColorKey,
+                onTap:
+                    onPersonalColorTap ??
+                    () async {
+                      final result = await Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => const ColorHarmonyCheckerPage(),
+                          builder: (_) => const PersonalColorDetailPage(),
                         ),
                       );
 
-                      if (checkResult is Map) {
+                      if (result == 'retake') {
                         if (context.mounted) {
-                          final saveResult = await Navigator.push(
+                          final checkResult = await Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => PersonalColorDetailPage(
-                                isFromScan: true,
-                                scannedSkinTone: checkResult['skinTone']
-                                    ?.toString(),
-                                scannedColorPref: checkResult['colorPref']
-                                    ?.toString(),
-                              ),
+                              builder: (_) => const ColorHarmonyCheckerPage(),
                             ),
                           );
 
-                          if (saveResult == 'saved') {
-                            if (onRefresh != null) {
-                              onRefresh!();
+                          if (checkResult is Map) {
+                            if (context.mounted) {
+                              final saveResult = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => PersonalColorDetailPage(
+                                    isFromScan: true,
+                                    scannedSkinTone: checkResult['skinTone']
+                                        ?.toString(),
+                                    scannedColorPref: checkResult['colorPref']
+                                        ?.toString(),
+                                  ),
+                                ),
+                              );
+
+                              if (saveResult == 'saved') {
+                                if (onRefresh != null) {
+                                  onRefresh!();
+                                }
+                              }
                             }
                           }
                         }
+                      } else if (result == 'saved') {
+                        if (onRefresh != null) {
+                          onRefresh!();
+                        }
                       }
-                    }
-                  } else if (result == 'saved') {
-                    if (onRefresh != null) {
-                      onRefresh!();
-                    }
-                  }
-                },
+                    },
                 borderRadius: BorderRadius.circular(16),
                 child: Container(
                   width: double.infinity,

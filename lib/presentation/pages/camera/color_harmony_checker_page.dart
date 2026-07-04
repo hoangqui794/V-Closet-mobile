@@ -6,9 +6,11 @@ import 'package:get_it/get_it.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../data/datasources/auth_local_storage.dart';
+import '../../widgets/app_tour_overlay.dart';
 
 class ColorHarmonyCheckerPage extends StatefulWidget {
-  const ColorHarmonyCheckerPage({super.key});
+  final bool showStartGuide;
+  const ColorHarmonyCheckerPage({super.key, this.showStartGuide = false});
 
   @override
   State<ColorHarmonyCheckerPage> createState() =>
@@ -18,6 +20,7 @@ class ColorHarmonyCheckerPage extends StatefulWidget {
 class _ColorHarmonyCheckerPageState extends State<ColorHarmonyCheckerPage>
     with SingleTickerProviderStateMixin {
   final _localStorage = GetIt.I<AuthLocalStorage>();
+  final GlobalKey _startColorCheckGuideKey = GlobalKey();
 
   int _flowState =
       0; // 0: Landing, 1: Camera Face Capture, 2: Scanning & Analysis
@@ -32,6 +35,7 @@ class _ColorHarmonyCheckerPageState extends State<ColorHarmonyCheckerPage>
   String _analysisStatus = "Đang nhận diện cấu trúc khuôn mặt...";
   int _analysisStep = 0;
   Timer? _analysisTimer;
+  bool _isShowingStartGuide = false;
 
   @override
   void initState() {
@@ -43,6 +47,9 @@ class _ColorHarmonyCheckerPageState extends State<ColorHarmonyCheckerPage>
     _laserAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _laserController, curve: Curves.easeInOut),
     );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _maybeShowStartGuide();
+    });
   }
 
   @override
@@ -86,6 +93,37 @@ class _ColorHarmonyCheckerPageState extends State<ColorHarmonyCheckerPage>
       _flowState = 1;
     });
     await _initializeCamera();
+  }
+
+  Future<void> _maybeShowStartGuide() async {
+    if (!widget.showStartGuide || _isShowingStartGuide || _flowState != 0) {
+      return;
+    }
+
+    _isShowingStartGuide = true;
+    await Future.delayed(const Duration(milliseconds: 450));
+    if (!mounted || _flowState != 0) {
+      _isShowingStartGuide = false;
+      return;
+    }
+
+    final result = await AppTourOverlay.showCoachStep(
+      context,
+      targetKey: _startColorCheckGuideKey,
+      stepNumber: 3,
+      totalSteps: 3,
+      icon: Icons.face_retouching_natural_rounded,
+      title: 'Bắt đầu test màu',
+      description:
+          'Nhấn nút này để mở camera trước. Hãy để mặt trong khung, đủ sáng tự nhiên để app phân tích màu chính xác hơn.',
+      primaryLabel: 'Nhấn vùng sáng để bắt đầu',
+    );
+
+    _isShowingStartGuide = false;
+    if (!mounted) return;
+    if (result == AppTourCoachAction.next) {
+      await _startColorCheck();
+    }
   }
 
   Future<void> _takePhoto() async {
@@ -482,6 +520,7 @@ class _ColorHarmonyCheckerPageState extends State<ColorHarmonyCheckerPage>
                       Padding(
                         padding: const EdgeInsets.fromLTRB(22, 18, 22, 22),
                         child: SizedBox(
+                          key: _startColorCheckGuideKey,
                           width: double.infinity,
                           height: 56,
                           child: ElevatedButton(

@@ -646,7 +646,7 @@ class _StyleDnaQuizPageState extends State<StyleDnaQuizPage>
     final isLastStep = _currentStep == totalSteps - 1;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F4FF),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Column(
           children: [

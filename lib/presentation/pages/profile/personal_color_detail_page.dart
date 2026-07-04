@@ -6,18 +6,21 @@ import 'package:get_it/get_it.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../data/datasources/auth_local_storage.dart';
 import '../../../data/datasources/user_api_service.dart';
+import '../../widgets/app_tour_overlay.dart';
 import 'personal_color_profile.dart';
 
 class PersonalColorDetailPage extends StatefulWidget {
   final bool isFromScan;
   final String? scannedSkinTone;
   final String? scannedColorPref;
+  final bool showColorTestGuide;
 
   const PersonalColorDetailPage({
     super.key,
     this.isFromScan = false,
     this.scannedSkinTone,
     this.scannedColorPref,
+    this.showColorTestGuide = false,
   });
 
   @override
@@ -28,7 +31,10 @@ class PersonalColorDetailPage extends StatefulWidget {
 class _PersonalColorDetailPageState extends State<PersonalColorDetailPage> {
   final _localStorage = GetIt.I<AuthLocalStorage>();
   final _userService = GetIt.I<UserApiService>();
+  final ScrollController _scrollController = ScrollController();
+  final GlobalKey _updateColorGuideKey = GlobalKey();
   bool _isSaving = false;
+  bool _isShowingColorGuide = false;
 
   PersonalColorProfile get _profile => PersonalColorProfile.resolve(
     skinTone: widget.isFromScan
@@ -41,6 +47,64 @@ class _PersonalColorDetailPageState extends State<PersonalColorDetailPage> {
   );
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _maybeShowColorTestGuide();
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _maybeShowColorTestGuide() async {
+    if (!widget.showColorTestGuide || widget.isFromScan) return;
+    if (_isShowingColorGuide) return;
+
+    _isShowingColorGuide = true;
+    await Future.delayed(const Duration(milliseconds: 450));
+    if (!mounted) {
+      _isShowingColorGuide = false;
+      return;
+    }
+
+    if (_scrollController.hasClients) {
+      await _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 520),
+        curve: Curves.easeOutCubic,
+      );
+      await Future.delayed(const Duration(milliseconds: 180));
+    }
+
+    if (!mounted) {
+      _isShowingColorGuide = false;
+      return;
+    }
+
+    final result = await AppTourOverlay.showCoachStep(
+      context,
+      targetKey: _updateColorGuideKey,
+      stepNumber: 2,
+      totalSteps: 3,
+      icon: Icons.camera_alt_rounded,
+      title: 'Mở camera test màu',
+      description:
+          'Nhấn nút này để chụp khuôn mặt và phân tích lại tone da, undertone, bảng màu hợp với bạn.',
+      primaryLabel: 'Nhấn vùng sáng để mở camera',
+    );
+
+    _isShowingColorGuide = false;
+    if (!mounted) return;
+    if (result == AppTourCoachAction.next) {
+      _retakeQuiz();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final profile = _profile;
 
@@ -48,6 +112,7 @@ class _PersonalColorDetailPageState extends State<PersonalColorDetailPage> {
       backgroundColor: Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
+          controller: _scrollController,
           padding: const EdgeInsets.fromLTRB(22, 8, 22, 32),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -209,6 +274,7 @@ class _PersonalColorDetailPageState extends State<PersonalColorDetailPage> {
                 ),
               ] else ...[
                 SizedBox(
+                  key: _updateColorGuideKey,
                   width: double.infinity,
                   height: 54,
                   child: OutlinedButton.icon(

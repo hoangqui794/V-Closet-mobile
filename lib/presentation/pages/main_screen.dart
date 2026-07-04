@@ -19,6 +19,7 @@ import 'profile/notification_page.dart';
 import '../../data/datasources/subscription_api_service.dart';
 import '../../data/datasources/signalr_service.dart';
 import '../../data/datasources/notification_api_service.dart';
+import '../widgets/app_tour_overlay.dart';
 import 'package:animate_do/animate_do.dart';
 
 class MainScreen extends StatefulWidget {
@@ -31,9 +32,11 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final _localStorage = GetIt.I<AuthLocalStorage>();
+  final List<GlobalKey> _navKeys = List.generate(6, (_) => GlobalKey());
   int _currentIndex = 0;
   StreamSubscription<Map<String, dynamic>>? _notificationSub;
   OverlayEntry? _overlayEntry;
+  bool _isRunningNewUserFlow = false;
 
   @override
   void initState() {
@@ -45,8 +48,8 @@ class _MainScreenState extends State<MainScreen> {
     // Kịch bản 3: Tự kiểm tra thông báo chưa đọc khi mở ứng dụng
     _checkGiftSubscriptionFromNotifications();
 
-    // Trigger Style DNA Quiz nếu user chưa hoàn thành
-    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeShowStyleQuiz());
+    // Trigger Style DNA Quiz và hướng dẫn nhanh cho user mới
+    WidgetsBinding.instance.addPostFrameCallback((_) => _runNewUserFlow());
   }
 
   @override
@@ -285,6 +288,30 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
+  Future<void> _runNewUserFlow() async {
+    if (_isRunningNewUserFlow) return;
+    _isRunningNewUserFlow = true;
+    try {
+      await _syncSubscription();
+      await _maybeShowStyleQuiz();
+      await _migrateGuideStateForExistingUsers();
+      await _maybeShowNewUserGuide();
+    } finally {
+      _isRunningNewUserFlow = false;
+    }
+  }
+
+  Future<void> _migrateGuideStateForExistingUsers() async {
+    if (_localStorage.hasNewUserGuideProgress()) return;
+
+    final hasExistingClosetData =
+        _localStorage.getWardrobeItemCount() > 0 ||
+        _localStorage.getOutfitCount() > 0;
+    if (!hasExistingClosetData) return;
+
+    await _localStorage.markGuidesSeenForExistingUser();
+  }
+
   /// Hiện Style DNA Quiz nếu user chưa làm
   Future<void> _maybeShowStyleQuiz() async {
     if (!mounted) return;
@@ -299,7 +326,7 @@ class _MainScreenState extends State<MainScreen> {
 
     if (!mounted) return;
     if (_localStorage.getHasCompletedStyleQuiz()) return;
-    Navigator.of(context).push(
+    await Navigator.of(context).push(
       PageRouteBuilder(
         pageBuilder: (context, animation, _) => StyleDnaQuizPage(
           onCompleted: () {
@@ -323,6 +350,68 @@ class _MainScreenState extends State<MainScreen> {
         transitionDuration: const Duration(milliseconds: 500),
       ),
     );
+  }
+
+  Future<void> _maybeShowNewUserGuide() async {
+    if (!mounted) return;
+    final step = _localStorage.getNewUserGuideStep();
+    if (step == NewUserGuideStep.completed) return;
+
+    await Future.delayed(const Duration(milliseconds: 350));
+    if (!mounted) return;
+
+    if (step == NewUserGuideStep.tryAi) {
+      setState(() => _currentIndex = 4);
+      return;
+    }
+
+    if (step == NewUserGuideStep.addItem ||
+        step == NewUserGuideStep.viewCloset ||
+        step == NewUserGuideStep.createOutfit ||
+        step == NewUserGuideStep.saveOutfit) {
+      await _showNewUserCoachTour();
+    }
+  }
+
+  Future<void> _showNewUserCoachTour() async {
+    final steps = [
+      if (_currentIndex != 1)
+        _NavTourStep(
+          navIndex: 1,
+          icon: Icons.door_sliding_rounded,
+          title: 'Bước 1: Mở Tủ đồ',
+          description:
+              'Nhấn đúng tab Tủ đồ ở thanh dưới. Sau đó app sẽ chỉ tiếp nút Nhập món đồ để bạn thêm món đầu tiên.',
+          primaryLabel: 'Nhấn vùng sáng để mở Tủ đồ',
+        ),
+    ];
+
+    if (steps.isEmpty) return;
+
+    for (var index = 0; index < steps.length; index++) {
+      final step = steps[index];
+      if (!mounted) return;
+
+      final result = await AppTourOverlay.showCoachStep(
+        context,
+        targetKey: _navKeys[step.navIndex],
+        stepNumber: 1,
+        totalSteps: 6,
+        icon: step.icon,
+        title: step.title,
+        description: step.description,
+        primaryLabel: step.primaryLabel,
+      );
+
+      if (!mounted) return;
+      if (result == AppTourCoachAction.finish) {
+        await _localStorage.completeNewUserGuide();
+        return;
+      }
+
+      setState(() => _currentIndex = step.navIndex);
+      await Future.delayed(const Duration(milliseconds: 320));
+    }
   }
 
   // Nav items: index 2 là nút camera đặc biệt ở giữa
@@ -853,6 +942,7 @@ class _MainScreenState extends State<MainScreen> {
     final (icon, label) = _navItems[index];
 
     return GestureDetector(
+      key: _navKeys[index],
       onTap: () => _onTapNav(index),
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
@@ -906,6 +996,7 @@ class _MainScreenState extends State<MainScreen> {
     final active = _currentIndex == index;
 
     return GestureDetector(
+      key: _navKeys[index],
       onTap: () => _onTapNav(index),
       child: Transform.translate(
         offset: const Offset(0, -10),
@@ -987,6 +1078,22 @@ class _MainScreenState extends State<MainScreen> {
       ),
     );
   }
+}
+
+class _NavTourStep {
+  final int navIndex;
+  final IconData icon;
+  final String title;
+  final String description;
+  final String primaryLabel;
+
+  const _NavTourStep({
+    required this.navIndex,
+    required this.icon,
+    required this.title,
+    required this.description,
+    required this.primaryLabel,
+  });
 }
 
 class _FloatingNotificationBanner extends StatefulWidget {

@@ -11,6 +11,7 @@ import '../../../../data/datasources/subscription_api_service.dart';
 import '../../../../data/datasources/wardrobe_api_service.dart';
 import '../../../../domain/entities/clothing_item.dart';
 import '../profile/subscription_page.dart';
+import '../../widgets/app_tour_overlay.dart';
 import '../../../../data/datasources/ad_service.dart';
 import '../../../../data/datasources/gemini_api_service.dart';
 
@@ -52,6 +53,8 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
 
   // Canvas capture key
   final GlobalKey _canvasRepaintKey = GlobalKey();
+  final GlobalKey _firstWardrobeGuideKey = GlobalKey();
+  final GlobalKey _saveButtonGuideKey = GlobalKey();
 
   // Canvas guidelines & grid state
   double? _lastCanvasWidth;
@@ -75,6 +78,7 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
 
   // Saving
   bool _isSaving = false;
+  bool _isShowingSaveOutfitGuide = false;
 
   // Category chips
   final List<String> _categories = [
@@ -126,9 +130,78 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
           _wardrobeItems = items;
           _isLoadingWardrobe = false;
         });
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _maybeShowSaveOutfitGuide();
+        });
       }
     } catch (e) {
       if (mounted) setState(() => _isLoadingWardrobe = false);
+    }
+  }
+
+  Future<void> _maybeShowSaveOutfitGuide() async {
+    if (_isShowingSaveOutfitGuide) return;
+    final localStorage = GetIt.I<AuthLocalStorage>();
+    if (localStorage.getNewUserGuideStep() != NewUserGuideStep.saveOutfit) {
+      return;
+    }
+    if (_isLoadingWardrobe || _wardrobeItems.isEmpty) return;
+
+    _isShowingSaveOutfitGuide = true;
+    await Future.delayed(const Duration(milliseconds: 650));
+    if (!mounted) {
+      _isShowingSaveOutfitGuide = false;
+      return;
+    }
+
+    if (_canvasItems.isEmpty) {
+      final itemResult = await AppTourOverlay.showCoachStep(
+        context,
+        targetKey: _firstWardrobeGuideKey,
+        stepNumber: 5,
+        totalSteps: 6,
+        icon: Icons.touch_app_rounded,
+        title: 'Bước 5: Đưa đồ vào outfit',
+        description:
+            'Nhấn món đồ đầu tiên bên dưới. App sẽ đưa món này lên canvas để bạn kéo thả, phóng to hoặc xoay nếu muốn.',
+        primaryLabel: 'Nhấn vùng sáng để thêm vào canvas',
+      );
+
+      if (!mounted || itemResult == AppTourCoachAction.finish) {
+        if (itemResult == AppTourCoachAction.finish) {
+          await localStorage.completeNewUserGuide();
+        }
+        _isShowingSaveOutfitGuide = false;
+        return;
+      }
+
+      _addToCanvas(_wardrobeItems.first);
+      await Future.delayed(const Duration(milliseconds: 420));
+    }
+
+    if (!mounted) {
+      _isShowingSaveOutfitGuide = false;
+      return;
+    }
+
+    final saveResult = await AppTourOverlay.showCoachStep(
+      context,
+      targetKey: _saveButtonGuideKey,
+      stepNumber: 5,
+      totalSteps: 6,
+      icon: Icons.save_rounded,
+      title: 'Bước 5: Lưu outfit',
+      description:
+          'Nhấn Lưu để đặt tên và lưu bộ phối này. Sau khi lưu xong, app sẽ đưa bạn sang Studio để thử AI.',
+      primaryLabel: 'Nhấn vùng sáng để lưu outfit',
+    );
+
+    _isShowingSaveOutfitGuide = false;
+    if (!mounted) return;
+    if (saveResult == AppTourCoachAction.next) {
+      _saveOutfit();
+    } else if (saveResult == AppTourCoachAction.finish) {
+      await localStorage.completeNewUserGuide();
     }
   }
 
@@ -665,6 +738,7 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
               : Padding(
                   padding: const EdgeInsets.only(right: 12),
                   child: TextButton.icon(
+                    key: _saveButtonGuideKey,
                     onPressed: _saveOutfit,
                     style: TextButton.styleFrom(
                       backgroundColor: AppColors.primary,
@@ -1094,6 +1168,7 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
       itemBuilder: (context, index) {
         final item = _wardrobeItems[index];
         return GestureDetector(
+          key: index == 0 ? _firstWardrobeGuideKey : null,
           onTap: () => _addToCanvas(item),
           child: _wardrobePickerCard(item),
         );

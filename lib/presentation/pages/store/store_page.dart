@@ -4,6 +4,7 @@ import 'package:get_it/get_it.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../data/datasources/affiliate_api_service.dart';
 import '../../../data/datasources/auth_local_storage.dart';
+import '../../widgets/app_tour_overlay.dart';
 import 'product_detail_page.dart';
 
 class StorePage extends StatefulWidget {
@@ -18,6 +19,8 @@ class _StorePageState extends State<StorePage> {
   final AffiliateApiService _affiliateApiService =
       GetIt.I<AffiliateApiService>();
   final AuthLocalStorage _localStorage = GetIt.I<AuthLocalStorage>();
+  final GlobalKey _storeCategoryGuideKey = GlobalKey();
+  final GlobalKey _firstProductGuideKey = GlobalKey();
 
   String _selectedCategory = 'Tất cả';
   List<String> get _categories {
@@ -31,6 +34,7 @@ class _StorePageState extends State<StorePage> {
   List<Map<String, dynamic>> _products = [];
   bool _isLoading = true;
   String? _errorMessage;
+  bool _isShowingStoreGuide = false;
 
   @override
   void initState() {
@@ -56,6 +60,9 @@ class _StorePageState extends State<StorePage> {
               .map((item) => Map<String, dynamic>.from(item))
               .toList();
           _isLoading = false;
+        });
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _maybeShowStoreGuide();
         });
       }
     } catch (e) {
@@ -206,6 +213,90 @@ class _StorePageState extends State<StorePage> {
         'Sản phẩm thời trang';
   }
 
+  Future<void> _maybeShowStoreGuide() async {
+    if (_isShowingStoreGuide) return;
+    if (_localStorage.getHasSeenStoreGuide()) return;
+    if (_isLoading || _errorMessage != null) return;
+
+    _isShowingStoreGuide = true;
+    await Future.delayed(const Duration(milliseconds: 550));
+    if (!mounted) {
+      _isShowingStoreGuide = false;
+      return;
+    }
+
+    final hasStyleDna = _localStorage.getHasCompletedStyleQuiz();
+    final recommendedCategory = hasStyleDna ? 'Dành cho bạn ✨' : 'Tất cả';
+
+    final categoryResult = await AppTourOverlay.showCoachStep(
+      context,
+      targetKey: _storeCategoryGuideKey,
+      stepNumber: 1,
+      totalSteps: 2,
+      icon: Icons.shopping_bag_rounded,
+      title: hasStyleDna ? 'Gợi ý mua sắm theo bạn' : 'Lọc sản phẩm',
+      description: hasStyleDna
+          ? 'Nhấn chip Dành cho bạn để xem sản phẩm được lọc theo Style DNA, bảng màu và phong cách của bạn.'
+          : 'Nhấn chip này để xem toàn bộ sản phẩm, sau đó có thể lọc theo áo, quần, váy đầm hoặc phụ kiện.',
+      primaryLabel: 'Nhấn vùng sáng để xem',
+    );
+
+    if (!mounted) {
+      _isShowingStoreGuide = false;
+      return;
+    }
+
+    if (categoryResult == AppTourCoachAction.finish) {
+      await _localStorage.saveHasSeenStoreGuide(true);
+      _isShowingStoreGuide = false;
+      return;
+    }
+
+    setState(() => _selectedCategory = recommendedCategory);
+    await Future.delayed(const Duration(milliseconds: 420));
+
+    if (!mounted) {
+      _isShowingStoreGuide = false;
+      return;
+    }
+
+    if (_filteredProducts.isEmpty && _products.isNotEmpty) {
+      setState(() => _selectedCategory = 'Tất cả');
+      await Future.delayed(const Duration(milliseconds: 260));
+    }
+
+    if (!mounted || _filteredProducts.isEmpty) {
+      await _localStorage.saveHasSeenStoreGuide(true);
+      _isShowingStoreGuide = false;
+      return;
+    }
+
+    final productResult = await AppTourOverlay.showCoachStep(
+      context,
+      targetKey: _firstProductGuideKey,
+      stepNumber: 2,
+      totalSteps: 2,
+      icon: Icons.open_in_new_rounded,
+      title: 'Xem chi tiết sản phẩm',
+      description:
+          'Nhấn vào một sản phẩm để xem ảnh, giá, mô tả và mở link mua hàng nếu phù hợp với tủ đồ của bạn.',
+      primaryLabel: 'Nhấn vùng sáng để mở chi tiết',
+    );
+
+    await _localStorage.saveHasSeenStoreGuide(true);
+    _isShowingStoreGuide = false;
+
+    if (!mounted) return;
+    if (productResult == AppTourCoachAction.next) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ProductDetailPage(product: _filteredProducts.first),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -272,6 +363,13 @@ class _StorePageState extends State<StorePage> {
                   return Padding(
                     padding: const EdgeInsets.only(right: 8),
                     child: ChoiceChip(
+                      key:
+                          cat ==
+                              (_localStorage.getHasCompletedStyleQuiz()
+                                  ? 'Dành cho bạn ✨'
+                                  : 'Tất cả')
+                          ? _storeCategoryGuideKey
+                          : null,
                       selected: active,
                       onSelected: (_) {
                         setState(() => _selectedCategory = cat);
@@ -383,6 +481,9 @@ class _StorePageState extends State<StorePage> {
                                     milliseconds: 50 * (index % 6),
                                   ),
                                   child: GestureDetector(
+                                    key: index == 0
+                                        ? _firstProductGuideKey
+                                        : null,
                                     onTap: () {
                                       Navigator.push(
                                         context,

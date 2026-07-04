@@ -19,6 +19,7 @@ import '../../../../data/datasources/ad_service.dart';
 import '../profile/subscription_page.dart';
 import '../../../../domain/entities/clothing_item.dart';
 import '../../../../data/datasources/gemini_api_service.dart';
+import '../../widgets/app_tour_overlay.dart';
 import 'canvas_outfit_page.dart';
 import '../outfit/outfit_page.dart';
 
@@ -38,6 +39,10 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
   final OutfitApiService _outfitApiService = GetIt.I<OutfitApiService>();
   final ClosetApiService _closetApiService = GetIt.I<ClosetApiService>();
   final ImagePicker _picker = ImagePicker();
+  final GlobalKey _importItemGuideKey = GlobalKey();
+  final GlobalKey _allItemsGuideKey = GlobalKey();
+  final GlobalKey _createOutfitGuideKey = GlobalKey();
+  bool _isShowingNewUserGuide = false;
 
   // Tab controller
   late TabController _tabController;
@@ -110,6 +115,11 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
             !_isLoadingOutfits) {
           _fetchOutfits();
         }
+        if (_tabController.index == 1) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _maybeContinueNewUserGuide();
+          });
+        }
       }
     });
 
@@ -144,6 +154,10 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
 
     _fetchItems();
     _fetchOutfits();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _maybeContinueNewUserGuide();
+    });
   }
 
   @override
@@ -204,6 +218,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
     if (_tabController.index != 1) {
       _tabController.animateTo(1);
     }
+    final localStorage = GetIt.I<AuthLocalStorage>();
     final saved = await Navigator.of(context).push<bool>(
       MaterialPageRoute(
         builder: (context) => const CanvasOutfitPage(),
@@ -212,6 +227,156 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
     );
     if (saved == true && mounted) {
       _fetchOutfits();
+      if (localStorage.getNewUserGuideStep() == NewUserGuideStep.saveOutfit) {
+        await localStorage.saveNewUserGuideStep(NewUserGuideStep.tryAi);
+        await Future.delayed(const Duration(milliseconds: 420));
+        if (mounted) {
+          widget.onNavigateTo?.call(4);
+        }
+      }
+    } else if (mounted &&
+        localStorage.getNewUserGuideStep() == NewUserGuideStep.saveOutfit) {
+      await localStorage.saveNewUserGuideStep(NewUserGuideStep.createOutfit);
+      await Future.delayed(const Duration(milliseconds: 420));
+      if (mounted) {
+        _maybeContinueNewUserGuide();
+      }
+    }
+  }
+
+  Future<void> _maybeContinueNewUserGuide() async {
+    if (_isShowingNewUserGuide) return;
+    final localStorage = GetIt.I<AuthLocalStorage>();
+    final step = localStorage.getNewUserGuideStep();
+    if (step == NewUserGuideStep.completed || step == NewUserGuideStep.tryAi) {
+      return;
+    }
+
+    _isShowingNewUserGuide = true;
+    try {
+      if (step == NewUserGuideStep.addItem) {
+        if (localStorage.getWardrobeItemCount() > 0) {
+          await localStorage.saveNewUserGuideStep(NewUserGuideStep.viewCloset);
+          if (mounted) await _showViewClosetGuide();
+        } else {
+          await _showAddItemGuide();
+        }
+      } else if (step == NewUserGuideStep.viewCloset) {
+        await _showViewClosetGuide();
+      } else if (step == NewUserGuideStep.createOutfit ||
+          step == NewUserGuideStep.saveOutfit) {
+        if (step == NewUserGuideStep.saveOutfit) {
+          await localStorage.saveNewUserGuideStep(
+            NewUserGuideStep.createOutfit,
+          );
+        }
+        await _showCreateOutfitGuide();
+      }
+    } finally {
+      _isShowingNewUserGuide = false;
+    }
+  }
+
+  Future<void> _showAddItemGuide() async {
+    final localStorage = GetIt.I<AuthLocalStorage>();
+    await Future.delayed(const Duration(milliseconds: 1800));
+    if (!mounted) return;
+
+    if (_tabController.index != 0) {
+      _tabController.animateTo(0);
+      await Future.delayed(const Duration(milliseconds: 280));
+    }
+    if (_viewMode != ClosetViewMode.closet) {
+      setState(() => _viewMode = ClosetViewMode.closet);
+      await Future.delayed(const Duration(milliseconds: 120));
+    }
+
+    if (!mounted) return;
+    final result = await AppTourOverlay.showCoachStep(
+      context,
+      targetKey: _importItemGuideKey,
+      stepNumber: 2,
+      totalSteps: 6,
+      icon: Icons.cloud_upload_outlined,
+      title: 'Bước 2: Thêm món đồ đầu tiên',
+      description:
+          'Nhấn nút Nhập món đồ. Bạn sẽ chọn chụp ảnh hoặc lấy ảnh từ thư viện, rồi app tách nền và lưu món đồ vào tủ.',
+      primaryLabel: 'Nhấn vùng sáng để thêm đồ',
+    );
+
+    if (!mounted) return;
+    if (result == AppTourCoachAction.next) {
+      _pickAndAddClothes();
+    } else if (result == AppTourCoachAction.finish) {
+      await localStorage.completeNewUserGuide();
+    }
+  }
+
+  Future<void> _showViewClosetGuide() async {
+    final localStorage = GetIt.I<AuthLocalStorage>();
+    await Future.delayed(const Duration(milliseconds: 450));
+    if (!mounted) return;
+
+    if (_tabController.index != 0) {
+      _tabController.animateTo(0);
+      await Future.delayed(const Duration(milliseconds: 280));
+    }
+    if (_viewMode != ClosetViewMode.closet) {
+      setState(() => _viewMode = ClosetViewMode.closet);
+      await Future.delayed(const Duration(milliseconds: 120));
+    }
+    if (_items.isEmpty && !_isLoading) {
+      await _fetchItems();
+    }
+
+    if (!mounted) return;
+    final result = await AppTourOverlay.showCoachStep(
+      context,
+      targetKey: _allItemsGuideKey,
+      stepNumber: 3,
+      totalSteps: 6,
+      icon: Icons.door_sliding_rounded,
+      title: 'Bước 3: Xem tủ đồ',
+      description:
+          'Món vừa thêm nằm trong Tất cả món đồ. Nhấn vùng này để mở danh sách quần áo, xem tủ của bạn trước. Khi xem xong, bấm tab Trang phục để tạo outfit.',
+      primaryLabel: 'Nhấn vùng sáng để xem tủ',
+    );
+
+    if (!mounted) return;
+    if (result == AppTourCoachAction.next) {
+      setState(() => _viewMode = ClosetViewMode.items);
+      await localStorage.saveNewUserGuideStep(NewUserGuideStep.createOutfit);
+    } else if (result == AppTourCoachAction.finish) {
+      await localStorage.completeNewUserGuide();
+    }
+  }
+
+  Future<void> _showCreateOutfitGuide() async {
+    final localStorage = GetIt.I<AuthLocalStorage>();
+    if (_tabController.index != 1) {
+      _tabController.animateTo(1);
+      await Future.delayed(const Duration(milliseconds: 360));
+    }
+    if (!mounted) return;
+
+    final result = await AppTourOverlay.showCoachStep(
+      context,
+      targetKey: _createOutfitGuideKey,
+      stepNumber: 4,
+      totalSteps: 6,
+      icon: Icons.add_circle_outline_rounded,
+      title: 'Bước 4: Tạo outfit',
+      description:
+          'Nhấn nút dấu cộng để mở canvas phối đồ. Ở màn tiếp theo, app sẽ chỉ cách đưa đồ vào canvas và lưu outfit.',
+      primaryLabel: 'Nhấn vùng sáng để tạo outfit',
+    );
+
+    if (!mounted) return;
+    if (result == AppTourCoachAction.next) {
+      await localStorage.saveNewUserGuideStep(NewUserGuideStep.saveOutfit);
+      _openCanvasBuilder();
+    } else if (result == AppTourCoachAction.finish) {
+      await localStorage.completeNewUserGuide();
     }
   }
 
@@ -346,6 +511,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
                           return Row(
                             children: [
                               IconButton(
+                                key: _createOutfitGuideKey,
                                 onPressed: _openCanvasBuilder,
                                 icon: const Icon(
                                   Icons.add_circle_outline_rounded,
@@ -777,6 +943,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
         _buildFeatureItem(
+          itemKey: _importItemGuideKey,
           icon: Icons.cloud_upload_outlined,
           label: 'Nhập món đồ',
           onTap: _pickAndAddClothes,
@@ -803,6 +970,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
   }
 
   Widget _buildFeatureItem({
+    Key? itemKey,
     required IconData icon,
     required String label,
     String? badgeText,
@@ -810,6 +978,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
   }) {
     return Expanded(
       child: GestureDetector(
+        key: itemKey,
         onTap: onTap,
         child: Column(
           children: [
@@ -1176,6 +1345,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
 
   Widget _buildAllItemsCard() {
     return Container(
+      key: _allItemsGuideKey,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
@@ -2447,7 +2617,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
             Container(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Color(0xFFF8F4FF), Color(0xFFEDE8FF)],
+                  colors: [AppColors.background, AppColors.muted],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -2625,7 +2795,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
             Container(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Color(0xFFF8F4FF), Color(0xFFEDE8FF)],
+                  colors: [AppColors.background, AppColors.muted],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -4885,8 +5055,22 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
                           ),
                           elevation: 0,
                         ),
-                        onPressed: () {
+                        onPressed: () async {
                           Navigator.pop(context);
+                          final shouldContinueGuide =
+                              localStorage.getNewUserGuideStep() ==
+                              NewUserGuideStep.addItem;
+                          if (shouldContinueGuide) {
+                            await localStorage.saveNewUserGuideStep(
+                              NewUserGuideStep.viewCloset,
+                            );
+                            await Future.delayed(
+                              const Duration(milliseconds: 520),
+                            );
+                            if (mounted) {
+                              _maybeContinueNewUserGuide();
+                            }
+                          }
                           AdService().showInterstitialAd(
                             onDismissed: () {},
                             force: false,

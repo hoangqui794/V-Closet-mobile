@@ -16,6 +16,7 @@ import '../../../data/datasources/auth_local_storage.dart';
 import '../../../data/datasources/ad_service.dart';
 import '../../../domain/entities/clothing_item.dart';
 import '../profile/subscription_page.dart';
+import '../../widgets/app_tour_overlay.dart';
 
 class OutfitPage extends StatefulWidget {
   final VoidCallback? onMenuPressed;
@@ -34,6 +35,9 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
   final WardrobeApiService _wardrobeApiService = GetIt.I<WardrobeApiService>();
   final OutfitApiService _outfitApiService = GetIt.I<OutfitApiService>();
   final ImagePicker _picker = ImagePicker();
+  final GlobalKey _studioNextGuideKey = GlobalKey();
+  final GlobalKey _studioSavedOutfitSourceGuideKey = GlobalKey();
+  bool _isShowingStudioGuide = false;
 
   // Selected state
   String? _selectedModelUrl;
@@ -124,6 +128,10 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
 
     // Default select first model
     _selectedModelUrl = _sampleModels[0]['url'];
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _maybeShowStudioActionGuide();
+    });
   }
 
   @override
@@ -163,6 +171,68 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
 
   Future<void> _refreshAllData() async {
     await Future.wait([_fetchWardrobe(), _fetchSavedOutfits()]);
+  }
+
+  Future<void> _maybeShowStudioActionGuide() async {
+    if (_isShowingStudioGuide) return;
+    final localStorage = GetIt.I<AuthLocalStorage>();
+    if (localStorage.getNewUserGuideStep() != NewUserGuideStep.tryAi) return;
+    if (OutfitPage.pendingTryOnGarment != null ||
+        OutfitPage.pendingTryOnOutfitSnapshotUrl != null) {
+      return;
+    }
+
+    _isShowingStudioGuide = true;
+    await Future.delayed(const Duration(milliseconds: 700));
+    if (!mounted || _activeStep != 0) {
+      _isShowingStudioGuide = false;
+      return;
+    }
+
+    final nextResult = await AppTourOverlay.showCoachStep(
+      context,
+      targetKey: _studioNextGuideKey,
+      stepNumber: 6,
+      totalSteps: 6,
+      icon: Icons.person_search_rounded,
+      title: 'Bước 6: Sang chọn trang phục',
+      description:
+          'App đã chọn sẵn một người mẫu. Nhấn Tiếp tục để sang bước chọn outfit vừa lưu.',
+      primaryLabel: 'Nhấn vùng sáng để tiếp tục',
+    );
+
+    if (!mounted || nextResult == AppTourCoachAction.finish) {
+      if (nextResult == AppTourCoachAction.finish) {
+        await localStorage.completeNewUserGuide();
+      }
+      _isShowingStudioGuide = false;
+      return;
+    }
+
+    setState(() => _activeStep = 1);
+    await Future.delayed(const Duration(milliseconds: 420));
+    if (!mounted) {
+      _isShowingStudioGuide = false;
+      return;
+    }
+
+    await AppTourOverlay.showCoachStep(
+      context,
+      targetKey: _studioSavedOutfitSourceGuideKey,
+      stepNumber: 6,
+      totalSteps: 6,
+      icon: Icons.checkroom_rounded,
+      title: 'Bước 6: Thử outfit bằng AI',
+      description:
+          'Nhấn Trang phục phối sẵn để chọn outfit vừa lưu. Sau đó chọn outfit, bấm Tiếp tục và bắt đầu thử đồ AI.',
+      primaryLabel: 'Nhấn vùng sáng để chọn outfit',
+    );
+
+    if (mounted) {
+      setState(() => _pickFromOutfits = true);
+    }
+    await localStorage.completeNewUserGuide();
+    _isShowingStudioGuide = false;
   }
 
   // Pick custom model photo
@@ -2673,6 +2743,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
               const SizedBox(width: 12),
               Expanded(
                 child: GestureDetector(
+                  key: _studioSavedOutfitSourceGuideKey,
                   onTap: () => setState(() => _pickFromOutfits = true),
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 10),
@@ -3014,6 +3085,7 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
                 ? SizedBox(
                     height: 42,
                     child: ElevatedButton(
+                      key: _activeStep == 0 ? _studioNextGuideKey : null,
                       style: ElevatedButton.styleFrom(
                         padding: EdgeInsets.zero,
                         backgroundColor: AppColors.primary,

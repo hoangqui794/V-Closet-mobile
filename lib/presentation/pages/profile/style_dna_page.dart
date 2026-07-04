@@ -3,7 +3,10 @@ import 'package:get_it/get_it.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../data/datasources/auth_local_storage.dart';
 import '../../../data/datasources/user_api_service.dart';
+import '../../widgets/app_tour_overlay.dart';
 import '../../widgets/profile/style_dna_card.dart';
+import '../camera/color_harmony_checker_page.dart';
+import 'personal_color_detail_page.dart';
 import 'style_dna_chat_page.dart';
 import 'style_dna_quiz_page.dart';
 
@@ -19,9 +22,11 @@ class StyleDnaPage extends StatefulWidget {
 class _StyleDnaPageState extends State<StyleDnaPage> {
   final _localStorage = GetIt.I<AuthLocalStorage>();
   final _userService = GetIt.I<UserApiService>();
+  final GlobalKey _personalColorGuideKey = GlobalKey();
 
   Map<String, dynamic>? _profileData;
   bool _isLoading = false;
+  bool _isShowingColorGuide = false;
 
   @override
   void initState() {
@@ -36,6 +41,9 @@ class _StyleDnaPageState extends State<StyleDnaPage> {
       final profile = await _userService.getMyProfile();
       setState(() {
         _profileData = profile;
+      });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _maybeShowColorTestGuide();
       });
     } catch (e) {
       debugPrint('Lỗi tải thông tin cá nhân trên trang Style DNA: $e');
@@ -90,6 +98,8 @@ class _StyleDnaPageState extends State<StyleDnaPage> {
                       StyleDnaCard(
                         gender: gender,
                         onRefresh: _fetchProfileData,
+                        personalColorKey: _personalColorGuideKey,
+                        onPersonalColorTap: () => _openPersonalColorDetail(),
                       ),
                       const SizedBox(height: 16),
                       _buildAiStylistCard(),
@@ -228,6 +238,76 @@ class _StyleDnaPageState extends State<StyleDnaPage> {
         ),
       ),
     );
+  }
+
+  Future<void> _maybeShowColorTestGuide() async {
+    if (_isShowingColorGuide) return;
+    if (!_localStorage.getHasCompletedStyleQuiz()) return;
+    if (_localStorage.getHasSeenColorTestGuide()) return;
+
+    _isShowingColorGuide = true;
+    await Future.delayed(const Duration(milliseconds: 650));
+    if (!mounted) {
+      _isShowingColorGuide = false;
+      return;
+    }
+
+    final result = await AppTourOverlay.showCoachStep(
+      context,
+      targetKey: _personalColorGuideKey,
+      stepNumber: 1,
+      totalSteps: 3,
+      icon: Icons.palette_rounded,
+      title: 'Test màu cá nhân',
+      description:
+          'Nhấn thẻ mùa màu này để xem bảng màu hợp da, màu nên tránh và mở công cụ test màu bằng camera.',
+      primaryLabel: 'Nhấn vùng sáng để test màu',
+    );
+
+    await _localStorage.saveHasSeenColorTestGuide(true);
+    _isShowingColorGuide = false;
+    if (!mounted) return;
+    if (result == AppTourCoachAction.next) {
+      await _openPersonalColorDetail(showGuide: true);
+    }
+  }
+
+  Future<void> _openPersonalColorDetail({bool showGuide = false}) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => PersonalColorDetailPage(showColorTestGuide: showGuide),
+      ),
+    );
+
+    if (result == 'retake') {
+      if (!mounted) return;
+      final checkResult = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ColorHarmonyCheckerPage(showStartGuide: showGuide),
+        ),
+      );
+
+      if (checkResult is Map && mounted) {
+        final saveResult = await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => PersonalColorDetailPage(
+              isFromScan: true,
+              scannedSkinTone: checkResult['skinTone']?.toString(),
+              scannedColorPref: checkResult['colorPref']?.toString(),
+            ),
+          ),
+        );
+
+        if (saveResult == 'saved') {
+          _fetchProfileData();
+        }
+      }
+    } else if (result == 'saved') {
+      _fetchProfileData();
+    }
   }
 
   Widget _buildAiStylistCard() {

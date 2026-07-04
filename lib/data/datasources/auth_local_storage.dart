@@ -1,5 +1,14 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
+enum NewUserGuideStep {
+  addItem,
+  viewCloset,
+  createOutfit,
+  saveOutfit,
+  tryAi,
+  completed,
+}
+
 class AuthLocalStorage {
   final SharedPreferences _prefs;
 
@@ -24,6 +33,16 @@ class AuthLocalStorage {
   static const String _kHasAcceptedTerms = 'has_accepted_terms_v2';
   static const String _kSurveyUrl = 'survey_url';
   static const String _kHasCompletedSurvey = 'has_completed_survey';
+  static const String _kHasSeenNewUserGuide = 'has_seen_new_user_guide';
+  static const String _kHasSeenClosetActionGuide =
+      'has_seen_closet_action_guide';
+  static const String _kHasSeenOutfitCreateGuide =
+      'has_seen_outfit_create_guide';
+  static const String _kHasSeenStudioActionGuide =
+      'has_seen_studio_action_guide';
+  static const String _kHasSeenColorTestGuide = 'has_seen_color_test_guide';
+  static const String _kHasSeenStoreGuide = 'has_seen_store_guide';
+  static const String _kNewUserGuideStep = 'new_user_guide_step';
 
   // ── Style DNA Quiz ───────────────────────────────────────────────
   static const String _kHasCompletedStyleQuiz = 'has_completed_style_quiz';
@@ -80,6 +99,62 @@ class AuthLocalStorage {
   bool getHasCompletedSurvey() => _prefs.getBool(_kHasCompletedSurvey) ?? false;
   Future<void> saveHasCompletedSurvey(bool value) async =>
       await _prefs.setBool(_kHasCompletedSurvey, value);
+  bool getHasSeenNewUserGuide() =>
+      _prefs.getBool(_kHasSeenNewUserGuide) ?? false;
+  Future<void> saveHasSeenNewUserGuide(bool value) async =>
+      await _prefs.setBool(_kHasSeenNewUserGuide, value);
+  bool getHasSeenClosetActionGuide() =>
+      _prefs.getBool(_kHasSeenClosetActionGuide) ?? false;
+  Future<void> saveHasSeenClosetActionGuide(bool value) async =>
+      await _prefs.setBool(_kHasSeenClosetActionGuide, value);
+  bool getHasSeenOutfitCreateGuide() =>
+      _prefs.getBool(_kHasSeenOutfitCreateGuide) ?? false;
+  Future<void> saveHasSeenOutfitCreateGuide(bool value) async =>
+      await _prefs.setBool(_kHasSeenOutfitCreateGuide, value);
+  bool getHasSeenStudioActionGuide() =>
+      _prefs.getBool(_kHasSeenStudioActionGuide) ?? false;
+  Future<void> saveHasSeenStudioActionGuide(bool value) async =>
+      await _prefs.setBool(_kHasSeenStudioActionGuide, value);
+  bool getHasSeenColorTestGuide() =>
+      _prefs.getBool(_kHasSeenColorTestGuide) ?? false;
+  Future<void> saveHasSeenColorTestGuide(bool value) async =>
+      await _prefs.setBool(_kHasSeenColorTestGuide, value);
+  bool getHasSeenStoreGuide() => _prefs.getBool(_kHasSeenStoreGuide) ?? false;
+  Future<void> saveHasSeenStoreGuide(bool value) async =>
+      await _prefs.setBool(_kHasSeenStoreGuide, value);
+
+  NewUserGuideStep getNewUserGuideStep() {
+    final savedIndex = _prefs.getInt(_kNewUserGuideStep);
+    if (savedIndex == null ||
+        savedIndex < 0 ||
+        savedIndex >= NewUserGuideStep.values.length) {
+      return NewUserGuideStep.addItem;
+    }
+    return NewUserGuideStep.values[savedIndex];
+  }
+
+  bool hasNewUserGuideProgress() => _prefs.containsKey(_kNewUserGuideStep);
+
+  Future<void> saveNewUserGuideStep(NewUserGuideStep step) async {
+    await _prefs.setInt(_kNewUserGuideStep, step.index);
+  }
+
+  bool getIsNewUserGuideCompleted() =>
+      getNewUserGuideStep() == NewUserGuideStep.completed;
+
+  Future<void> completeNewUserGuide() async {
+    await saveNewUserGuideStep(NewUserGuideStep.completed);
+  }
+
+  Future<void> markGuidesSeenForExistingUser() async {
+    await completeNewUserGuide();
+    await saveHasSeenNewUserGuide(true);
+    await saveHasSeenClosetActionGuide(true);
+    await saveHasSeenOutfitCreateGuide(true);
+    await saveHasSeenStudioActionGuide(true);
+    await saveHasSeenColorTestGuide(true);
+    await saveHasSeenStoreGuide(true);
+  }
 
   Future<void> setOnboardingCompleted(bool completed) async {
     await _prefs.setBool(_kIsOnboardingCompleted, completed);
@@ -108,6 +183,13 @@ class AuthLocalStorage {
     await _prefs.remove(_kOutfitLimit);
     await _prefs.remove(_kHasAcceptedTerms);
     await _prefs.remove(_kHasCompletedSurvey);
+    await _prefs.remove(_kHasSeenNewUserGuide);
+    await _prefs.remove(_kHasSeenClosetActionGuide);
+    await _prefs.remove(_kHasSeenOutfitCreateGuide);
+    await _prefs.remove(_kHasSeenStudioActionGuide);
+    await _prefs.remove(_kHasSeenColorTestGuide);
+    await _prefs.remove(_kHasSeenStoreGuide);
+    await _prefs.remove(_kNewUserGuideStep);
     await _prefs.remove(_kHasCompletedStyleQuiz);
     await _prefs.remove(_kSkinTone);
     await _prefs.remove(_kBodyType);
