@@ -703,25 +703,28 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
 
   Rect _targetRectForCategory(String category) {
     if (category == 'top') {
-      return const Rect.fromLTWH(50, 50, 220, 280);
+      return const Rect.fromLTWH(50, 50, 220, 260);
     }
     if (category == 'outerwear') {
-      return const Rect.fromLTWH(330, 50, 220, 280);
+      return const Rect.fromLTWH(330, 50, 220, 260);
     }
     if (category == 'bottom') {
-      // Đẩy khoảng cách xuống từ 380 -> 430 để tránh đè lên áo (top)
-      return const Rect.fromLTWH(50, 430, 220, 330);
+      // Đẩy khoảng cách xuống tránh đè lên áo (top) - khoảng cách 100px
+      return const Rect.fromLTWH(50, 410, 220, 340);
     }
     if (category == 'dress') {
       return const Rect.fromLTWH(50, 80, 220, 550);
     }
     if (category == 'bag') {
-      return const Rect.fromLTWH(330, 380, 220, 200);
+      // Đẩy khoảng cách xuống tránh đè lên outerwear - khoảng cách 100px
+      return const Rect.fromLTWH(330, 410, 220, 170);
     }
     if (category == 'shoes') {
-      return const Rect.fromLTWH(330, 600, 220, 160);
+      // Đẩy khoảng cách xuống tránh đè lên túi - khoảng cách 80px
+      return const Rect.fromLTWH(330, 660, 220, 120);
     }
-    return const Rect.fromLTWH(330, 200, 220, 220);
+    // Đối với các phụ kiện khác, đặt ở vị trí giữa cột phải để tránh đè các món trên
+    return const Rect.fromLTWH(330, 410, 220, 220);
   }
 
   void _paintImageFit(Canvas canvas, ui.Image img, Rect rect) {
