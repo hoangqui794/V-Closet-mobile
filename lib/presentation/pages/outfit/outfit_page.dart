@@ -709,7 +709,8 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
       return const Rect.fromLTWH(330, 50, 220, 280);
     }
     if (category == 'bottom') {
-      return const Rect.fromLTWH(50, 380, 220, 380);
+      // Đẩy khoảng cách xuống từ 380 -> 430 để tránh đè lên áo (top)
+      return const Rect.fromLTWH(50, 430, 220, 330);
     }
     if (category == 'dress') {
       return const Rect.fromLTWH(50, 80, 220, 550);
