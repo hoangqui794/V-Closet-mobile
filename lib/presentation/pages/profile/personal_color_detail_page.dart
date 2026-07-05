@@ -434,7 +434,9 @@ class _PersonalColorDetailPageState extends State<PersonalColorDetailPage> {
   }
 
   Future<void> _saveScanResult() async {
-    if (widget.scannedSkinTone == null || widget.scannedColorPref == null) return;
+    if (widget.scannedSkinTone == null || widget.scannedColorPref == null) {
+      return;
+    }
     setState(() => _isSaving = true);
 
     await _localStorage.saveStyleDna(

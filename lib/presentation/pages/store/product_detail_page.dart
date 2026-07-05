@@ -282,10 +282,18 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     final cat = product['Category'] as String? ??
         product['category'] as String? ??
         'Fashion';
-    if (cat.toLowerCase() == 'top' || cat.toLowerCase() == 'outerwear') return 'Áo';
-    if (cat.toLowerCase() == 'bottom') return 'Quần';
-    if (cat.toLowerCase() == 'dress') return 'Váy đầm';
-    if (cat.toLowerCase() == 'accessory' || cat.toLowerCase() == 'bag' || cat.toLowerCase() == 'shoes' || cat.toLowerCase() == 'other') return 'Phụ kiện';
+    if (cat.toLowerCase() == 'top' || cat.toLowerCase() == 'outerwear') {
+      return 'Áo';
+    }
+    if (cat.toLowerCase() == 'bottom') {
+      return 'Quần';
+    }
+    if (cat.toLowerCase() == 'dress') {
+      return 'Váy đầm';
+    }
+    if (cat.toLowerCase() == 'accessory' || cat.toLowerCase() == 'bag' || cat.toLowerCase() == 'shoes' || cat.toLowerCase() == 'other') {
+      return 'Phụ kiện';
+    }
     return cat;
   }
 
@@ -306,7 +314,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
   double _getProductRating(Map<String, dynamic> product) {
     final rating = product['Rating'] ?? product['rating'];
-    if (rating is num) return rating.toDouble();
+    if (rating is num) {
+      return rating.toDouble();
+    }
     return 5.0;
   }
 

@@ -362,7 +362,9 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
         );
       }
     } finally {
-      if (mounted) setState(() => _isSaving = false);
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
     }
   }
 

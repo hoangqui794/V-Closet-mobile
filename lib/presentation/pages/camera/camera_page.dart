@@ -48,7 +48,9 @@ class _CameraPageState extends State<CameraPage> {
         );
         await _cameraController!.initialize();
         await _cameraController!.setFlashMode(_flashMode);
-        if (mounted) setState(() {});
+        if (mounted) {
+          setState(() {});
+        }
       }
     } catch (e) {
       debugPrint('Lỗi khởi tạo camera: $e');
@@ -56,7 +58,9 @@ class _CameraPageState extends State<CameraPage> {
   }
 
   Future<void> _switchCamera() async {
-    if (_cameras == null || _cameras!.length < 2) return;
+    if (_cameras == null || _cameras!.length < 2) {
+      return;
+    }
     
     _selectedCameraIndex = _selectedCameraIndex == 0 ? 1 : 0;
     await _cameraController?.dispose();
@@ -77,7 +81,9 @@ class _CameraPageState extends State<CameraPage> {
   }
 
   Future<void> _toggleFlash() async {
-    if (_cameraController == null || !_cameraController!.value.isInitialized) return;
+    if (_cameraController == null || !_cameraController!.value.isInitialized) {
+      return;
+    }
     
     FlashMode nextMode;
     if (_flashMode == FlashMode.off) {
@@ -97,8 +103,12 @@ class _CameraPageState extends State<CameraPage> {
   }
 
   IconData _getFlashIcon() {
-    if (_flashMode == FlashMode.always) return Icons.flash_on;
-    if (_flashMode == FlashMode.auto) return Icons.flash_auto;
+    if (_flashMode == FlashMode.always) {
+      return Icons.flash_on;
+    }
+    if (_flashMode == FlashMode.auto) {
+      return Icons.flash_auto;
+    }
     return Icons.flash_off;
   }
 
@@ -536,15 +546,21 @@ class _CameraPageState extends State<CameraPage> {
       if (isFromGallery) {
         image = await _picker.pickImage(source: ImageSource.gallery);
       } else {
-        if (_cameraController == null || !_cameraController!.value.isInitialized) return;
+        if (_cameraController == null || !_cameraController!.value.isInitialized) {
+          return;
+        }
         image = await _cameraController!.takePicture();
       }
       
-      if (image == null) return;
+      if (image == null) {
+        return;
+      }
 
       // HIỂN THỊ POPUP YÊU CẦU NHẬP TÊN & DANH MỤC TRƯỚC
       final details = await _showDetailsDialog(File(image.path));
-      if (details == null) return; // Người dùng bấm hủy
+      if (details == null) {
+        return; // Người dùng bấm hủy
+      }
 
       // Kiểm tra Credits trước khi thực hiện
       final localStorage = GetIt.I<AuthLocalStorage>();
