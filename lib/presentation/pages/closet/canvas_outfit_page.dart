@@ -128,7 +128,9 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
         });
       }
     } catch (e) {
-      if (mounted) setState(() => _isLoadingWardrobe = false);
+      if (mounted) {
+        setState(() => _isLoadingWardrobe = false);
+      }
     }
   }
 
@@ -169,7 +171,9 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
   }
 
   void _deleteSelected() {
-    if (_selectedUid == null) return;
+    if (_selectedUid == null) {
+      return;
+    }
     setState(() {
       _canvasItems.removeWhere((c) => c.uid == _selectedUid);
       _selectedUid = null;
@@ -290,7 +294,9 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
     setState(() => _isSaving = false);
 
     final result = await _showSaveDialog(suggestedName: suggestedName);
-    if (result == null || !mounted) return;
+    if (result == null || !mounted) {
+      return;
+    }
 
     setState(() => _isSaving = true);
 
@@ -300,7 +306,9 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
         // Fallback: try capturing now if pre-capture failed
         final boundary = _canvasRepaintKey.currentContext?.findRenderObject()
             as RenderRepaintBoundary?;
-        if (boundary == null) throw Exception('Không thể chụp canvas');
+        if (boundary == null) {
+          throw Exception('Không thể chụp canvas');
+        }
 
         final uiImage = await boundary.toImage(pixelRatio: 2.5);
         final byteData = await uiImage.toByteData(format: ui.ImageByteFormat.png);
@@ -308,7 +316,9 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
       }
 
       final activeSize = canvasSize ?? _canvasRepaintKey.currentContext?.size;
-      if (activeSize == null) throw Exception('Không thể xác định kích thước canvas');
+      if (activeSize == null) {
+        throw Exception('Không thể xác định kích thước canvas');
+      }
 
       // Build items list for API
       final apiItems = _canvasItems.map((c) {
@@ -386,7 +396,9 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
     try {
       final boundary = _canvasRepaintKey.currentContext?.findRenderObject()
           as RenderRepaintBoundary?;
-      if (boundary == null) throw Exception('Không thể chụp canvas');
+      if (boundary == null) {
+        throw Exception('Không thể chụp canvas');
+      }
 
       final uiImage = await boundary.toImage(pixelRatio: 3.0); // High quality
       final byteData = await uiImage.toByteData(format: ui.ImageByteFormat.png);
@@ -716,7 +728,9 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
                       fontWeight: FontWeight.w600,
                     ),
                     onSelected: (val) {
-                      if (!val) return;
+                      if (!val) {
+                        return;
+                      }
                       setState(() => _wardrobeFilter = label);
                       _loadWardrobe();
                     },
