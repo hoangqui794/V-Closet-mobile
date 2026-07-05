@@ -2140,12 +2140,16 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
         children: [
           const Text(
             'Chọn người mẫu thử đồ',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.primary),
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+              color: AppColors.primary,
+            ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 4),
           const Text(
-            'Chọn hình ảnh người mẫu để thử trang phục lên. Bạn có thể sử dụng các mẫu có sẵn hoặc tải lên ảnh chụp chính diện của riêng bạn.',
-            style: TextStyle(fontSize: 13, color: Colors.grey, height: 1.35),
+            'Chọn người mẫu có sẵn hoặc tải ảnh chụp của riêng bạn.',
+            style: TextStyle(fontSize: 11, color: Colors.grey, height: 1.3),
           ),
           const SizedBox(height: 16),
           _buildModelSelector(),
@@ -2210,12 +2214,16 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
         children: [
           const Text(
             'Chọn trang phục thử đồ',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.primary),
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+              color: AppColors.primary,
+            ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 4),
           const Text(
-            'Chọn 1 hoặc nhiều quần áo từ tủ đồ của bạn hoặc một bộ phối đồ đã lưu để thử lên người mẫu.',
-            style: TextStyle(fontSize: 13, color: Colors.grey, height: 1.35),
+            'Chọn quần áo từ tủ đồ của bạn để thử lên người mẫu.',
+            style: TextStyle(fontSize: 11, color: Colors.grey, height: 1.3),
           ),
           const SizedBox(height: 16),
           
@@ -2293,8 +2301,12 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Xác nhận thông tin & Cấu hình',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.primary),
+            'Xác nhận & Cấu hình',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+              color: AppColors.primary,
+            ),
           ),
           const SizedBox(height: 16),
           

@@ -490,7 +490,7 @@ class _HomePageState extends State<HomePage> {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
-                  fontSize: 22,
+                  fontSize: 16,
                   fontWeight: FontWeight.w900,
                   color: AppColors.primary,
                   height: 1.1,

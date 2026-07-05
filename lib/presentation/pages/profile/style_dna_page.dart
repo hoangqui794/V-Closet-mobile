@@ -61,11 +61,11 @@ class _StyleDnaPageState extends State<StyleDnaPage> {
               )
             : null,
         title: const Text(
-          'Phong cách cá nhân',
+          'Phong cách',
           style: TextStyle(
             color: AppColors.primary,
             fontWeight: FontWeight.w900,
-            fontSize: 20,
+            fontSize: 17,
           ),
         ),
         centerTitle: true,
@@ -97,10 +97,13 @@ class _StyleDnaPageState extends State<StyleDnaPage> {
                           height: 52,
                           child: OutlinedButton.icon(
                             onPressed: _retakeQuiz,
-                            icon: const Icon(Icons.refresh_rounded, size: 20),
+                            icon: const Icon(Icons.refresh_rounded, size: 18),
                             label: const Text(
-                              'Làm lại trắc nghiệm DNA',
-                              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+                              'Làm lại trắc nghiệm',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 13,
+                              ),
                             ),
                             style: OutlinedButton.styleFrom(
                               foregroundColor: AppColors.primary,
@@ -142,19 +145,20 @@ class _StyleDnaPageState extends State<StyleDnaPage> {
           const Icon(Icons.auto_awesome_rounded, color: AppColors.primaryLight, size: 64),
           const SizedBox(height: 18),
           const Text(
-            'Khám phá Phong cách cá nhân của bạn',
+            'Khám phá Phong cách của bạn',
+            textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 18,
+              fontSize: 16,
               fontWeight: FontWeight.w900,
               color: AppColors.primary,
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            'Làm khảo sát nhanh để AI phân tích màu sắc tôn da nhất và vóc dáng của bạn, từ đó gợi ý công thức phối đồ chuẩn chỉnh.',
+            'Khảo sát nhanh để AI phân tích màu tôn da và vóc dáng, gợi ý công thức phối đồ chuẩn.',
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 13,
+              fontSize: 12,
               color: AppColors.primary.withOpacity(0.6),
               height: 1.5,
             ),
@@ -167,8 +171,12 @@ class _StyleDnaPageState extends State<StyleDnaPage> {
               onPressed: _retakeQuiz,
               icon: const Icon(Icons.rocket_launch_rounded, color: Colors.white, size: 20),
               label: const Text(
-                'Bắt đầu Trắc nghiệm',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                'Bắt đầu trắc nghiệm',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 13,
+                ),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
@@ -293,16 +301,16 @@ class _StyleDnaPageState extends State<StyleDnaPage> {
                   'Trò chuyện với AI Stylist',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 20,
+                    fontSize: 17,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Tư vấn phối đồ theo vóc dáng, màu sắc tôn da và tủ đồ thực tế của bạn bằng trí tuệ nhân tạo.',
+                  'Tư vấn phối đồ theo vóc dáng, màu tôn da và tủ đồ thực tế của bạn.',
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.85),
-                    fontSize: 13,
+                    fontSize: 12,
                     height: 1.4,
                     fontWeight: FontWeight.w500,
                   ),

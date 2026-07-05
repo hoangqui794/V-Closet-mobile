@@ -98,19 +98,19 @@ class _PersonalColorCheckPageState extends State<PersonalColorCheckPage> {
                               'Tìm màu sắc của tôi',
                               style: TextStyle(
                                 color: Color(0xFF25252B),
-                                fontSize: 28,
+                                fontSize: 22,
                                 fontWeight: FontWeight.w900,
                                 height: 1.1,
                               ),
                             ),
-                            SizedBox(height: 8),
+                            SizedBox(height: 6),
                             Text(
-                              'Cùng xem màu sắc nào hợp với bạn nhất nhé.',
+                              'Màu sắc nào hợp với bạn nhất?',
                               style: TextStyle(
                                 color: Color(0xFF9A9AA2),
-                                fontSize: 19,
+                                fontSize: 14,
                                 fontWeight: FontWeight.w500,
-                                height: 1.25,
+                                height: 1.3,
                               ),
                             ),
                           ],
@@ -169,7 +169,7 @@ class _PersonalColorCheckPageState extends State<PersonalColorCheckPage> {
                             child: Text(
                               hasResult ? 'Kiểm tra lại' : 'Bắt đầu kiểm tra',
                               style: const TextStyle(
-                                fontSize: 18,
+                                fontSize: 15,
                                 fontWeight: FontWeight.w800,
                               ),
                             ),
@@ -255,7 +255,7 @@ class _TonePreviewCard extends StatelessWidget {
                   title,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 20,
+                    fontSize: 16,
                     fontWeight: FontWeight.w900,
                     height: 1.1,
                   ),

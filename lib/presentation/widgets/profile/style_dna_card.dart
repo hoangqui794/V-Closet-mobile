@@ -82,9 +82,9 @@ class StyleDnaCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 10),
                   const Text(
-                    'Hồ sơ Phong cách của bạn',
+                    'Hồ sơ Phong cách',
                     style: TextStyle(
-                      fontSize: 17,
+                      fontSize: 15,
                       fontWeight: FontWeight.w900,
                       color: AppColors.primary,
                     ),
@@ -194,20 +194,22 @@ class StyleDnaCard extends StatelessWidget {
                           children: [
                             Text(
                               personalColorProfile.title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
                                 color: AppColors.primary,
-                                fontSize: 14,
+                                fontSize: 13,
                                 fontWeight: FontWeight.w900,
                               ),
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              'Xem đặc điểm, màu hợp, chất liệu vải và màu nên tránh',
+                              'Xem bảng màu, chất liệu và màu nên tránh',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 color: AppColors.primary.withOpacity(0.55),
-                                fontSize: 11.5,
+                                fontSize: 11,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -226,70 +228,151 @@ class StyleDnaCard extends StatelessWidget {
               const Divider(height: 1, thickness: 0.8),
               const SizedBox(height: 16),
 
-              // Nhóm 1: Bảng màu tôn da
-              const Text(
-                'Bảng màu tôn da nhất (Best Colors) ✨',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
+              // ── Nhóm 1: Bảng màu tôn da ────────────────────────────
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: AppColors.primary.withOpacity(0.08),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: const [
+                        Icon(
+                          Icons.palette_rounded,
+                          color: AppColors.primary,
+                          size: 14,
+                        ),
+                        SizedBox(width: 6),
+                        Text(
+                          'Màu tôn da',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      skinToneDesc,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: AppColors.primary.withOpacity(0.6),
+                        height: 1.4,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: bestColors
+                          .map((color) => _colorSwatch(color))
+                          .toList(),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 8),
-              Text(
-                skinToneDesc,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: AppColors.primary.withOpacity(0.6),
-                  height: 1.4,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: bestColors.map((color) => _colorBox(color)).toList(),
-              ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
 
-              // Nhóm 2: Màu sắc nên tránh
-              const Text(
-                'Màu sắc dìm tone da nên tránh (Avoid Colors) ⚠️',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
+              // ── Nhóm 2: Màu nên tránh ───────────────────────────────
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: AppColors.primary.withOpacity(0.08),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.not_interested_rounded,
+                          color: AppColors.error.withOpacity(0.75),
+                          size: 14,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Màu nên tránh',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.error.withOpacity(0.80),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: avoidColors
+                          .map((color) => _colorSwatch(color))
+                          .toList(),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 8),
-              Row(
-                children: avoidColors.map((color) => _colorBox(color)).toList(),
-              ),
-              const SizedBox(height: 22),
-              const Divider(height: 1, thickness: 0.8),
-              const SizedBox(height: 16),
+              const SizedBox(height: 10),
 
-              // Nhóm 3: Kiểu dáng và form đồ khuyên mặc
-              const Text(
-                'Kiểu dáng trang phục khuyên chọn 📐',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
+              // ── Nhóm 3: Kiểu dáng ───────────────────────────────────
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: AppColors.primary.withOpacity(0.08),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                bodyTypeDesc,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: AppColors.primary.withOpacity(0.6),
-                  height: 1.4,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: const [
+                        Icon(
+                          Icons.straighten_rounded,
+                          color: AppColors.primary,
+                          size: 14,
+                        ),
+                        SizedBox(width: 6),
+                        Text(
+                          'Kiểu dáng phù hợp',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      bodyTypeDesc,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: AppColors.primary.withOpacity(0.6),
+                        height: 1.4,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      children: bestCuts.map((cut) => _cutChip(cut)).toList(),
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: bestCuts.map((cut) => _cutChip(cut)).toList(),
               ),
             ],
           ),
@@ -318,9 +401,8 @@ class StyleDnaCard extends StatelessWidget {
 
   Widget _colorBox(Color color) {
     return Container(
-      margin: const EdgeInsets.only(right: 12),
-      width: 38,
-      height: 38,
+      width: 36,
+      height: 36,
       decoration: BoxDecoration(
         color: color,
         shape: BoxShape.circle,
@@ -341,12 +423,64 @@ class StyleDnaCard extends StatelessWidget {
     );
   }
 
+  Widget _colorSwatch(Color color) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 12),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _colorBox(color),
+          const SizedBox(height: 4),
+          Text(
+            _getColorName(color),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 9,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF686872),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getColorName(Color color) {
+    final val = color.value;
+    if (val == 0xFF1A237E) return 'Navy';
+    if (val == 0xFF1B5E20) return 'Lục rừng';
+    if (val == 0xFF800020) return 'Burgundy';
+    if (val == 0xFFFCE4EC) return 'Hồng nhạt';
+    if (val == 0xFFFFF9C4) return 'Vàng nhạt';
+    if (val == 0xFFFAF2EB) return 'Be nhạt';
+    if (val == 0xFFD4AF37) return 'Vàng gold';
+    if (val == 0xFFE67E22) return 'Cam ấm';
+    if (val == 0xFF0047AB) return 'Cobalt';
+    if (val == 0xFFFFFFFF) return 'Trắng tinh';
+    if (val == 0xFFCCFF00) return 'Neon';
+    if (val == 0xFFECEFF1) return 'Xám xịt';
+    if (val == 0xFFFFD700) return 'Vàng kim';
+    if (val == 0xFFFF2400) return 'Đỏ tươi';
+    if (val == 0xFF0066CC) return 'Xanh điện';
+    if (val == 0xFF5D4037) return 'Nâu xỉn';
+    if (val == 0xFFFFEBEE) return 'Hồng đào';
+    if (val == 0xFF556B2F) return 'Xanh rêu';
+    if (val == 0xFFC0392B) return 'Đỏ gạch';
+    if (val == 0xFFC19A6B) return 'Camel';
+    if (val == 0xFFE5A93B) return 'Mù tạt';
+    if (val == 0xFFF3E5F5) return 'Tím nhạt';
+    if (val == 0xFFB0BEC5) return 'Xám lạnh';
+    return 'Màu';
+  }
+
   Widget _cutChip(String cut) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
         border: Border.all(color: AppColors.primary.withOpacity(0.1), width: 1),
       ),
       child: Row(
@@ -355,13 +489,13 @@ class StyleDnaCard extends StatelessWidget {
           const Icon(
             Icons.check_circle_outline_rounded,
             color: Colors.green,
-            size: 14,
+            size: 12,
           ),
-          const SizedBox(width: 6),
+          const SizedBox(width: 5),
           Text(
             cut,
             style: const TextStyle(
-              fontSize: 12,
+              fontSize: 11,
               fontWeight: FontWeight.w700,
               color: AppColors.primary,
             ),

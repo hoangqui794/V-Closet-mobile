@@ -166,12 +166,12 @@ class _LoginPageState extends State<LoginPage> {
     final screenSize = MediaQuery.of(context).size;
     final bool isSmallScreen = screenSize.height < 740 || screenSize.width < 360;
 
-    final double logoSize = isSmallScreen ? 80.0 : 100.0;
-    final double spacingTiny = isSmallScreen ? 4.0 : 8.0;
-    final double spacingSmall = isSmallScreen ? 8.0 : 12.0;
-    final double spacingMedium = isSmallScreen ? 12.0 : 16.0;
-    final double spacingLarge = isSmallScreen ? 14.0 : 20.0;
-    final double titleFontSize = isSmallScreen ? 24.0 : 28.0;
+    final double logoSize = isSmallScreen ? 60.0 : 76.0;
+    final double spacingTiny = isSmallScreen ? 4.0 : 6.0;
+    final double spacingSmall = isSmallScreen ? 6.0 : 10.0;
+    final double spacingMedium = isSmallScreen ? 10.0 : 14.0;
+    final double spacingLarge = isSmallScreen ? 12.0 : 16.0;
+    final double titleFontSize = isSmallScreen ? 18.0 : 20.0;
     final double cardPadding = isSmallScreen ? 14.0 : 20.0;
 
     return Scaffold(
@@ -219,7 +219,7 @@ class _LoginPageState extends State<LoginPage> {
                             Text(
                               'Chào mừng trở lại',
                               style: TextStyle(
-                                fontSize: isSmallScreen ? 20.0 : 24.0,
+                                fontSize: isSmallScreen ? 15.0 : 17.0,
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.primary,
                               ),
@@ -228,7 +228,7 @@ class _LoginPageState extends State<LoginPage> {
                             Text(
                               'Đăng nhập để tiếp tục hành trình thời trang của bạn',
                               style: TextStyle(
-                                fontSize: isSmallScreen ? 13.0 : 15.0,
+                                fontSize: isSmallScreen ? 11.0 : 12.0,
                                 color: AppColors.primary.withOpacity(0.7),
                               ),
                               textAlign: TextAlign.center,
@@ -483,7 +483,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _socialButton({
-    required IconData icon,
+    required FaIconData icon,
     required String label,
     required VoidCallback onTap,
     required bool isSmallScreen,
@@ -502,14 +502,18 @@ class _LoginPageState extends State<LoginPage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            FaIcon(icon, size: isSmallScreen ? 18 : 20, color: const Color(0xFFDB4437)),
-            const SizedBox(width: 10),
+            FaIcon(
+              icon,
+              size: isSmallScreen ? 15 : 17,
+              color: const Color(0xFFDB4437),
+            ),
+            const SizedBox(width: 8),
             Text(
               label,
               style: TextStyle(
                 color: AppColors.primary,
                 fontWeight: FontWeight.w700,
-                fontSize: isSmallScreen ? 14.0 : 15.0,
+                fontSize: isSmallScreen ? 12.0 : 13.0,
               ),
             ),
           ],

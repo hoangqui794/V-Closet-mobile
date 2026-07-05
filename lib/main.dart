@@ -118,6 +118,15 @@ class _VClosetAppState extends State<VClosetApp> {
       theme: AppTheme.lightTheme,
       themeMode: ThemeMode.light,
       navigatorKey: navigatorKey,
+      builder: (context, child) {
+        final mediaQueryData = MediaQuery.of(context);
+        return MediaQuery(
+          data: mediaQueryData.copyWith(
+            textScaler: const TextScaler.linear(0.88),
+          ),
+          child: child!,
+        );
+      },
       // Named routes — mọi trang navigate qua tên, không cần import nhau
       routes: {
         AppRoutes.login:      (_) => const LoginPage(),
