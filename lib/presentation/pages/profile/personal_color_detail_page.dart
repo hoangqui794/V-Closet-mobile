@@ -135,25 +135,25 @@ class _PersonalColorDetailPageState extends State<PersonalColorDetailPage> {
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         color: Color(0xFF24242A),
-                        fontSize: 30,
+                        fontSize: 22,
                         fontWeight: FontWeight.w900,
                         height: 1.1,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 6),
                     Text(
                       profile.subtitle,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         color: Color(0xFF8D8D94),
-                        fontSize: 18,
+                        fontSize: 13,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                    const SizedBox(height: 34),
+                    const SizedBox(height: 24),
                     SizedBox(
-                      width: 156,
-                      height: 156,
+                      width: 120,
+                      height: 120,
                       child: CustomPaint(
                         painter: _ColorWheelPainter(profile.wheelColors),
                         child: Center(
@@ -186,29 +186,52 @@ class _PersonalColorDetailPageState extends State<PersonalColorDetailPage> {
                   ],
                 ),
               ),
-              const SizedBox(height: 54),
-              _sectionTitle('Đặc điểm chính'),
+              const SizedBox(height: 20),
+              _sectionCard(
+                icon: Icons.info_outline_rounded,
+                title: 'Đặc điểm chính',
+                content: _paragraph(profile.mainDescription),
+              ),
               const SizedBox(height: 12),
-              _paragraph(profile.mainDescription),
-              const SizedBox(height: 42),
-              _sectionTitle('Màu sắc phù hợp nhất'),
-              const SizedBox(height: 18),
-              _colorSwatchRow(profile.bestColors),
-              const SizedBox(height: 16),
-              _paragraph(profile.bestColorDescription),
-              const SizedBox(height: 42),
-              _sectionTitle('Chất liệu vải phù hợp nhất'),
-              const SizedBox(height: 18),
-              _fabricScroller(profile.fabrics),
-              const SizedBox(height: 16),
-              _paragraph(profile.fabricDescription),
-              const SizedBox(height: 42),
-              _sectionTitle('Những màu sắc cần tránh'),
-              const SizedBox(height: 18),
-              _colorSwatchRow(profile.avoidColors),
-              const SizedBox(height: 16),
-              _paragraph(profile.avoidDescription),
-              const SizedBox(height: 34),
+              _sectionCard(
+                icon: Icons.palette_outlined,
+                title: 'Màu sắc phù hợp nhất',
+                content: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _colorSwatchRow(profile.bestColors),
+                    const SizedBox(height: 8),
+                    _paragraph(profile.bestColorDescription),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              _sectionCard(
+                icon: Icons.checkroom_outlined,
+                title: 'Chất liệu vải phù hợp nhất',
+                content: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _fabricScroller(profile.fabrics),
+                    const SizedBox(height: 8),
+                    _paragraph(profile.fabricDescription),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              _sectionCard(
+                icon: Icons.block_flipped,
+                title: 'Những màu sắc cần tránh',
+                content: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _colorSwatchRow(profile.avoidColors),
+                    const SizedBox(height: 8),
+                    _paragraph(profile.avoidDescription),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
               if (widget.isFromScan) ...[
                 Row(
                   children: [
@@ -323,47 +346,64 @@ class _PersonalColorDetailPageState extends State<PersonalColorDetailPage> {
     );
   }
 
-  Widget _sectionTitle(String title) {
-    return Text(
-      title,
-      style: const TextStyle(
-        color: Color(0xFF25252B),
-        fontSize: 22,
-        fontWeight: FontWeight.w900,
-        height: 1.1,
+  Widget _sectionCard({
+    required IconData icon,
+    required String title,
+    required Widget content,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF9F9FB),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.primary.withOpacity(0.06)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: AppColors.primary, size: 18),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: const TextStyle(
+                  color: Color(0xFF25252B),
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          content,
+        ],
       ),
     );
   }
 
   Widget _paragraph(String text) {
-    return Text(
-      text,
-      style: const TextStyle(
-        color: Color(0xFF2F2F35),
-        fontSize: 16,
-        height: 1.28,
-        fontWeight: FontWeight.w400,
-      ),
-    );
+    return _ExpandableParagraph(text: text);
   }
 
   Widget _colorSwatchRow(List<PersonalColorSwatch> colors) {
     return SizedBox(
-      height: 84,
+      height: 68,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
         itemCount: colors.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 14),
+        separatorBuilder: (_, _) => const SizedBox(width: 10),
         itemBuilder: (context, index) {
           final swatch = colors[index];
           return SizedBox(
-            width: 62,
+            width: 50,
             child: Column(
               children: [
                 Container(
-                  width: 58,
-                  height: 58,
+                  width: 44,
+                  height: 44,
                   decoration: BoxDecoration(
                     color: swatch.color,
                     shape: BoxShape.circle,
@@ -375,13 +415,13 @@ class _PersonalColorDetailPageState extends State<PersonalColorDetailPage> {
                     boxShadow: [
                       BoxShadow(
                         color: swatch.color.withOpacity(0.28),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
+                        blurRadius: 8,
+                        offset: const Offset(0, 3),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 7),
+                const SizedBox(height: 5),
                 Text(
                   swatch.name,
                   maxLines: 1,
@@ -389,7 +429,7 @@ class _PersonalColorDetailPageState extends State<PersonalColorDetailPage> {
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     color: Color(0xFF686872),
-                    fontSize: 10.5,
+                    fontSize: 9,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -403,22 +443,22 @@ class _PersonalColorDetailPageState extends State<PersonalColorDetailPage> {
 
   Widget _fabricScroller(List<FabricSuggestion> fabrics) {
     return SizedBox(
-      height: 196,
+      height: 160,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
         itemCount: fabrics.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 12),
+        separatorBuilder: (_, _) => const SizedBox(width: 10),
         itemBuilder: (context, index) {
           final fabric = fabrics[index];
           return SizedBox(
-            width: 178,
+            width: 130,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(10),
                     child: fabric.imagePath != null
                         ? Image.asset(
                             fabric.imagePath!,
@@ -435,12 +475,14 @@ class _PersonalColorDetailPageState extends State<PersonalColorDetailPage> {
                           ),
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 6),
                 Text(
                   fabric.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     color: Color(0xFF25252B),
-                    fontSize: 14,
+                    fontSize: 12,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
@@ -451,7 +493,7 @@ class _PersonalColorDetailPageState extends State<PersonalColorDetailPage> {
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     color: Color(0xFF777781),
-                    fontSize: 12,
+                    fontSize: 10,
                     height: 1.2,
                     fontWeight: FontWeight.w500,
                   ),
@@ -613,5 +655,67 @@ class _FabricPreviewPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _FabricPreviewPainter oldDelegate) {
     return oldDelegate.colors != colors || oldDelegate.seed != seed;
+  }
+}
+
+class _ExpandableParagraph extends StatefulWidget {
+  final String text;
+  const _ExpandableParagraph({required this.text});
+
+  @override
+  State<_ExpandableParagraph> createState() => _ExpandableParagraphState();
+}
+
+class _ExpandableParagraphState extends State<_ExpandableParagraph> {
+  bool _isExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isLongText = widget.text.length > 80;
+
+    return GestureDetector(
+      onTap: isLongText ? () => setState(() => _isExpanded = !_isExpanded) : null,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          AnimatedSize(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeInOut,
+            child: Text(
+              widget.text,
+              maxLines: _isExpanded ? null : 2,
+              overflow: _isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: Color(0xFF5A5A62),
+                fontSize: 12.0,
+                height: 1.4,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          if (isLongText) ...[
+            const SizedBox(height: 4),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Text(
+                  _isExpanded ? 'Thu gọn' : 'Xem thêm...',
+                  style: const TextStyle(
+                    color: AppColors.primary,
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                Icon(
+                  _isExpanded ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
+                  color: AppColors.primary,
+                  size: 14,
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
   }
 }

@@ -3,10 +3,7 @@ import 'package:get_it/get_it.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../data/datasources/auth_local_storage.dart';
 import '../../../data/datasources/user_api_service.dart';
-import '../../widgets/app_tour_overlay.dart';
 import '../../widgets/profile/style_dna_card.dart';
-import '../camera/color_harmony_checker_page.dart';
-import 'personal_color_detail_page.dart';
 import 'style_dna_chat_page.dart';
 import 'style_dna_quiz_page.dart';
 
@@ -22,11 +19,9 @@ class StyleDnaPage extends StatefulWidget {
 class _StyleDnaPageState extends State<StyleDnaPage> {
   final _localStorage = GetIt.I<AuthLocalStorage>();
   final _userService = GetIt.I<UserApiService>();
-  final GlobalKey _personalColorGuideKey = GlobalKey();
 
   Map<String, dynamic>? _profileData;
   bool _isLoading = false;
-  bool _isShowingColorGuide = false;
 
   @override
   void initState() {
@@ -42,9 +37,6 @@ class _StyleDnaPageState extends State<StyleDnaPage> {
       setState(() {
         _profileData = profile;
       });
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _maybeShowColorTestGuide();
-      });
     } catch (e) {
       debugPrint('Lỗi tải thông tin cá nhân trên trang Style DNA: $e');
     } finally {
@@ -55,9 +47,7 @@ class _StyleDnaPageState extends State<StyleDnaPage> {
   @override
   Widget build(BuildContext context) {
     final hasQuiz = _localStorage.getHasCompletedStyleQuiz();
-    final gender =
-        _profileData?['gender']?.toString() ??
-        _profileData?['Gender']?.toString();
+    final gender = _profileData?['gender']?.toString() ?? _profileData?['Gender']?.toString();
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -71,19 +61,17 @@ class _StyleDnaPageState extends State<StyleDnaPage> {
               )
             : null,
         title: const Text(
-          'Phong cách cá nhân',
+          'Phong cách',
           style: TextStyle(
             color: AppColors.primary,
             fontWeight: FontWeight.w900,
-            fontSize: 20,
+            fontSize: 17,
           ),
         ),
         centerTitle: true,
       ),
       body: _isLoading
-          ? const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
-            )
+          ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
           : RefreshIndicator(
               color: AppColors.primary,
               onRefresh: _fetchProfileData,
@@ -98,8 +86,6 @@ class _StyleDnaPageState extends State<StyleDnaPage> {
                       StyleDnaCard(
                         gender: gender,
                         onRefresh: _fetchProfileData,
-                        personalColorKey: _personalColorGuideKey,
-                        onPersonalColorTap: () => _openPersonalColorDetail(),
                       ),
                       const SizedBox(height: 16),
                       _buildAiStylistCard(),
@@ -111,20 +97,17 @@ class _StyleDnaPageState extends State<StyleDnaPage> {
                           height: 52,
                           child: OutlinedButton.icon(
                             onPressed: _retakeQuiz,
-                            icon: const Icon(Icons.refresh_rounded, size: 20),
+                            icon: const Icon(Icons.refresh_rounded, size: 18),
                             label: const Text(
-                              'Làm lại trắc nghiệm DNA',
+                              'Làm lại trắc nghiệm',
                               style: TextStyle(
                                 fontWeight: FontWeight.w800,
-                                fontSize: 14,
+                                fontSize: 13,
                               ),
                             ),
                             style: OutlinedButton.styleFrom(
                               foregroundColor: AppColors.primary,
-                              side: const BorderSide(
-                                color: AppColors.primary,
-                                width: 1.5,
-                              ),
+                              side: const BorderSide(color: AppColors.primary, width: 1.5),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
                               ),
@@ -147,10 +130,7 @@ class _StyleDnaPageState extends State<StyleDnaPage> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(26),
-        border: Border.all(
-          color: AppColors.primary.withOpacity(0.08),
-          width: 1.5,
-        ),
+        border: Border.all(color: AppColors.primary.withOpacity(0.08), width: 1.5),
         boxShadow: [
           BoxShadow(
             color: AppColors.primary.withOpacity(0.04),
@@ -162,26 +142,23 @@ class _StyleDnaPageState extends State<StyleDnaPage> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(
-            Icons.auto_awesome_rounded,
-            color: AppColors.primaryLight,
-            size: 64,
-          ),
+          const Icon(Icons.auto_awesome_rounded, color: AppColors.primaryLight, size: 64),
           const SizedBox(height: 18),
           const Text(
-            'Khám phá Phong cách cá nhân của bạn',
+            'Khám phá Phong cách của bạn',
+            textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 18,
+              fontSize: 16,
               fontWeight: FontWeight.w900,
               color: AppColors.primary,
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            'Làm khảo sát nhanh để AI phân tích màu sắc tôn da nhất và vóc dáng của bạn, từ đó gợi ý công thức phối đồ chuẩn chỉnh.',
+            'Khảo sát nhanh để AI phân tích màu tôn da và vóc dáng, gợi ý công thức phối đồ chuẩn.',
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 13,
+              fontSize: 12,
               color: AppColors.primary.withOpacity(0.6),
               height: 1.5,
             ),
@@ -192,17 +169,13 @@ class _StyleDnaPageState extends State<StyleDnaPage> {
             height: 52,
             child: ElevatedButton.icon(
               onPressed: _retakeQuiz,
-              icon: const Icon(
-                Icons.rocket_launch_rounded,
-                color: Colors.white,
-                size: 20,
-              ),
+              icon: const Icon(Icons.rocket_launch_rounded, color: Colors.white, size: 20),
               label: const Text(
-                'Bắt đầu Trắc nghiệm',
+                'Bắt đầu trắc nghiệm',
                 style: TextStyle(
                   color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 13,
                 ),
               ),
               style: ElevatedButton.styleFrom(
@@ -240,82 +213,15 @@ class _StyleDnaPageState extends State<StyleDnaPage> {
     );
   }
 
-  Future<void> _maybeShowColorTestGuide() async {
-    if (_isShowingColorGuide) return;
-    if (!_localStorage.getHasCompletedStyleQuiz()) return;
-    if (_localStorage.getHasSeenColorTestGuide()) return;
-
-    _isShowingColorGuide = true;
-    await Future.delayed(const Duration(milliseconds: 650));
-    if (!mounted) {
-      _isShowingColorGuide = false;
-      return;
-    }
-
-    final result = await AppTourOverlay.showCoachStep(
-      context,
-      targetKey: _personalColorGuideKey,
-      stepNumber: 1,
-      totalSteps: 3,
-      icon: Icons.palette_rounded,
-      title: 'Test màu cá nhân',
-      description:
-          'Nhấn thẻ mùa màu này để xem bảng màu hợp da, màu nên tránh và mở công cụ test màu bằng camera.',
-      primaryLabel: 'Nhấn vùng sáng để test màu',
-    );
-
-    await _localStorage.saveHasSeenColorTestGuide(true);
-    _isShowingColorGuide = false;
-    if (!mounted) return;
-    if (result == AppTourCoachAction.next) {
-      await _openPersonalColorDetail(showGuide: true);
-    }
-  }
-
-  Future<void> _openPersonalColorDetail({bool showGuide = false}) async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => PersonalColorDetailPage(showColorTestGuide: showGuide),
-      ),
-    );
-
-    if (result == 'retake') {
-      if (!mounted) return;
-      final checkResult = await Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => ColorHarmonyCheckerPage(showStartGuide: showGuide),
-        ),
-      );
-
-      if (checkResult is Map && mounted) {
-        final saveResult = await Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => PersonalColorDetailPage(
-              isFromScan: true,
-              scannedSkinTone: checkResult['skinTone']?.toString(),
-              scannedColorPref: checkResult['colorPref']?.toString(),
-            ),
-          ),
-        );
-
-        if (saveResult == 'saved') {
-          _fetchProfileData();
-        }
-      }
-    } else if (result == 'saved') {
-      _fetchProfileData();
-    }
-  }
-
   Widget _buildAiStylistCard() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [AppColors.primary, AppColors.primaryLight],
+          colors: [
+            AppColors.primary,
+            AppColors.primaryLight,
+          ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -335,9 +241,7 @@ class _StyleDnaPageState extends State<StyleDnaPage> {
             if (_profileData == null) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text(
-                    'Đang tải dữ liệu hồ sơ của bạn... Hãy thử lại sau giây lát.',
-                  ),
+                  content: Text('Đang tải dữ liệu hồ sơ của bạn... Hãy thử lại sau giây lát.'),
                   behavior: SnackBarBehavior.floating,
                 ),
               );
@@ -346,8 +250,7 @@ class _StyleDnaPageState extends State<StyleDnaPage> {
             final result = await Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) =>
-                    StyleDnaChatPage(profileData: _profileData!),
+                builder: (context) => StyleDnaChatPage(profileData: _profileData!),
               ),
             );
             if (result == 'go_to_studio' && mounted) {
@@ -364,25 +267,15 @@ class _StyleDnaPageState extends State<StyleDnaPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 5,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                       decoration: BoxDecoration(
                         color: Colors.greenAccent.withOpacity(0.15),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: Colors.greenAccent.withOpacity(0.3),
-                          width: 1,
-                        ),
+                        border: Border.all(color: Colors.greenAccent.withOpacity(0.3), width: 1),
                       ),
                       child: Row(
                         children: const [
-                          Icon(
-                            Icons.circle,
-                            color: Colors.greenAccent,
-                            size: 8,
-                          ),
+                          Icon(Icons.circle, color: Colors.greenAccent, size: 8),
                           SizedBox(width: 6),
                           Text(
                             'ONLINE',
@@ -408,16 +301,16 @@ class _StyleDnaPageState extends State<StyleDnaPage> {
                   'Trò chuyện với AI Stylist',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 20,
+                    fontSize: 17,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Tư vấn phối đồ theo vóc dáng, màu sắc tôn da và tủ đồ thực tế của bạn bằng trí tuệ nhân tạo.',
+                  'Tư vấn phối đồ theo vóc dáng, màu tôn da và tủ đồ thực tế của bạn.',
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.85),
-                    fontSize: 13,
+                    fontSize: 12,
                     height: 1.4,
                     fontWeight: FontWeight.w500,
                   ),
@@ -427,10 +320,7 @@ class _StyleDnaPageState extends State<StyleDnaPage> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 10,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(14),

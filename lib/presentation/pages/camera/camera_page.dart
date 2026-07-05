@@ -48,7 +48,9 @@ class _CameraPageState extends State<CameraPage> {
         );
         await _cameraController!.initialize();
         await _cameraController!.setFlashMode(_flashMode);
-        if (mounted) setState(() {});
+        if (mounted) {
+          setState(() {});
+        }
       }
     } catch (e) {
       debugPrint('Lỗi khởi tạo camera: $e');
@@ -56,17 +58,19 @@ class _CameraPageState extends State<CameraPage> {
   }
 
   Future<void> _switchCamera() async {
-    if (_cameras == null || _cameras!.length < 2) return;
-
+    if (_cameras == null || _cameras!.length < 2) {
+      return;
+    }
+    
     _selectedCameraIndex = _selectedCameraIndex == 0 ? 1 : 0;
     await _cameraController?.dispose();
-
+    
     _cameraController = CameraController(
       _cameras![_selectedCameraIndex],
       ResolutionPreset.high,
       enableAudio: false,
     );
-
+    
     try {
       await _cameraController!.initialize();
       await _cameraController!.setFlashMode(_flashMode);
@@ -80,7 +84,7 @@ class _CameraPageState extends State<CameraPage> {
     if (_cameraController == null || !_cameraController!.value.isInitialized) {
       return;
     }
-
+    
     FlashMode nextMode;
     if (_flashMode == FlashMode.off) {
       nextMode = FlashMode.always;
@@ -89,7 +93,7 @@ class _CameraPageState extends State<CameraPage> {
     } else {
       nextMode = FlashMode.off;
     }
-
+    
     try {
       await _cameraController!.setFlashMode(nextMode);
       setState(() => _flashMode = nextMode);
@@ -99,8 +103,12 @@ class _CameraPageState extends State<CameraPage> {
   }
 
   IconData _getFlashIcon() {
-    if (_flashMode == FlashMode.always) return Icons.flash_on;
-    if (_flashMode == FlashMode.auto) return Icons.flash_auto;
+    if (_flashMode == FlashMode.always) {
+      return Icons.flash_on;
+    }
+    if (_flashMode == FlashMode.auto) {
+      return Icons.flash_auto;
+    }
     return Icons.flash_off;
   }
 
@@ -131,18 +139,14 @@ class _CameraPageState extends State<CameraPage> {
               ),
             ),
             const SizedBox(height: 20),
-
+            
             // Header
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Row(
                   children: [
-                    Icon(
-                      Icons.info_outline_rounded,
-                      color: AppColors.primary,
-                      size: 22,
-                    ),
+                    Icon(Icons.info_outline_rounded, color: AppColors.primary, size: 22),
                     SizedBox(width: 8),
                     Text(
                       'Lưu ý chụp ảnh tách nền',
@@ -156,10 +160,7 @@ class _CameraPageState extends State<CameraPage> {
                 ),
                 IconButton(
                   onPressed: () => Navigator.pop(context),
-                  icon: const Icon(
-                    Icons.close_rounded,
-                    color: AppColors.primary,
-                  ),
+                  icon: const Icon(Icons.close_rounded, color: AppColors.primary),
                 ),
               ],
             ),
@@ -174,10 +175,7 @@ class _CameraPageState extends State<CameraPage> {
                     decoration: BoxDecoration(
                       color: Colors.green.shade50.withOpacity(0.6),
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: Colors.green.shade200,
-                        width: 1,
-                      ),
+                      border: Border.all(color: Colors.green.shade200, width: 1),
                     ),
                     child: Stack(
                       children: [
@@ -185,27 +183,16 @@ class _CameraPageState extends State<CameraPage> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(
-                                Icons.checkroom_rounded,
-                                size: 36,
-                                color: Colors.green.shade700,
-                              ),
+                              Icon(Icons.checkroom_rounded, size: 36, color: Colors.green.shade700),
                               const SizedBox(height: 6),
                               const Text(
                                 'Ảnh phẳng / Treo',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.green,
-                                ),
+                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.green),
                               ),
                               const SizedBox(height: 2),
                               Text(
                                 'Nền trơn, rõ nét',
-                                style: TextStyle(
-                                  fontSize: 9,
-                                  color: Colors.green.shade800,
-                                ),
+                                style: TextStyle(fontSize: 9, color: Colors.green.shade800),
                               ),
                             ],
                           ),
@@ -213,11 +200,7 @@ class _CameraPageState extends State<CameraPage> {
                         const Positioned(
                           top: 8,
                           right: 8,
-                          child: Icon(
-                            Icons.check_circle_rounded,
-                            color: Colors.green,
-                            size: 18,
-                          ),
+                          child: Icon(Icons.check_circle_rounded, color: Colors.green, size: 18),
                         ),
                       ],
                     ),
@@ -238,27 +221,16 @@ class _CameraPageState extends State<CameraPage> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(
-                                Icons.photo_filter_rounded,
-                                size: 36,
-                                color: Colors.red.shade700,
-                              ),
+                              Icon(Icons.photo_filter_rounded, size: 36, color: Colors.red.shade700),
                               const SizedBox(height: 6),
                               Text(
                                 'Không nên chọn',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.red.shade700,
-                                ),
+                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.red.shade700),
                               ),
                               const SizedBox(height: 2),
                               Text(
                                 'Nền rối, nhiều đồ vật',
-                                style: TextStyle(
-                                  fontSize: 9,
-                                  color: Colors.red.shade800,
-                                ),
+                                style: TextStyle(fontSize: 9, color: Colors.red.shade800),
                               ),
                             ],
                           ),
@@ -266,11 +238,7 @@ class _CameraPageState extends State<CameraPage> {
                         const Positioned(
                           top: 8,
                           right: 8,
-                          child: Icon(
-                            Icons.cancel_rounded,
-                            color: Colors.red,
-                            size: 18,
-                          ),
+                          child: Icon(Icons.cancel_rounded, color: Colors.red, size: 18),
                         ),
                       ],
                     ),
@@ -293,32 +261,15 @@ class _CameraPageState extends State<CameraPage> {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(
-                        Icons.check_circle_rounded,
-                        color: Colors.green,
-                        size: 16,
-                      ),
+                      const Icon(Icons.check_circle_rounded, color: Colors.green, size: 16),
                       const SizedBox(width: 10),
                       Expanded(
                         child: RichText(
                           text: const TextSpan(
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: AppColors.primary,
-                              height: 1.4,
-                            ),
+                            style: TextStyle(fontSize: 12, color: AppColors.primary, height: 1.4),
                             children: [
-                              TextSpan(
-                                text: 'Nên: ',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.green,
-                                ),
-                              ),
-                              TextSpan(
-                                text:
-                                    'Trải phẳng quần áo trên sàn đơn sắc hoặc treo trên móc trước tường trơn. Chụp thẳng từ trên xuống hoặc chính diện, đủ ánh sáng.',
-                              ),
+                              TextSpan(text: 'Nên: ', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
+                              TextSpan(text: 'Trải phẳng quần áo trên sàn đơn sắc hoặc treo trên móc trước tường trơn. Chụp thẳng từ trên xuống hoặc chính diện, đủ ánh sáng.'),
                             ],
                           ),
                         ),
@@ -332,32 +283,15 @@ class _CameraPageState extends State<CameraPage> {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(
-                        Icons.cancel_rounded,
-                        color: Colors.red,
-                        size: 16,
-                      ),
+                      const Icon(Icons.cancel_rounded, color: Colors.red, size: 16),
                       const SizedBox(width: 10),
                       Expanded(
                         child: RichText(
                           text: const TextSpan(
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: AppColors.primary,
-                              height: 1.4,
-                            ),
+                            style: TextStyle(fontSize: 12, color: AppColors.primary, height: 1.4),
                             children: [
-                              TextSpan(
-                                text: 'Tránh: ',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.red,
-                                ),
-                              ),
-                              TextSpan(
-                                text:
-                                    'Chụp quần áo bị nhăn nheo, gấp nếp. Tránh hậu cảnh có quá nhiều đồ đạc xung quanh hoặc có màu nền trùng với màu quần áo.',
-                              ),
+                              TextSpan(text: 'Tránh: ', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
+                              TextSpan(text: 'Chụp quần áo bị nhăn nheo, gấp nếp. Tránh hậu cảnh có quá nhiều đồ đạc xung quanh hoặc có màu nền trùng với màu quần áo.'),
                             ],
                           ),
                         ),
@@ -376,19 +310,13 @@ class _CameraPageState extends State<CameraPage> {
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   elevation: 0,
                 ),
                 onPressed: () => Navigator.pop(context),
                 child: const Text(
                   'Đã hiểu',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    fontSize: 15,
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 15),
                 ),
               ),
             ),
@@ -406,14 +334,12 @@ class _CameraPageState extends State<CameraPage> {
 
   Future<Map<String, String>?> _showDetailsDialog(File imageFile) async {
     String name = 'Đang nhận dạng...';
-    String category = 'Top';
+    String category = 'Top'; 
     String currentCatName = 'Áo';
     String detectedColor = '';
     bool isAnalyzing = true;
 
-    final TextEditingController nameController = TextEditingController(
-      text: name,
-    );
+    final TextEditingController nameController = TextEditingController(text: name);
 
     final Map<String, String> categoryOptions = {
       'Áo': 'Top',
@@ -423,7 +349,7 @@ class _CameraPageState extends State<CameraPage> {
       'Giày': 'Shoes',
       'Túi': 'Bag',
       'Phụ kiện': 'Accessory',
-      'Khác': 'Other',
+      'Khác': 'Other'
     };
 
     final Map<String, String> reverseCategoryMap = {
@@ -434,7 +360,7 @@ class _CameraPageState extends State<CameraPage> {
       'Shoes': 'Giày',
       'Bag': 'Túi',
       'Accessory': 'Phụ kiện',
-      'Other': 'Khác',
+      'Other': 'Khác'
     };
 
     return await showModalBottomSheet<Map<String, String>>(
@@ -449,9 +375,7 @@ class _CameraPageState extends State<CameraPage> {
           builder: (context, setModalState) {
             if (isAnalyzing) {
               isAnalyzing = false;
-              GetIt.I<GeminiApiService>().analyzeClothingImage(imageFile).then((
-                result,
-              ) {
+              GetIt.I<GeminiApiService>().analyzeClothingImage(imageFile).then((result) {
                 if (result != null && context.mounted) {
                   setModalState(() {
                     name = result['name'] ?? 'Món đồ mới';
@@ -483,62 +407,38 @@ class _CameraPageState extends State<CameraPage> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Phân loại đồ',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
-                      ),
-                    ),
+                    const Text('Phân loại đồ', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.primary)),
                     const SizedBox(height: 20),
                     Center(
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(16),
-                        child: Image.file(
-                          imageFile,
-                          height: 120,
-                          fit: BoxFit.cover,
-                        ),
+                        child: Image.file(imageFile, height: 120, fit: BoxFit.cover),
                       ),
                     ),
                     const SizedBox(height: 20),
                     // Lưu ý nhỏ ở dưới ảnh preview
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 10,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                       decoration: BoxDecoration(
                         color: AppColors.secondary.withOpacity(0.5),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: AppColors.accent.withOpacity(0.3),
-                        ),
+                        border: Border.all(color: AppColors.accent.withOpacity(0.3)),
                       ),
                       child: const Row(
                         children: [
-                          Icon(
-                            Icons.lightbulb_outline_rounded,
-                            color: AppColors.primaryLight,
-                            size: 18,
-                          ),
+                          Icon(Icons.lightbulb_outline_rounded, color: AppColors.primaryLight, size: 18),
                           SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               'Mẹo: Ảnh quần áo phẳng phiu, nền đơn sắc sẽ tách nền sạch đẹp nhất.',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: AppColors.primary,
-                                height: 1.3,
-                              ),
+                              style: TextStyle(fontSize: 11, color: AppColors.primary, height: 1.3),
                             ),
                           ),
                         ],
                       ),
                     ),
                     const SizedBox(height: 16),
-
+                    
                     if (isAiRunning)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 12),
@@ -548,10 +448,7 @@ class _CameraPageState extends State<CameraPage> {
                             const SizedBox(
                               width: 14,
                               height: 14,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: AppColors.primaryLight,
-                              ),
+                              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryLight),
                             ),
                             const SizedBox(width: 8),
                             Text(
@@ -571,11 +468,7 @@ class _CameraPageState extends State<CameraPage> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(
-                              Icons.palette_rounded,
-                              size: 14,
-                              color: AppColors.primaryLight,
-                            ),
+                            const Icon(Icons.palette_rounded, size: 14, color: AppColors.primaryLight),
                             const SizedBox(width: 6),
                             Text(
                               'AI nhận diện màu sắc: $detectedColor',
@@ -627,24 +520,12 @@ class _CameraPageState extends State<CameraPage> {
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         ),
                         onPressed: () {
-                          Navigator.pop(context, {
-                            'name': name,
-                            'category': category,
-                          });
+                          Navigator.pop(context, {'name': name, 'category': category});
                         },
-                        child: const Text(
-                          'Lưu & Tách nền',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
+                        child: const Text('Lưu & Tách nền', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -665,18 +546,21 @@ class _CameraPageState extends State<CameraPage> {
       if (isFromGallery) {
         image = await _picker.pickImage(source: ImageSource.gallery);
       } else {
-        if (_cameraController == null ||
-            !_cameraController!.value.isInitialized) {
+        if (_cameraController == null || !_cameraController!.value.isInitialized) {
           return;
         }
         image = await _cameraController!.takePicture();
       }
-
-      if (image == null) return;
+      
+      if (image == null) {
+        return;
+      }
 
       // HIỂN THỊ POPUP YÊU CẦU NHẬP TÊN & DANH MỤC TRƯỚC
       final details = await _showDetailsDialog(File(image.path));
-      if (details == null) return; // Người dùng bấm hủy
+      if (details == null) {
+        return; // Người dùng bấm hủy
+      }
 
       // Kiểm tra Credits trước khi thực hiện
       final localStorage = GetIt.I<AuthLocalStorage>();
@@ -692,20 +576,16 @@ class _CameraPageState extends State<CameraPage> {
 
       // 1. GỌI API TÁCH NỀN TRƯỚC
       final bgRemovalService = GetIt.I<BgRemovalService>();
-      final Uint8List? resultBytes = await bgRemovalService.removeBackground(
-        File(image.path),
-      );
-
+      final Uint8List? resultBytes = await bgRemovalService.removeBackground(File(image.path));
+      
       // Trừ 1 credit xóa nền
       await localStorage.updateCredits(bgCredits: bgCredits - 1);
-
+      
       File fileToUpload = File(image.path);
-
+      
       // Nếu tách nền thành công, tạo 1 file tạm chứa ảnh trong suốt để chuẩn bị upload
       if (resultBytes != null) {
-        final tempFile = File(
-          '${Directory.systemTemp.path}/transparent_${DateTime.now().millisecondsSinceEpoch}.png',
-        );
+        final tempFile = File('${Directory.systemTemp.path}/transparent_${DateTime.now().millisecondsSinceEpoch}.png');
         await tempFile.writeAsBytes(resultBytes);
         fileToUpload = tempFile;
       }
@@ -714,7 +594,7 @@ class _CameraPageState extends State<CameraPage> {
       final wardrobeService = GetIt.I<WardrobeApiService>();
       final newItem = await wardrobeService.uploadAndCreateItem(
         imageFile: fileToUpload,
-        category: details['category']!,
+        category: details['category']!, 
         name: details['name']!,
       );
 
@@ -784,7 +664,10 @@ class _CameraPageState extends State<CameraPage> {
                   const Text(
                     'Món đồ đã được tách nền và lưu vào tủ đồ.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textMuted,
+                    ),
                   ),
                   const SizedBox(height: 20),
                   Container(
@@ -803,17 +686,17 @@ class _CameraPageState extends State<CameraPage> {
                       child: Center(
                         child: Padding(
                           padding: const EdgeInsets.all(12),
-                          child: Image.file(fileToUpload, fit: BoxFit.contain),
+                          child: Image.file(
+                            fileToUpload,
+                            fit: BoxFit.contain,
+                          ),
                         ),
                       ),
                     ),
                   ),
                   const SizedBox(height: 14),
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 6,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                     decoration: BoxDecoration(
                       color: AppColors.primary.withOpacity(0.06),
                       borderRadius: BorderRadius.circular(10),
@@ -873,8 +756,7 @@ class _CameraPageState extends State<CameraPage> {
         String errorMsg = e.toString();
         if (e is DioException) {
           if (e.response?.statusCode == 413) {
-            errorMsg =
-                'Ảnh chụp quá lớn (giới hạn 30MB). Vui lòng chọn hoặc chụp ảnh nhẹ hơn.';
+            errorMsg = 'Ảnh chụp quá lớn (giới hạn 30MB). Vui lòng chọn hoặc chụp ảnh nhẹ hơn.';
           } else {
             final data = e.response?.data;
             if (data is Map) {
@@ -885,10 +767,8 @@ class _CameraPageState extends State<CameraPage> {
               }
             } else if (data != null) {
               final dataStr = data.toString();
-              if (dataStr.contains('<html') ||
-                  dataStr.contains('<!DOCTYPE html>')) {
-                errorMsg =
-                    'Không thể kết nối đến hệ thống. Vui lòng thử lại sau.';
+              if (dataStr.contains('<html') || dataStr.contains('<!DOCTYPE html>')) {
+                errorMsg = 'Không thể kết nối đến hệ thống. Vui lòng thử lại sau.';
               } else {
                 errorMsg = dataStr;
                 if (errorMsg.length > 250) {
@@ -898,9 +778,9 @@ class _CameraPageState extends State<CameraPage> {
             }
           }
         }
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(errorMsg)));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(errorMsg)),
+        );
       }
     }
   }
@@ -913,8 +793,7 @@ class _CameraPageState extends State<CameraPage> {
         fit: StackFit.expand,
         children: [
           // Live Camera Preview
-          if (_cameraController != null &&
-              _cameraController!.value.isInitialized)
+          if (_cameraController != null && _cameraController!.value.isInitialized)
             SizedBox.expand(
               child: FittedBox(
                 fit: BoxFit.cover,
@@ -927,21 +806,16 @@ class _CameraPageState extends State<CameraPage> {
             )
           else
             Container(
-              color: Colors.black,
-              child: const Center(
-                child: CircularProgressIndicator(color: Colors.white),
-              ),
+              color: Colors.black, 
+              child: const Center(child: CircularProgressIndicator(color: Colors.white))
             ),
-
+          
           SafeArea(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 16,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -965,39 +839,28 @@ class _CameraPageState extends State<CameraPage> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
-                            icon: const Icon(
-                              Icons.palette_rounded,
-                              color: Colors.white,
-                            ),
-                            onPressed: () async {
-                              final result = await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) =>
-                                      const ColorHarmonyCheckerPage(),
-                                ),
-                              );
-                              if (result is Map && context.mounted) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => PersonalColorDetailPage(
-                                      isFromScan: true,
-                                      scannedSkinTone: result['skinTone']
-                                          ?.toString(),
-                                      scannedColorPref: result['colorPref']
-                                          ?.toString(),
-                                    ),
-                                  ),
-                                );
-                              }
-                            },
+                            icon: const Icon(Icons.palette_rounded, color: Colors.white),
+                             onPressed: () async {
+                               final result = await Navigator.push(
+                                 context,
+                                 MaterialPageRoute(builder: (_) => const ColorHarmonyCheckerPage()),
+                               );
+                               if (result is Map && context.mounted) {
+                                 Navigator.push(
+                                   context,
+                                   MaterialPageRoute(
+                                     builder: (_) => PersonalColorDetailPage(
+                                       isFromScan: true,
+                                       scannedSkinTone: result['skinTone']?.toString(),
+                                       scannedColorPref: result['colorPref']?.toString(),
+                                     ),
+                                   ),
+                                 );
+                               }
+                             },
                           ),
                           IconButton(
-                            icon: const Icon(
-                              Icons.help_outline_rounded,
-                              color: Colors.white,
-                            ),
+                            icon: const Icon(Icons.help_outline_rounded, color: Colors.white),
                             onPressed: _showBgRemovalGuidelines,
                           ),
                           IconButton(
@@ -1009,30 +872,20 @@ class _CameraPageState extends State<CameraPage> {
                     ],
                   ),
                 ),
-
+                
                 Padding(
                   padding: const EdgeInsets.only(bottom: 40),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _isLoading
-                          ? const CircularProgressIndicator(color: Colors.white)
-                          : IconButton(
-                              icon: const Icon(
-                                Icons.photo_library,
-                                color: Colors.white,
-                                size: 32,
-                              ),
-                              onPressed: () => _processAndUpload(
-                                true,
-                              ), // isFromGallery = true
-                            ),
+                      _isLoading 
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : IconButton(
+                            icon: const Icon(Icons.photo_library, color: Colors.white, size: 32),
+                            onPressed: () => _processAndUpload(true), // isFromGallery = true
+                          ),
                       GestureDetector(
-                        onTap: _isLoading
-                            ? null
-                            : () => _processAndUpload(
-                                false,
-                              ), // isFromGallery = false
+                        onTap: _isLoading ? null : () => _processAndUpload(false), // isFromGallery = false
                         child: Container(
                           height: 80,
                           width: 80,
@@ -1050,11 +903,7 @@ class _CameraPageState extends State<CameraPage> {
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(
-                          Icons.flip_camera_ios,
-                          color: Colors.white,
-                          size: 32,
-                        ),
+                        icon: const Icon(Icons.flip_camera_ios, color: Colors.white, size: 32),
                         onPressed: _switchCamera, // Đổi camera trước/sau
                       ),
                     ],

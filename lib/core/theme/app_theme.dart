@@ -32,7 +32,7 @@ class AppTheme {
         iconTheme: IconThemeData(color: AppColors.onBackground),
         titleTextStyle: TextStyle(
           color: AppColors.onBackground,
-          fontSize: 22,
+          fontSize: 16,
           fontWeight: FontWeight.w800,
         ),
       ),
@@ -40,33 +40,33 @@ class AppTheme {
         color: AppColors.surface,
         elevation: 0,
         margin: EdgeInsets.zero,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: AppColors.onPrimary,
-          minimumSize: const Size(double.infinity, 54),
+          minimumSize: const Size(double.infinity, 46),
           elevation: 0,
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(14),
           ),
-          textStyle: textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w700,
+          textStyle: textTheme.bodyLarge?.copyWith(
+            fontWeight: FontWeight.w800,
           ),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          minimumSize: const Size(double.infinity, 52),
+          minimumSize: const Size(double.infinity, 44),
           foregroundColor: AppColors.primary,
           side: const BorderSide(color: Color(0x1F4A3728)),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(14),
           ),
-          textStyle: textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w700,
+          textStyle: textTheme.bodyLarge?.copyWith(
+            fontWeight: FontWeight.w800,
           ),
         ),
       ),
@@ -101,7 +101,7 @@ class AppTheme {
         selectedColor: AppColors.primary,
         secondarySelectedColor: AppColors.primary,
         disabledColor: const Color(0xFFE9E1D8),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         labelStyle: textTheme.labelLarge ?? const TextStyle(),
         secondaryLabelStyle: (textTheme.labelLarge ?? const TextStyle())
             .copyWith(color: AppColors.onPrimary),
