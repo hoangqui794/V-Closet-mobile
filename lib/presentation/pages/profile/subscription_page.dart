@@ -15,7 +15,10 @@ import 'payos_payment_page.dart';
 class SubscriptionPage extends StatefulWidget {
   const SubscriptionPage({super.key});
 
-  static void showOutOfCreditsSheet(BuildContext context, {required bool isBgRemoval}) {
+  static void showOutOfCreditsSheet(
+    BuildContext context, {
+    required bool isBgRemoval,
+  }) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -30,7 +33,8 @@ class SubscriptionPage extends StatefulWidget {
   State<SubscriptionPage> createState() => _SubscriptionPageState();
 }
 
-class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBindingObserver {
+class _SubscriptionPageState extends State<SubscriptionPage>
+    with WidgetsBindingObserver {
   final _localStorage = GetIt.I<AuthLocalStorage>();
   final _subscriptionApiService = GetIt.I<SubscriptionApiService>();
 
@@ -47,7 +51,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
     _loadSubscriptionData();
 
     // Đăng ký lắng nghe cập nhật trạng thái thanh toán thời gian thực từ SignalR
-    _paymentUpdateSubscription = SignalRService().onPaymentUpdate.listen((update) {
+    _paymentUpdateSubscription = SignalRService().onPaymentUpdate.listen((
+      update,
+    ) {
       if (!mounted) return;
       _handlePaymentUpdate(update);
     });
@@ -69,7 +75,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
 
   void _handlePaymentUpdate(Map<String, dynamic> update) {
     final status = update['status']?.toString();
-    final message = update['message']?.toString() ?? 'Cập nhật trạng thái thanh toán mới.';
+    final message =
+        update['message']?.toString() ?? 'Cập nhật trạng thái thanh toán mới.';
 
     if (status == 'success') {
       _showPaymentResultDialog(
@@ -99,7 +106,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: AppColors.background,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
           title: Row(
             children: [
               Icon(
@@ -134,8 +143,13 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
               style: ElevatedButton.styleFrom(
                 backgroundColor: isSuccess ? Colors.green : AppColors.primary,
                 foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
+                ),
               ),
               child: const Text(
                 'Đồng ý',
@@ -162,7 +176,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Lỗi đồng bộ: ${e.toString().replaceAll('Exception: ', '')}'),
+            content: Text(
+              'Lỗi đồng bộ: ${e.toString().replaceAll('Exception: ', '')}',
+            ),
             backgroundColor: AppColors.error,
           ),
         );
@@ -183,7 +199,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Lỗi tải gói: ${e.toString().replaceAll('Exception: ', '')}'),
+            content: Text(
+              'Lỗi tải gói: ${e.toString().replaceAll('Exception: ', '')}',
+            ),
             backgroundColor: AppColors.error,
           ),
         );
@@ -229,7 +247,11 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
     );
   }
 
-  void _initiatePurchase(SubscriptionPlan plan, String gateway, {String? couponCode}) async {
+  void _initiatePurchase(
+    SubscriptionPlan plan,
+    String gateway, {
+    String? couponCode,
+  }) async {
     if (gateway == 'manual_transfer') {
       showModalBottomSheet(
         context: context,
@@ -271,10 +293,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
         final statusResult = await Navigator.push<String>(
           context,
           MaterialPageRoute(
-            builder: (context) => PayOSPaymentPage(
-              paymentUrl: paymentUrl,
-              planName: plan.name,
-            ),
+            builder: (context) =>
+                PayOSPaymentPage(paymentUrl: paymentUrl, planName: plan.name),
           ),
         );
 
@@ -282,7 +302,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
           _showPaymentResultDialog(
             isSuccess: true,
             title: 'Thanh toán thành công',
-            message: 'Chúc mừng! Bạn đã đăng ký thành công gói "${plan.name}". Giao diện đang được cập nhật.',
+            message:
+                'Chúc mừng! Bạn đã đăng ký thành công gói "${plan.name}". Giao diện đang được cập nhật.',
           );
         } else if (statusResult == 'cancelled') {
           _showPaymentResultDialog(
@@ -298,7 +319,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
             ),
           );
         }
-        
+
         await _loadSubscriptionData();
         return;
       }
@@ -344,172 +365,191 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
     return DefaultTabController(
       length: 3,
       child: Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.primary),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          'Gói dịch vụ & Hạn mức',
-          style: TextStyle(
-            color: AppColors.primary,
-            fontWeight: FontWeight.w900,
-            fontSize: 20,
+        backgroundColor: AppColors.background,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: AppColors.primary,
+            ),
+            onPressed: () => Navigator.pop(context),
           ),
+          title: const Text(
+            'Gói dịch vụ & Hạn mức',
+            style: TextStyle(
+              color: AppColors.primary,
+              fontWeight: FontWeight.w900,
+              fontSize: 20,
+            ),
+          ),
+          centerTitle: true,
         ),
-        centerTitle: true,
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Current status summary card
-            Container(
-              margin: const EdgeInsets.all(20),
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [AppColors.primary, AppColors.primaryLight],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.primary.withOpacity(0.15),
-                    blurRadius: 18,
-                    offset: const Offset(0, 8),
+        body: SafeArea(
+          child: Column(
+            children: [
+              // Current status summary card
+              Container(
+                margin: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [AppColors.primary, AppColors.primaryLight],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Hạn mức của bạn',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: !hasActivePremium
-                              ? Colors.white.withOpacity(0.15)
-                              : const Color(0xFFD4AF37),
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: Text(
-                          !hasActivePremium
-                              ? 'GÓI MIỄN PHÍ'
-                              : (currentPlan == 'monthly' || currentPlan == 'premium_monthly')
-                                  ? 'PREMIUM THÁNG'
-                                  : 'PREMIUM NĂM',
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withOpacity(0.15),
+                      blurRadius: 18,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Hạn mức của bạn',
                           style: TextStyle(
-                            color: !hasActivePremium ? Colors.white : AppColors.primaryDark,
-                            fontWeight: FontWeight.w900,
-                            fontSize: 11,
-                            letterSpacing: 0.6,
+                            color: Colors.white70,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _statusItem(
-                          Icons.photo_filter_rounded,
-                          'Xóa nền tự động',
-                          '$bgCredits lượt',
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: !hasActivePremium
+                                ? Colors.white.withOpacity(0.15)
+                                : const Color(0xFFD4AF37),
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          child: Text(
+                            !hasActivePremium
+                                ? 'GÓI MIỄN PHÍ'
+                                : (currentPlan == 'monthly' ||
+                                      currentPlan == 'premium_monthly')
+                                ? 'PREMIUM THÁNG'
+                                : 'PREMIUM NĂM',
+                            style: TextStyle(
+                              color: !hasActivePremium
+                                  ? Colors.white
+                                  : AppColors.primaryDark,
+                              fontWeight: FontWeight.w900,
+                              fontSize: 11,
+                              letterSpacing: 0.6,
+                            ),
+                          ),
                         ),
-                      ),
-                      Container(
-                        width: 1.5,
-                        height: 40,
-                        color: Colors.white24,
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: _statusItem(
-                          Icons.auto_awesome_rounded,
-                          'Thử đồ ảo AI',
-                          '$tryonCredits lượt',
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _statusItem(
+                            Icons.photo_filter_rounded,
+                            'Xóa nền tự động',
+                            '$bgCredits lượt',
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            // Tab bar
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 20),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.05),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: TabBar(
-                padding: const EdgeInsets.all(4),
-                indicatorSize: TabBarIndicatorSize.tab,
-                dividerColor: Colors.transparent,
-                indicator: BoxDecoration(
-                  color: AppColors.primary,
-                  borderRadius: BorderRadius.circular(12),
+                        Container(
+                          width: 1.5,
+                          height: 40,
+                          color: Colors.white24,
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: _statusItem(
+                            Icons.auto_awesome_rounded,
+                            'Thử đồ ảo AI',
+                            '$tryonCredits lượt',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-                labelColor: Colors.white,
-                unselectedLabelColor: AppColors.textMuted,
-                labelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
-                unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
-                tabs: const [
-                  Tab(
-                    height: 38,
-                    child: Align(
-                      alignment: Alignment.center,
-                      child: Text('Gói Đăng Ký'),
-                    ),
-                  ),
-                  Tab(
-                    height: 38,
-                    child: Align(
-                      alignment: Alignment.center,
-                      child: Text('Nạp Lượt Thử'),
-                    ),
-                  ),
-                  Tab(
-                    height: 38,
-                    child: Align(
-                      alignment: Alignment.center,
-                      child: Text('Lịch Sử'),
-                    ),
-                  ),
-                ],
               ),
-            ),
-            const SizedBox(height: 10),
 
-            // Tab contents
-            Expanded(
-              child: TabBarView(
-                children: [
-                  _buildPlansTab(currentPlan, hasActivePremium),
-                  _buildTopupTab(),
-                  _buildTransactionsTab(),
-                ],
+              // Tab bar
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 20),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: TabBar(
+                  padding: const EdgeInsets.all(4),
+                  indicatorSize: TabBarIndicatorSize.tab,
+                  dividerColor: Colors.transparent,
+                  indicator: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [AppColors.primary, AppColors.primaryLight], // Ombre Navy sang Sky Blue
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  labelColor: Colors.white,
+                  unselectedLabelColor: AppColors.textMuted,
+                  labelStyle: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 13,
+                  ),
+                  unselectedLabelStyle: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                  ),
+                  tabs: const [
+                    Tab(
+                      height: 38,
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: Text('Gói Đăng Ký'),
+                      ),
+                    ),
+                    Tab(
+                      height: 38,
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: Text('Nạp Lượt Thử'),
+                      ),
+                    ),
+                    Tab(
+                      height: 38,
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: Text('Lịch Sử'),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+              const SizedBox(height: 10),
+
+              // Tab contents
+              Expanded(
+                child: TabBarView(
+                  children: [
+                    _buildPlansTab(currentPlan, hasActivePremium),
+                    _buildTopupTab(),
+                    _buildTransactionsTab(),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
       ),
     );
   }
@@ -524,14 +564,22 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
             const SizedBox(width: 4),
             Text(
               title,
-              style: const TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w500),
+              style: const TextStyle(
+                color: Colors.white70,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ],
         ),
         const SizedBox(height: 4),
         Text(
           value,
-          style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w900),
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.w900,
+          ),
         ),
       ],
     );
@@ -539,7 +587,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
 
   Widget _buildPlansTab(String currentPlan, bool hasActivePremium) {
     if (_isLoadingPlans) {
-      return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.primary),
+      );
     }
 
     try {
@@ -570,40 +620,61 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
             const SizedBox(height: 16),
 
             // Dynamic plans from BE (chỉ hiển thị các gói có phí và không phải gói lẻ)
-            ..._plans.where((plan) {
-              return plan.price > 0 && plan.durationDays != null;
-            }).map((plan) {
-              final formattedPrice = plan.price.toStringAsFixed(0).replaceAllMapped(formatCurrency, (Match m) => '${m[1]}.');
-              final isMonthly = plan.durationDays! <= 30;
-              // BE có thể trả planType dạng "monthly"/"yearly" hoặc "premium_monthly"/"premium_yearly"
-              final isPlanActive = hasActivePremium && (
-                isMonthly
-                  ? (currentPlan == 'monthly' || currentPlan == 'premium_monthly')
-                  : (currentPlan == 'yearly' || currentPlan == 'premium_yearly')
-              );
-              
-              final discountRate = isMonthly ? 0.20 : 0.45;
-              final discountPercent = isMonthly ? 'TIẾT KIỆM 20%' : 'TIẾT KIỆM 45%';
-              final originalPriceVal = _calculateOriginalPrice(plan.price, discountRate);
-              final formattedOriginalPrice = originalPriceVal.toStringAsFixed(0).replaceAllMapped(formatCurrency, (Match m) => '${m[1]}.');
+            ..._plans
+                .where((plan) {
+                  return plan.price > 0 && plan.durationDays != null;
+                })
+                .map((plan) {
+                  final formattedPrice = plan.price
+                      .toStringAsFixed(0)
+                      .replaceAllMapped(
+                        formatCurrency,
+                        (Match m) => '${m[1]}.',
+                      );
+                  final isMonthly = plan.durationDays! <= 30;
+                  // BE có thể trả planType dạng "monthly"/"yearly" hoặc "premium_monthly"/"premium_yearly"
+                  final isPlanActive =
+                      hasActivePremium &&
+                      (isMonthly
+                          ? (currentPlan == 'monthly' ||
+                                currentPlan == 'premium_monthly')
+                          : (currentPlan == 'yearly' ||
+                                currentPlan == 'premium_yearly'));
 
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: _planCard(
-                  title: plan.name,
-                  price: '$formattedPrice đ',
-                  period: ' / ${plan.durationDays} ngày',
-                  isPremium: true,
-                  isBestValue: isMonthly,
-                  originalPrice: '$formattedOriginalPrice đ',
-                  discountPercent: discountPercent,
-                  features: plan.description != null && plan.description!.isNotEmpty
-                      ? plan.description!
-                          .split('.')
-                          .map((e) => e.trim())
-                          .where((e) => e.isNotEmpty)
-                          .toList()
-                      : isMonthly
+                  final discountRate = isMonthly ? 0.20 : 0.45;
+                  final discountPercent = isMonthly
+                      ? 'TIẾT KIỆM 20%'
+                      : 'TIẾT KIỆM 45%';
+                  final originalPriceVal = _calculateOriginalPrice(
+                    plan.price,
+                    discountRate,
+                  );
+                  final formattedOriginalPrice = originalPriceVal
+                      .toStringAsFixed(0)
+                      .replaceAllMapped(
+                        formatCurrency,
+                        (Match m) => '${m[1]}.',
+                      );
+
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: _planCard(
+                      title: plan.name,
+                      price: '$formattedPrice đ',
+                      period: ' / ${plan.durationDays} ngày',
+                      isPremium: true,
+                      isBestValue: isMonthly,
+                      originalPrice: '$formattedOriginalPrice đ',
+                      discountPercent: discountPercent,
+                      features:
+                          plan.description != null &&
+                              plan.description!.isNotEmpty
+                          ? plan.description!
+                                .split('.')
+                                .map((e) => e.trim())
+                                .where((e) => e.isNotEmpty)
+                                .toList()
+                          : isMonthly
                           ? [
                               'Không giới hạn tủ đồ số & canvas phối',
                               '30 lượt xóa nền tự động / tháng',
@@ -618,16 +689,18 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
                               'Tiết kiệm chi phí lên đến 45%',
                               'Trải nghiệm sớm các tính năng AI mới',
                             ],
-                  buttonText: isPlanActive ? 'Đang sử dụng' : 'Đăng ký ngay',
-                  onPressed: isPlanActive
-                      ? null
-                      : () {
-                          _purchasePlan(plan);
-                        },
-                  isActive: isPlanActive,
-                ),
-              );
-            }),
+                      buttonText: isPlanActive
+                          ? 'Đang sử dụng'
+                          : 'Đăng ký ngay',
+                      onPressed: isPlanActive
+                          ? null
+                          : () {
+                              _purchasePlan(plan);
+                            },
+                      isActive: isPlanActive,
+                    ),
+                  );
+                }),
             const SizedBox(height: 80),
           ],
         ),
@@ -640,11 +713,19 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline_rounded, color: Colors.red, size: 48),
+              const Icon(
+                Icons.error_outline_rounded,
+                color: Colors.red,
+                size: 48,
+              ),
               const SizedBox(height: 12),
               const Text(
                 'Lỗi hiển thị gói đăng ký',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.red),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red,
+                ),
               ),
               const SizedBox(height: 8),
               Text(
@@ -661,7 +742,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
 
   Widget _buildTopupTab() {
     if (_isLoadingPlans) {
-      return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.primary),
+      );
     }
 
     try {
@@ -674,11 +757,19 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.auto_awesome_rounded, size: 64, color: AppColors.primary.withOpacity(0.2)),
+              Icon(
+                Icons.auto_awesome_rounded,
+                size: 64,
+                color: AppColors.primary.withOpacity(0.2),
+              ),
               const SizedBox(height: 12),
               const Text(
                 'Không tìm thấy gói cước lẻ',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.primary),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primary,
+                ),
               ),
               const SizedBox(height: 4),
               const Text(
@@ -711,27 +802,36 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
               ),
             ),
             ...topupPlans.map((plan) {
-              final formattedPrice = plan.price.toStringAsFixed(0).replaceAllMapped(formatCurrency, (Match m) => '${m[1]}.');
-              
-              int credits = plan.grantedTryOnCredits > 0 
-                  ? plan.grantedTryOnCredits 
+              final formattedPrice = plan.price
+                  .toStringAsFixed(0)
+                  .replaceAllMapped(formatCurrency, (Match m) => '${m[1]}.');
+
+              int credits = plan.grantedTryOnCredits > 0
+                  ? plan.grantedTryOnCredits
                   : (plan.grantedBgCredits > 0 ? plan.grantedBgCredits : 1);
-              
+
               final unitCostValue = plan.price / credits;
-              final unitCost = unitCostValue.toStringAsFixed(0).replaceAllMapped(formatCurrency, (Match m) => '${m[1]}.');
+              final unitCost = unitCostValue
+                  .toStringAsFixed(0)
+                  .replaceAllMapped(formatCurrency, (Match m) => '${m[1]}.');
 
               final discountRate = credits == 10
                   ? 0.25
                   : credits == 25
-                      ? 0.30
-                      : 0.20;
+                  ? 0.30
+                  : 0.20;
               final discountPercentStr = credits == 10
                   ? '-25%'
                   : credits == 25
-                      ? '-30%'
-                      : '-20%';
-              final originalPriceVal = _calculateOriginalPrice(plan.price, discountRate);
-              final formattedOriginalPrice = originalPriceVal.toStringAsFixed(0).replaceAllMapped(formatCurrency, (Match m) => '${m[1]}.');
+                  ? '-30%'
+                  : '-20%';
+              final originalPriceVal = _calculateOriginalPrice(
+                plan.price,
+                discountRate,
+              );
+              final formattedOriginalPrice = originalPriceVal
+                  .toStringAsFixed(0)
+                  .replaceAllMapped(formatCurrency, (Match m) => '${m[1]}.');
 
               return Padding(
                 padding: const EdgeInsets.only(bottom: 16),
@@ -740,7 +840,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
                   price: '$formattedPrice đ',
                   unitCost: 'Chỉ $unitCost đ / lượt thử',
                   credits: credits,
-                  description: plan.description ?? 'Hỗ trợ nạp nhanh cho nhu cầu phối đồ.',
+                  description:
+                      plan.description ??
+                      'Hỗ trợ nạp nhanh cho nhu cầu phối đồ.',
                   isPopular: credits >= 25,
                   originalPrice: '$formattedOriginalPrice đ',
                   discountPercent: discountPercentStr,
@@ -762,11 +864,19 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline_rounded, color: Colors.red, size: 48),
+              const Icon(
+                Icons.error_outline_rounded,
+                color: Colors.red,
+                size: 48,
+              ),
               const SizedBox(height: 12),
               const Text(
                 'Lỗi hiển thị gói cước lẻ',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.red),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red,
+                ),
               ),
               const SizedBox(height: 8),
               Text(
@@ -783,7 +893,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
 
   Widget _buildTransactionsTab() {
     if (_isLoadingTransactions) {
-      return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.primary),
+      );
     }
 
     try {
@@ -792,11 +904,19 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.history_rounded, size: 64, color: AppColors.primary.withOpacity(0.2)),
+              Icon(
+                Icons.history_rounded,
+                size: 64,
+                color: AppColors.primary.withOpacity(0.2),
+              ),
               const SizedBox(height: 12),
               const Text(
                 'Chưa có giao dịch nào',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.primary),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primary,
+                ),
               ),
               const SizedBox(height: 4),
               const Text(
@@ -819,10 +939,13 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
           itemBuilder: (context, index) {
             try {
               final tx = _transactions[index];
-              final formattedPrice = tx.amount.toStringAsFixed(0).replaceAllMapped(formatCurrency, (Match m) => '${m[1]}.');
-              final isSuccess = tx.status == 'completed' || tx.status == 'success';
+              final formattedPrice = tx.amount
+                  .toStringAsFixed(0)
+                  .replaceAllMapped(formatCurrency, (Match m) => '${m[1]}.');
+              final isSuccess =
+                  tx.status == 'completed' || tx.status == 'success';
               final isPending = tx.status == 'pending';
-              
+
               return Container(
                 margin: const EdgeInsets.only(bottom: 12),
                 padding: const EdgeInsets.all(16),
@@ -836,7 +959,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
                       offset: const Offset(0, 4),
                     ),
                   ],
-                  border: Border.all(color: AppColors.primary.withOpacity(0.05)),
+                  border: Border.all(
+                    color: AppColors.primary.withOpacity(0.05),
+                  ),
                 ),
                 child: Row(
                   children: [
@@ -846,21 +971,21 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
                         color: isSuccess
                             ? Colors.green.withOpacity(0.08)
                             : isPending
-                                ? Colors.orange.withOpacity(0.08)
-                                : Colors.red.withOpacity(0.08),
+                            ? Colors.orange.withOpacity(0.08)
+                            : Colors.red.withOpacity(0.08),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
                         isSuccess
                             ? Icons.check_circle_outline_rounded
                             : isPending
-                                ? Icons.pending_actions_rounded
-                                : Icons.error_outline_rounded,
+                            ? Icons.pending_actions_rounded
+                            : Icons.error_outline_rounded,
                         color: isSuccess
                             ? Colors.green
                             : isPending
-                                ? Colors.orange
-                                : Colors.red,
+                            ? Colors.orange
+                            : Colors.red,
                         size: 24,
                       ),
                     ),
@@ -871,17 +996,28 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
                         children: [
                           Text(
                             tx.planName,
-                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.primary),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primary,
+                            ),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             'Cổng: ${tx.paymentGateway.toUpperCase()}',
-                            style: const TextStyle(fontSize: 11, color: AppColors.textMuted, fontWeight: FontWeight.w500),
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: AppColors.textMuted,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             'Thời gian: ${tx.createdAt.toLocal().toString().substring(0, 16)}',
-                            style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: AppColors.textMuted,
+                            ),
                           ),
                         ],
                       ),
@@ -891,33 +1027,42 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
                       children: [
                         Text(
                           '+$formattedPrice đ',
-                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: AppColors.primary),
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w900,
+                            color: AppColors.primary,
+                          ),
                         ),
                         const SizedBox(height: 4),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: isSuccess
                                 ? Colors.green.withOpacity(0.08)
                                 : isPending
-                                    ? Colors.orange.withOpacity(0.08)
-                                    : Colors.red.withOpacity(0.08),
+                                ? Colors.orange.withOpacity(0.08)
+                                : Colors.red.withOpacity(0.08),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
                             isSuccess
                                 ? 'Thành công'
                                 : isPending
-                                    ? (tx.paymentGateway == 'manual_transfer' ? 'Chờ duyệt' : 'Chờ')
-                                    : 'Thất bại',
+                                ? (tx.paymentGateway == 'manual_transfer'
+                                      ? 'Chờ duyệt'
+                                      : 'Chờ')
+                                : 'Thất bại',
                             style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.bold,
                               color: isSuccess
                                   ? Colors.green
                                   : isPending
-                                      ? Colors.orange
-                                      : Colors.red,
+                                  ? Colors.orange
+                                  : Colors.red,
                             ),
                           ),
                         ),
@@ -927,7 +1072,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
                 ),
               );
             } catch (e, stack) {
-              debugPrint('CRITICAL ERROR in Transactions itemBuilder: $e\n$stack');
+              debugPrint(
+                'CRITICAL ERROR in Transactions itemBuilder: $e\n$stack',
+              );
               return Container(
                 margin: const EdgeInsets.only(bottom: 12),
                 padding: const EdgeInsets.all(16),
@@ -936,7 +1083,10 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
                   borderRadius: BorderRadius.circular(18),
                   border: Border.all(color: Colors.red.shade200),
                 ),
-                child: Text('Lỗi tải giao dịch: $e\n$stack', style: const TextStyle(color: Colors.red, fontSize: 10)),
+                child: Text(
+                  'Lỗi tải giao dịch: $e\n$stack',
+                  style: const TextStyle(color: Colors.red, fontSize: 10),
+                ),
               );
             }
           },
@@ -950,11 +1100,19 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline_rounded, color: Colors.red, size: 48),
+              const Icon(
+                Icons.error_outline_rounded,
+                color: Colors.red,
+                size: 48,
+              ),
               const SizedBox(height: 12),
               const Text(
                 'Lỗi hiển thị lịch sử',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.red),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red,
+                ),
               ),
               const SizedBox(height: 8),
               Text(
@@ -990,8 +1148,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
           color: isActive
               ? AppColors.primary
               : isBestValue
-                  ? const Color(0xFFD4AF37)
-                  : AppColors.primary.withOpacity(0.08),
+              ? const Color(0xFFD4AF37)
+              : AppColors.primary.withOpacity(0.08),
           width: isActive || isBestValue ? 2 : 1,
         ),
         boxShadow: [
@@ -1008,10 +1166,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
           clipBehavior: Clip.hardEdge,
           children: [
             if (isBestValue)
-              PositionBar(
-                text: 'BÁN CHẠY',
-                color: const Color(0xFFD4AF37),
-              ),
+              PositionBar(text: 'BÁN CHẠY', color: const Color(0xFFD4AF37)),
             Padding(
               padding: const EdgeInsets.all(24),
               child: Column(
@@ -1020,7 +1175,10 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
                   if (isActive)
                     Container(
                       margin: const EdgeInsets.only(bottom: 6),
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.primary.withOpacity(0.08),
                         borderRadius: BorderRadius.circular(6),
@@ -1040,7 +1198,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w900,
-                      color: isPremium ? const Color(0xFF8B6508) : AppColors.primary,
+                      color: isPremium
+                          ? const Color(0xFF8B6508)
+                          : AppColors.primary,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -1060,7 +1220,10 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
                         const SizedBox(width: 8),
                         if (discountPercent != null)
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
                             decoration: BoxDecoration(
                               color: const Color(0xFFFFEAEA),
                               borderRadius: BorderRadius.circular(8),
@@ -1141,13 +1304,13 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
                         backgroundColor: isActive
                             ? AppColors.primary.withOpacity(0.1)
                             : isPremium
-                                ? const Color(0xFFD4AF37)
-                                : AppColors.primary,
+                            ? const Color(0xFFD4AF37)
+                            : AppColors.primary,
                         foregroundColor: isActive
                             ? AppColors.primary
                             : isPremium
-                                ? AppColors.primaryDark
-                                : Colors.white,
+                            ? AppColors.primaryDark
+                            : Colors.white,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
@@ -1188,7 +1351,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
         color: Colors.white,
         borderRadius: BorderRadius.circular(22),
         border: Border.all(
-          color: isPopular ? AppColors.primary : AppColors.primary.withOpacity(0.08),
+          color: isPopular
+              ? AppColors.primary
+              : AppColors.primary.withOpacity(0.08),
           width: isPopular ? 2 : 1,
         ),
         boxShadow: [
@@ -1221,7 +1386,10 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
                 if (isPopular)
                   Container(
                     margin: const EdgeInsets.only(bottom: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.primary,
                       borderRadius: BorderRadius.circular(6),
@@ -1269,7 +1437,10 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
                       const SizedBox(width: 6),
                       if (discountPercent != null)
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: const Color(0xFFFFEAEA),
                             borderRadius: BorderRadius.circular(6),
@@ -1314,21 +1485,26 @@ class _SubscriptionPageState extends State<SubscriptionPage> with WidgetsBinding
             ),
           ),
           const SizedBox(width: 10),
-          ElevatedButton(
-            onPressed: onPressed,
-            style: ElevatedButton.styleFrom(
-              minimumSize: const Size(0, 0),
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              elevation: 0,
+          GestureDetector(
+            onTap: onPressed,
+            child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              shape: RoundedRectangleBorder(
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [AppColors.primary, AppColors.primaryLight], // Ombre Navy sang Sky Blue
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
                 borderRadius: BorderRadius.circular(12),
               ),
-            ),
-            child: const Text(
-              'Mua',
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+              child: const Text(
+                'Mua',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ),
         ],
@@ -1390,7 +1566,9 @@ class _OutOfCreditsSheetState extends State<_OutOfCreditsSheet> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Đang tải quảng cáo, vui lòng thử lại sau vài giây...'),
+            content: Text(
+              'Đang tải quảng cáo, vui lòng thử lại sau vài giây...',
+            ),
             duration: Duration(seconds: 2),
           ),
         );
@@ -1447,9 +1625,7 @@ class _OutOfCreditsSheetState extends State<_OutOfCreditsSheet> {
     // Mở trang khảo sát WebView và chờ nhận kết quả trả về
     final completed = await Navigator.push<bool>(
       context,
-      MaterialPageRoute(
-        builder: (context) => SurveyPage(surveyUrl: surveyUrl),
-      ),
+      MaterialPageRoute(builder: (context) => SurveyPage(surveyUrl: surveyUrl)),
     );
 
     if (completed == true) {
@@ -1471,10 +1647,12 @@ class _OutOfCreditsSheetState extends State<_OutOfCreditsSheet> {
         if (!mounted) return;
         Navigator.pop(context); // Close loading dialog
         Navigator.pop(context); // Close out-of-credits sheet
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('🎉 Cảm ơn bạn đã đóng góp ý kiến! Đã cộng 3 lượt thử đồ AI miễn phí.'),
+            content: Text(
+              '🎉 Cảm ơn bạn đã đóng góp ý kiến! Đã cộng 3 lượt thử đồ AI miễn phí.',
+            ),
             backgroundColor: Colors.green,
             duration: Duration(seconds: 4),
             behavior: SnackBarBehavior.floating,
@@ -1485,7 +1663,9 @@ class _OutOfCreditsSheetState extends State<_OutOfCreditsSheet> {
         Navigator.pop(context); // Close loading dialog if open
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Không thể nhận phần thưởng: ${e.toString().replaceAll('Exception: ', '')}'),
+            content: Text(
+              'Không thể nhận phần thưởng: ${e.toString().replaceAll('Exception: ', '')}',
+            ),
             backgroundColor: AppColors.error,
             duration: const Duration(seconds: 3),
           ),
@@ -1496,7 +1676,9 @@ class _OutOfCreditsSheetState extends State<_OutOfCreditsSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final titleText = widget.isBgRemoval ? 'Hết lượt xóa nền!' : 'Hết lượt thử đồ AI!';
+    final titleText = widget.isBgRemoval
+        ? 'Hết lượt xóa nền!'
+        : 'Hết lượt thử đồ AI!';
     final descText = widget.isBgRemoval
         ? 'Bạn đã sử dụng hết hạn mức xóa nền tự động trong tháng này. Hãy nâng cấp Premium hoặc xem quảng cáo để tiếp tục.'
         : 'Bạn đã sử dụng hết hạn mức thử đồ AI thông minh trong tháng này. Hãy nâng cấp Premium hoặc xem quảng cáo để tiếp tục.';
@@ -1509,7 +1691,12 @@ class _OutOfCreditsSheetState extends State<_OutOfCreditsSheet> {
           topRight: Radius.circular(28),
         ),
       ),
-      padding: EdgeInsets.fromLTRB(24, 20, 24, MediaQuery.of(context).viewInsets.bottom + 24),
+      padding: EdgeInsets.fromLTRB(
+        24,
+        20,
+        24,
+        MediaQuery.of(context).viewInsets.bottom + 24,
+      ),
       child: _isWatchingAd
           ? SizedBox(
               height: 250,
@@ -1517,7 +1704,11 @@ class _OutOfCreditsSheetState extends State<_OutOfCreditsSheet> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.play_circle_fill_rounded, color: AppColors.primary, size: 54),
+                    const Icon(
+                      Icons.play_circle_fill_rounded,
+                      color: AppColors.primary,
+                      size: 54,
+                    ),
                     const SizedBox(height: 16),
                     Text(
                       'Quảng cáo tài trợ V-Closet sẽ kết thúc sau $_countdown giây...',
@@ -1591,7 +1782,9 @@ class _OutOfCreditsSheetState extends State<_OutOfCreditsSheet> {
                       Navigator.pop(context); // Close out-of-credits sheet
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const SubscriptionPage()),
+                        MaterialPageRoute(
+                          builder: (context) => const SubscriptionPage(),
+                        ),
                       );
                     },
                     style: ElevatedButton.styleFrom(
@@ -1604,7 +1797,10 @@ class _OutOfCreditsSheetState extends State<_OutOfCreditsSheet> {
                     ),
                     child: const Text(
                       'Nâng cấp PREMIUM (Gói 30 lượt)',
-                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
@@ -1617,7 +1813,10 @@ class _OutOfCreditsSheetState extends State<_OutOfCreditsSheet> {
                       onPressed: _watchAdForCredit,
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.primary,
-                        side: const BorderSide(color: AppColors.primary, width: 1.5),
+                        side: const BorderSide(
+                          color: AppColors.primary,
+                          width: 1.5,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
@@ -1629,14 +1828,18 @@ class _OutOfCreditsSheetState extends State<_OutOfCreditsSheet> {
                           SizedBox(width: 8),
                           Text(
                             'Xem quảng cáo tài trợ (Nhận 1 lượt)',
-                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ],
                       ),
                     ),
                   ),
                 ],
-                if (!widget.isBgRemoval && !GetIt.I<AuthLocalStorage>().getHasCompletedSurvey()) ...[
+                if (!widget.isBgRemoval &&
+                    !GetIt.I<AuthLocalStorage>().getHasCompletedSurvey()) ...[
                   const SizedBox(height: 10),
                   SizedBox(
                     width: double.infinity,
@@ -1645,15 +1848,24 @@ class _OutOfCreditsSheetState extends State<_OutOfCreditsSheet> {
                       onPressed: _doSurveyForCredits,
                       style: OutlinedButton.styleFrom(
                         foregroundColor: const Color(0xFFD4AF37),
-                        side: const BorderSide(color: Color(0xFFD4AF37), width: 1.5),
+                        side: const BorderSide(
+                          color: Color(0xFFD4AF37),
+                          width: 1.5,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
                       ),
-                      icon: const Icon(Icons.assignment_turned_in_rounded, size: 18),
+                      icon: const Icon(
+                        Icons.assignment_turned_in_rounded,
+                        size: 18,
+                      ),
                       label: const Text(
                         'Làm khảo sát (Nhận 3 lượt thử miễn phí)',
-                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
@@ -1692,7 +1904,8 @@ class _PaymentVerificationSheet extends StatefulWidget {
   });
 
   @override
-  State<_PaymentVerificationSheet> createState() => _PaymentVerificationSheetState();
+  State<_PaymentVerificationSheet> createState() =>
+      _PaymentVerificationSheetState();
 }
 
 class _PaymentVerificationSheetState extends State<_PaymentVerificationSheet> {
@@ -1716,9 +1929,13 @@ class _PaymentVerificationSheetState extends State<_PaymentVerificationSheet> {
   @override
   Widget build(BuildContext context) {
     final formatCurrency = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
-    final formattedPrice = widget.price.toStringAsFixed(0).replaceAllMapped(formatCurrency, (Match m) => '${m[1]}.');
+    final formattedPrice = widget.price
+        .toStringAsFixed(0)
+        .replaceAllMapped(formatCurrency, (Match m) => '${m[1]}.');
     final isVnPay = widget.gateway == 'vnpay';
-    final brandColor = isVnPay ? const Color(0xFF005BAA) : const Color(0xFFA50064);
+    final brandColor = isVnPay
+        ? const Color(0xFF005BAA)
+        : const Color(0xFFA50064);
     final buttonText = isVnPay ? 'Mở thanh toán VNPay' : 'Mở ứng dụng Ví MoMo';
 
     return Container(
@@ -1729,7 +1946,12 @@ class _PaymentVerificationSheetState extends State<_PaymentVerificationSheet> {
           topRight: Radius.circular(28),
         ),
       ),
-      padding: EdgeInsets.fromLTRB(24, 20, 24, MediaQuery.of(context).viewInsets.bottom + 24),
+      padding: EdgeInsets.fromLTRB(
+        24,
+        20,
+        24,
+        MediaQuery.of(context).viewInsets.bottom + 24,
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -1746,7 +1968,11 @@ class _PaymentVerificationSheetState extends State<_PaymentVerificationSheet> {
           const SizedBox(height: 16),
           const Text(
             'Đang thực hiện thanh toán...',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.primary),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
+              color: AppColors.primary,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
@@ -1754,7 +1980,11 @@ class _PaymentVerificationSheetState extends State<_PaymentVerificationSheet> {
                 ? 'Bạn có thể quét mã QR dưới bằng điện thoại khác, hoặc bấm nút mở trang thanh toán VNPay dưới đây để thanh toán trên điện thoại này cho "${widget.packageName}" ($formattedPrice đ).'
                 : 'Bạn có thể quét mã QR dưới bằng điện thoại khác, hoặc bấm nút mở ứng dụng MoMo dưới đây để thanh toán trên điện thoại này cho "${widget.packageName}" ($formattedPrice đ).',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 13, color: AppColors.primary.withOpacity(0.6), height: 1.4),
+            style: TextStyle(
+              fontSize: 13,
+              color: AppColors.primary.withOpacity(0.6),
+              height: 1.4,
+            ),
           ),
           if (widget.paymentUrl != null && widget.paymentUrl!.isNotEmpty) ...[
             const SizedBox(height: 16),
@@ -1777,12 +2007,18 @@ class _PaymentVerificationSheetState extends State<_PaymentVerificationSheet> {
                         width: 150,
                         height: 150,
                         child: Center(
-                          child: CircularProgressIndicator(color: AppColors.primary),
+                          child: CircularProgressIndicator(
+                            color: AppColors.primary,
+                          ),
                         ),
                       );
                     },
                     errorBuilder: (context, error, stackTrace) {
-                      return const Icon(Icons.qr_code_2_rounded, size: 60, color: AppColors.textMuted);
+                      return const Icon(
+                        Icons.qr_code_2_rounded,
+                        size: 60,
+                        color: AppColors.textMuted,
+                      );
                     },
                   ),
                   const SizedBox(height: 8),
@@ -1812,11 +2048,19 @@ class _PaymentVerificationSheetState extends State<_PaymentVerificationSheet> {
                   }
                 },
                 icon: const Icon(Icons.open_in_new_rounded, size: 18),
-                label: Text(buttonText, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                label: Text(
+                  buttonText,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: brandColor,
                   side: BorderSide(color: brandColor, width: 1.5),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
                 ),
               ),
             ),
@@ -1830,22 +2074,39 @@ class _PaymentVerificationSheetState extends State<_PaymentVerificationSheet> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
                 elevation: 0,
               ),
               child: _isChecking
                   ? const SizedBox(
                       width: 24,
                       height: 24,
-                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
                     )
-                  : const Text('Tôi đã hoàn tất chuyển khoản', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                  : const Text(
+                      'Tôi đã hoàn tất chuyển khoản',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
             ),
           ),
           const SizedBox(height: 10),
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Đóng', style: TextStyle(color: AppColors.textMuted, fontWeight: FontWeight.bold)),
+            child: const Text(
+              'Đóng',
+              style: TextStyle(
+                color: AppColors.textMuted,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),
@@ -1865,10 +2126,12 @@ class _PaymentGatewaySelectorSheet extends StatefulWidget {
   });
 
   @override
-  State<_PaymentGatewaySelectorSheet> createState() => _PaymentGatewaySelectorSheetState();
+  State<_PaymentGatewaySelectorSheet> createState() =>
+      _PaymentGatewaySelectorSheetState();
 }
 
-class _PaymentGatewaySelectorSheetState extends State<_PaymentGatewaySelectorSheet> {
+class _PaymentGatewaySelectorSheetState
+    extends State<_PaymentGatewaySelectorSheet> {
   final _couponController = TextEditingController();
   final _subscriptionApiService = GetIt.I<SubscriptionApiService>();
 
@@ -1903,7 +2166,8 @@ class _PaymentGatewaySelectorSheetState extends State<_PaymentGatewaySelectorShe
         if (isValid) {
           _couponResult = res;
         } else {
-          _couponError = res['message'] as String? ?? 'Mã giảm giá không hợp lệ';
+          _couponError =
+              res['message'] as String? ?? 'Mã giảm giá không hợp lệ';
         }
       });
     } catch (e) {
@@ -1917,12 +2181,13 @@ class _PaymentGatewaySelectorSheetState extends State<_PaymentGatewaySelectorShe
   @override
   Widget build(BuildContext context) {
     final formatCurrency = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
-    
+
     // Tính toán giá sau giảm nếu có coupon
     double finalPrice = widget.price;
     double discountAmount = 0.0;
-    
-    if (_couponResult != null && (_couponResult!['isValid'] as bool? ?? false) == true) {
+
+    if (_couponResult != null &&
+        (_couponResult!['isValid'] as bool? ?? false) == true) {
       final type = _couponResult!['discountType'] as String?;
       final value = (_couponResult!['discountValue'] as num? ?? 0.0).toDouble();
       if (type == 'percentage') {
@@ -1934,11 +2199,17 @@ class _PaymentGatewaySelectorSheetState extends State<_PaymentGatewaySelectorShe
       if (finalPrice < 0) finalPrice = 0;
     }
 
-    final formattedOriginalPrice = widget.price.toStringAsFixed(0).replaceAllMapped(formatCurrency, (Match m) => '${m[1]}.');
-    final formattedFinalPrice = finalPrice.toStringAsFixed(0).replaceAllMapped(formatCurrency, (Match m) => '${m[1]}.');
+    final formattedOriginalPrice = widget.price
+        .toStringAsFixed(0)
+        .replaceAllMapped(formatCurrency, (Match m) => '${m[1]}.');
+    final formattedFinalPrice = finalPrice
+        .toStringAsFixed(0)
+        .replaceAllMapped(formatCurrency, (Match m) => '${m[1]}.');
 
     return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
       child: Container(
         decoration: const BoxDecoration(
           color: AppColors.background,
@@ -1964,16 +2235,24 @@ class _PaymentGatewaySelectorSheetState extends State<_PaymentGatewaySelectorShe
               ),
               const Text(
                 'Chọn phương thức thanh toán',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.primary),
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.primary,
+                ),
               ),
               const SizedBox(height: 6),
               Text(
                 'Vui lòng chọn cổng thanh toán để mua gói "${widget.packageName}".',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 13, color: AppColors.primary.withOpacity(0.6), height: 1.4),
+                style: TextStyle(
+                  fontSize: 13,
+                  color: AppColors.primary.withOpacity(0.6),
+                  height: 1.4,
+                ),
               ),
               const SizedBox(height: 16),
-              
+
               // Ô nhập mã giảm giá (Coupon Code)
               Container(
                 decoration: BoxDecoration(
@@ -1983,8 +2262,8 @@ class _PaymentGatewaySelectorSheetState extends State<_PaymentGatewaySelectorShe
                     color: _couponResult != null
                         ? Colors.green.withOpacity(0.5)
                         : _couponError != null
-                            ? Colors.red.withOpacity(0.5)
-                            : AppColors.primary.withOpacity(0.08),
+                        ? Colors.red.withOpacity(0.5)
+                        : AppColors.primary.withOpacity(0.08),
                     width: 1.5,
                   ),
                 ),
@@ -1996,24 +2275,37 @@ class _PaymentGatewaySelectorSheetState extends State<_PaymentGatewaySelectorShe
                         controller: _couponController,
                         decoration: const InputDecoration(
                           hintText: 'Nhập mã giảm giá (ví dụ: WELCOME20)',
-                          hintStyle: TextStyle(fontSize: 13, color: Colors.grey),
+                          hintStyle: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey,
+                          ),
                           border: InputBorder.none,
                         ),
-                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.primary),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primary,
+                        ),
                       ),
                     ),
                     if (_isCheckingCoupon)
                       const SizedBox(
                         width: 20,
                         height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.primary,
+                        ),
                       )
                     else
                       TextButton(
                         onPressed: _checkCoupon,
                         child: const Text(
                           'Áp dụng',
-                          style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary,
+                          ),
                         ),
                       ),
                   ],
@@ -2023,12 +2315,20 @@ class _PaymentGatewaySelectorSheetState extends State<_PaymentGatewaySelectorShe
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    const Icon(Icons.check_circle_rounded, color: Colors.green, size: 16),
+                    const Icon(
+                      Icons.check_circle_rounded,
+                      color: Colors.green,
+                      size: 16,
+                    ),
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(
                         'Đã áp dụng mã ${_couponController.text.trim().toUpperCase()} thành công!',
-                        style: const TextStyle(color: Colors.green, fontSize: 12, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          color: Colors.green,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ],
@@ -2037,23 +2337,34 @@ class _PaymentGatewaySelectorSheetState extends State<_PaymentGatewaySelectorShe
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    const Icon(Icons.error_rounded, color: Colors.red, size: 16),
+                    const Icon(
+                      Icons.error_rounded,
+                      color: Colors.red,
+                      size: 16,
+                    ),
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(
                         _couponError!,
-                        style: const TextStyle(color: Colors.red, fontSize: 12, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          color: Colors.red,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ],
                 ),
               ],
-              
+
               const SizedBox(height: 16),
-              
+
               // Thẻ hiển thị giá tiền
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.primary.withOpacity(0.04),
                   borderRadius: BorderRadius.circular(16),
@@ -2063,7 +2374,11 @@ class _PaymentGatewaySelectorSheetState extends State<_PaymentGatewaySelectorShe
                   children: [
                     const Text(
                       'Tổng thanh toán:',
-                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.primary),
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primary,
+                      ),
                     ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
@@ -2092,12 +2407,13 @@ class _PaymentGatewaySelectorSheetState extends State<_PaymentGatewaySelectorShe
               ),
 
               const SizedBox(height: 16),
-              
+
               _buildGatewayCard(
                 context: context,
                 gateway: 'payos',
                 title: 'Cổng thanh toán PayOS',
-                subtitle: 'Thanh toán tự động qua mã VietQR Ngân hàng hoặc thẻ ATM/Visa',
+                subtitle:
+                    'Thanh toán tự động qua mã VietQR Ngân hàng hoặc thẻ ATM/Visa',
                 iconColor: const Color(0xFFE25822),
                 logoText: 'PayOS',
                 logoBgColor: const Color(0xFFFFF5EE),
@@ -2115,7 +2431,13 @@ class _PaymentGatewaySelectorSheetState extends State<_PaymentGatewaySelectorShe
               const SizedBox(height: 16),
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('Hủy bỏ', style: TextStyle(color: AppColors.textMuted, fontWeight: FontWeight.bold)),
+                child: const Text(
+                  'Hủy bỏ',
+                  style: TextStyle(
+                    color: AppColors.textMuted,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ],
           ),
@@ -2135,7 +2457,9 @@ class _PaymentGatewaySelectorSheetState extends State<_PaymentGatewaySelectorShe
   }) {
     return InkWell(
       onTap: () {
-        final couponCode = _couponResult != null ? _couponController.text.trim() : null;
+        final couponCode = _couponResult != null
+            ? _couponController.text.trim()
+            : null;
         widget.onSelected(gateway, couponCode);
       },
       borderRadius: BorderRadius.circular(16),
@@ -2143,7 +2467,10 @@ class _PaymentGatewaySelectorSheetState extends State<_PaymentGatewaySelectorShe
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.primary.withOpacity(0.1), width: 1.5),
+          border: Border.all(
+            color: AppColors.primary.withOpacity(0.1),
+            width: 1.5,
+          ),
         ),
         child: Row(
           children: [
@@ -2190,7 +2517,10 @@ class _PaymentGatewaySelectorSheetState extends State<_PaymentGatewaySelectorShe
                 ],
               ),
             ),
-            Icon(Icons.chevron_right_rounded, color: AppColors.primary.withOpacity(0.3)),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.primary.withOpacity(0.3),
+            ),
           ],
         ),
       ),

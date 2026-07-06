@@ -19,8 +19,8 @@ import 'profile/notification_page.dart';
 import '../../data/datasources/subscription_api_service.dart';
 import '../../data/datasources/signalr_service.dart';
 import '../../data/datasources/notification_api_service.dart';
+import '../widgets/app_tour_overlay.dart';
 import 'package:animate_do/animate_do.dart';
-
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -32,9 +32,11 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final _localStorage = GetIt.I<AuthLocalStorage>();
+  final List<GlobalKey> _navKeys = List.generate(6, (_) => GlobalKey());
   int _currentIndex = 0;
   StreamSubscription<Map<String, dynamic>>? _notificationSub;
   OverlayEntry? _overlayEntry;
+  bool _isRunningNewUserFlow = false;
 
   @override
   void initState() {
@@ -42,12 +44,12 @@ class _MainScreenState extends State<MainScreen> {
     _syncSubscription();
     SignalRService().initSignalR();
     _listenNotifications();
-    
+
     // Kịch bản 3: Tự kiểm tra thông báo chưa đọc khi mở ứng dụng
     _checkGiftSubscriptionFromNotifications();
 
-    // Trigger Style DNA Quiz nếu user chưa hoàn thành
-    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeShowStyleQuiz());
+    // Trigger Style DNA Quiz và hướng dẫn nhanh cho user mới
+    WidgetsBinding.instance.addPostFrameCallback((_) => _runNewUserFlow());
   }
 
   @override
@@ -59,14 +61,25 @@ class _MainScreenState extends State<MainScreen> {
 
   // Kịch bản 1: Lắng nghe qua SignalR thời gian thực
   void _listenNotifications() {
-    _notificationSub = SignalRService().onNewNotification.listen((notification) {
+    _notificationSub = SignalRService().onNewNotification.listen((
+      notification,
+    ) {
       if (!mounted) return;
       _syncSubscription(); // Đồng bộ ngay lập tức để có Premium features
-      
-      final type = notification['type']?.toString() ?? notification['Type']?.toString() ?? 'System';
+
+      final type =
+          notification['type']?.toString() ??
+          notification['Type']?.toString() ??
+          'System';
       if (type.toLowerCase() == 'subscription') {
-        final title = notification['title']?.toString() ?? notification['Title']?.toString() ?? 'Chúc mừng! Bạn đã được tặng gói';
-        final body = notification['body']?.toString() ?? notification['Body']?.toString() ?? '';
+        final title =
+            notification['title']?.toString() ??
+            notification['Title']?.toString() ??
+            'Chúc mừng! Bạn đã được tặng gói';
+        final body =
+            notification['body']?.toString() ??
+            notification['Body']?.toString() ??
+            '';
         _showGiftSubscriptionDialog(title, body);
       } else {
         _showFloatingNotification(notification);
@@ -77,10 +90,15 @@ class _MainScreenState extends State<MainScreen> {
   // Kịch bản 2: Handler khi bấm từ thông báo đẩy ngoài app (để hệ thống gọi khi click)
   void handlePushNotificationClicked(Map<String, dynamic> payload) {
     if (!mounted) return;
-    final type = payload['type']?.toString() ?? payload['Type']?.toString() ?? '';
+    final type =
+        payload['type']?.toString() ?? payload['Type']?.toString() ?? '';
     if (type.toLowerCase() == 'subscription') {
-      final title = payload['title']?.toString() ?? payload['Title']?.toString() ?? 'Chúc mừng! Bạn đã được tặng gói';
-      final body = payload['body']?.toString() ?? payload['Body']?.toString() ?? '';
+      final title =
+          payload['title']?.toString() ??
+          payload['Title']?.toString() ??
+          'Chúc mừng! Bạn đã được tặng gói';
+      final body =
+          payload['body']?.toString() ?? payload['Body']?.toString() ?? '';
       _showGiftSubscriptionDialog(title, body);
     }
   }
@@ -89,8 +107,10 @@ class _MainScreenState extends State<MainScreen> {
   Future<void> _checkGiftSubscriptionFromNotifications() async {
     try {
       final notificationService = GetIt.I<NotificationApiService>();
-      final unreadNotifications = await notificationService.getNotifications(isRead: false);
-      
+      final unreadNotifications = await notificationService.getNotifications(
+        isRead: false,
+      );
+
       NotificationModel? giftNotification;
       for (final n in unreadNotifications) {
         if (n.type.toLowerCase() == 'subscription') {
@@ -101,8 +121,11 @@ class _MainScreenState extends State<MainScreen> {
 
       if (giftNotification != null) {
         // Hiển thị Dialog chúc mừng
-        _showGiftSubscriptionDialog(giftNotification.title, giftNotification.body);
-        
+        _showGiftSubscriptionDialog(
+          giftNotification.title,
+          giftNotification.body,
+        );
+
         // Đánh dấu thông báo là đã đọc
         await notificationService.markAsRead(giftNotification.id);
       }
@@ -148,10 +171,7 @@ class _MainScreenState extends State<MainScreen> {
                       shape: BoxShape.circle,
                     ),
                     child: const Center(
-                      child: Text(
-                        '🎁',
-                        style: TextStyle(fontSize: 48),
-                      ),
+                      child: Text('🎁', style: TextStyle(fontSize: 48)),
                     ),
                   ),
                   const SizedBox(height: 18),
@@ -220,9 +240,18 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void _showFloatingNotification(Map<String, dynamic> notification) {
-    final title = notification['title']?.toString() ?? notification['Title']?.toString() ?? 'Thông báo mới';
-    final body = notification['body']?.toString() ?? notification['Body']?.toString() ?? '';
-    final type = notification['type']?.toString() ?? notification['Type']?.toString() ?? 'System';
+    final title =
+        notification['title']?.toString() ??
+        notification['Title']?.toString() ??
+        'Thông báo mới';
+    final body =
+        notification['body']?.toString() ??
+        notification['Body']?.toString() ??
+        '';
+    final type =
+        notification['type']?.toString() ??
+        notification['Type']?.toString() ??
+        'System';
 
     _overlayEntry?.remove();
     _overlayEntry = null;
@@ -259,6 +288,30 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
+  Future<void> _runNewUserFlow() async {
+    if (_isRunningNewUserFlow) return;
+    _isRunningNewUserFlow = true;
+    try {
+      await _syncSubscription();
+      await _maybeShowStyleQuiz();
+      await _migrateGuideStateForExistingUsers();
+      await _maybeShowNewUserGuide();
+    } finally {
+      _isRunningNewUserFlow = false;
+    }
+  }
+
+  Future<void> _migrateGuideStateForExistingUsers() async {
+    if (_localStorage.hasNewUserGuideProgress()) return;
+
+    final hasExistingClosetData =
+        _localStorage.getWardrobeItemCount() > 0 ||
+        _localStorage.getOutfitCount() > 0;
+    if (!hasExistingClosetData) return;
+
+    await _localStorage.markGuidesSeenForExistingUser();
+  }
+
   /// Hiện Style DNA Quiz nếu user chưa làm
   Future<void> _maybeShowStyleQuiz() async {
     if (!mounted) return;
@@ -273,7 +326,7 @@ class _MainScreenState extends State<MainScreen> {
 
     if (!mounted) return;
     if (_localStorage.getHasCompletedStyleQuiz()) return;
-    Navigator.of(context).push(
+    await Navigator.of(context).push(
       PageRouteBuilder(
         pageBuilder: (context, animation, _) => StyleDnaQuizPage(
           onCompleted: () {
@@ -284,10 +337,13 @@ class _MainScreenState extends State<MainScreen> {
         ),
         transitionsBuilder: (context, animation, _, child) {
           return SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(0, 1),
-              end: Offset.zero,
-            ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic)),
+            position: Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero)
+                .animate(
+                  CurvedAnimation(
+                    parent: animation,
+                    curve: Curves.easeOutCubic,
+                  ),
+                ),
             child: child,
           );
         },
@@ -296,7 +352,67 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
+  Future<void> _maybeShowNewUserGuide() async {
+    if (!mounted) return;
+    final step = _localStorage.getNewUserGuideStep();
+    if (step == NewUserGuideStep.completed) return;
 
+    await Future.delayed(const Duration(milliseconds: 350));
+    if (!mounted) return;
+
+    if (step == NewUserGuideStep.tryAi) {
+      setState(() => _currentIndex = 4);
+      return;
+    }
+
+    if (step == NewUserGuideStep.addItem ||
+        step == NewUserGuideStep.viewCloset ||
+        step == NewUserGuideStep.createOutfit ||
+        step == NewUserGuideStep.saveOutfit) {
+      await _showNewUserCoachTour();
+    }
+  }
+
+  Future<void> _showNewUserCoachTour() async {
+    final steps = [
+      if (_currentIndex != 1)
+        _NavTourStep(
+          navIndex: 1,
+          icon: Icons.door_sliding_rounded,
+          title: 'Bước 1: Mở Tủ đồ',
+          description:
+              'Nhấn đúng tab Tủ đồ ở thanh dưới. Sau đó app sẽ chỉ tiếp nút Nhập món đồ để bạn thêm món đầu tiên.',
+          primaryLabel: 'Nhấn vùng sáng để mở Tủ đồ',
+        ),
+    ];
+
+    if (steps.isEmpty) return;
+
+    for (var index = 0; index < steps.length; index++) {
+      final step = steps[index];
+      if (!mounted) return;
+
+      final result = await AppTourOverlay.showCoachStep(
+        context,
+        targetKey: _navKeys[step.navIndex],
+        stepNumber: 1,
+        totalSteps: 6,
+        icon: step.icon,
+        title: step.title,
+        description: step.description,
+        primaryLabel: step.primaryLabel,
+      );
+
+      if (!mounted) return;
+      if (result == AppTourCoachAction.finish) {
+        await _localStorage.completeNewUserGuide();
+        return;
+      }
+
+      setState(() => _currentIndex = step.navIndex);
+      await Future.delayed(const Duration(milliseconds: 320));
+    }
+  }
 
   // Nav items: index 2 là nút camera đặc biệt ở giữa
   static const List<(IconData, String)> _navItems = [
@@ -332,7 +448,9 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void _openDrawer() {
-    debugPrint('DEBUG: _openDrawer triggered. scaffoldKey.currentState = ${_scaffoldKey.currentState}');
+    debugPrint(
+      'DEBUG: _openDrawer triggered. scaffoldKey.currentState = ${_scaffoldKey.currentState}',
+    );
     _scaffoldKey.currentState?.openDrawer();
   }
 
@@ -401,7 +519,10 @@ class _MainScreenState extends State<MainScreen> {
                   const SizedBox(height: 4),
                   // Version Badge
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.primary.withOpacity(0.08),
                       borderRadius: BorderRadius.circular(12),
@@ -519,8 +640,11 @@ class _MainScreenState extends State<MainScreen> {
               ),
               currentAccountPicture: CircleAvatar(
                 backgroundColor: AppColors.accent,
-                backgroundImage: _localStorage.getUserAvatar() != null && _localStorage.getUserAvatar()!.startsWith('http')
-                    ? NetworkImage(_localStorage.getUserAvatar()!) as ImageProvider
+                backgroundImage:
+                    _localStorage.getUserAvatar() != null &&
+                        _localStorage.getUserAvatar()!.startsWith('http')
+                    ? NetworkImage(_localStorage.getUserAvatar()!)
+                          as ImageProvider
                     : const AssetImage('assets/images/avatar1.png'),
               ),
               accountName: Row(
@@ -553,39 +677,81 @@ class _MainScreenState extends State<MainScreen> {
             // Menu Items
             ListTile(
               leading: const Icon(Icons.home_rounded, color: AppColors.primary),
-              title: const Text('Trang chủ', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
+              title: const Text(
+                'Trang chủ',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primary,
+                ),
+              ),
               onTap: () {
                 Navigator.pop(context);
                 setState(() => _currentIndex = 0);
               },
             ),
             ListTile(
-              leading: const Icon(Icons.door_sliding_rounded, color: AppColors.primary),
-              title: const Text('Tủ đồ cá nhân', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
+              leading: const Icon(
+                Icons.door_sliding_rounded,
+                color: AppColors.primary,
+              ),
+              title: const Text(
+                'Tủ đồ cá nhân',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primary,
+                ),
+              ),
               onTap: () {
                 Navigator.pop(context);
                 setState(() => _currentIndex = 1);
               },
             ),
             ListTile(
-              leading: const Icon(Icons.palette_rounded, color: AppColors.primary),
-              title: const Text('Phong cách cá nhân', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
+              leading: const Icon(
+                Icons.palette_rounded,
+                color: AppColors.primary,
+              ),
+              title: const Text(
+                'Phong cách cá nhân',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primary,
+                ),
+              ),
               onTap: () {
                 Navigator.pop(context);
                 setState(() => _currentIndex = 3);
               },
             ),
             ListTile(
-              leading: const Icon(Icons.auto_awesome_rounded, color: AppColors.primary),
-              title: const Text('Studio Phối Đồ AI', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
+              leading: const Icon(
+                Icons.auto_awesome_rounded,
+                color: AppColors.primary,
+              ),
+              title: const Text(
+                'Studio Phối Đồ AI',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primary,
+                ),
+              ),
               onTap: () {
                 Navigator.pop(context);
                 setState(() => _currentIndex = 4);
               },
             ),
             ListTile(
-              leading: const Icon(Icons.shopping_bag_rounded, color: AppColors.primary),
-              title: const Text('Cửa hàng', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
+              leading: const Icon(
+                Icons.shopping_bag_rounded,
+                color: AppColors.primary,
+              ),
+              title: const Text(
+                'Cửa hàng',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primary,
+                ),
+              ),
               onTap: () {
                 Navigator.pop(context);
                 setState(() => _currentIndex = 5);
@@ -593,21 +759,43 @@ class _MainScreenState extends State<MainScreen> {
             ),
             // Gói Premium — đặt nổi bật để dễ nhìn thấy
             ListTile(
-              leading: const Icon(Icons.workspace_premium_rounded, color: Color(0xFFD4AF37)),
-              title: const Text('Gói Premium & Nạp Credits', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF996515))),
+              leading: const Icon(
+                Icons.workspace_premium_rounded,
+                color: Color(0xFFD4AF37),
+              ),
+              title: const Text(
+                'Gói Premium & Nạp Credits',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF996515),
+                ),
+              ),
               tileColor: const Color(0xFFFCF8F2),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const SubscriptionPage()),
+                  MaterialPageRoute(
+                    builder: (context) => const SubscriptionPage(),
+                  ),
                 ).then((_) => setState(() {}));
               },
             ),
             ListTile(
-              leading: const Icon(Icons.person_rounded, color: AppColors.primary),
-              title: const Text('Hồ sơ cá nhân', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
+              leading: const Icon(
+                Icons.person_rounded,
+                color: AppColors.primary,
+              ),
+              title: const Text(
+                'Hồ sơ cá nhân',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primary,
+                ),
+              ),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
@@ -619,8 +807,17 @@ class _MainScreenState extends State<MainScreen> {
             const Spacer(),
             const Divider(color: AppColors.accent, thickness: 1),
             ListTile(
-              leading: const Icon(Icons.info_outline_rounded, color: AppColors.primary),
-              title: const Text('Giới thiệu V-Closet', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
+              leading: const Icon(
+                Icons.info_outline_rounded,
+                color: AppColors.primary,
+              ),
+              title: const Text(
+                'Giới thiệu V-Closet',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primary,
+                ),
+              ),
               onTap: () {
                 Navigator.pop(context);
                 _showCustomAboutDialog(context);
@@ -628,10 +825,16 @@ class _MainScreenState extends State<MainScreen> {
             ),
             ListTile(
               leading: const Icon(Icons.logout_rounded, color: AppColors.error),
-              title: const Text('Đăng xuất', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.error)),
+              title: const Text(
+                'Đăng xuất',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.error,
+                ),
+              ),
               onTap: () async {
                 Navigator.pop(context); // Đóng drawer
-                
+
                 // Hiển thị loading dialog
                 showDialog(
                   context: context,
@@ -640,10 +843,10 @@ class _MainScreenState extends State<MainScreen> {
                     child: CircularProgressIndicator(color: AppColors.primary),
                   ),
                 );
-                
+
                 await SignalRService().disconnect();
                 await GetIt.I<AuthApiService>().logout();
-                
+
                 if (context.mounted) {
                   Navigator.of(context).pop(); // Đóng loading dialog
                   Navigator.pushAndRemoveUntil(
@@ -705,17 +908,21 @@ class _MainScreenState extends State<MainScreen> {
         child: Container(
           height: 64,
           decoration: BoxDecoration(
-            color: AppColors.primaryDark,
+            gradient: const LinearGradient(
+              colors: [AppColors.primary, AppColors.primaryLight], // Ombre ngang Navy sâu sang Sky Blue
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+            ),
             borderRadius: BorderRadius.circular(32),
             boxShadow: [
               BoxShadow(
-                color: AppColors.primaryDark.withOpacity(0.45),
+                color: AppColors.primary.withOpacity(0.3),
                 blurRadius: 24,
                 spreadRadius: 0,
                 offset: const Offset(0, 8),
               ),
               BoxShadow(
-                color: Colors.black.withOpacity(0.18),
+                color: Colors.black.withOpacity(0.15),
                 blurRadius: 10,
                 offset: const Offset(0, 3),
               ),
@@ -733,12 +940,13 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  /// Item thường: icon trắng mờ → khi active hiện pill kem + icon nâu + label
+  /// Item thường: icon trắng mờ → khi active hiện pill trắng + icon Navy sâu + label
   Widget _buildNavItem(int index) {
     final active = _currentIndex == index;
     final (icon, label) = _navItems[index];
 
     return GestureDetector(
+      key: _navKeys[index],
       onTap: () => _onTapNav(index),
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
@@ -749,7 +957,7 @@ class _MainScreenState extends State<MainScreen> {
             : const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
         decoration: BoxDecoration(
           color: active
-              ? AppColors.secondary.withOpacity(0.90)
+              ? Colors.white.withOpacity(0.90) // Pill màu trắng nổi bật trên nền ombre
               : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
         ),
@@ -759,8 +967,8 @@ class _MainScreenState extends State<MainScreen> {
             Icon(
               icon,
               color: active
-                  ? AppColors.primaryDark
-                  : Colors.white.withOpacity(0.60),
+                  ? AppColors.primary // Icon màu Navy sâu
+                  : Colors.white.withOpacity(0.70), // Icon màu trắng mờ
               size: active ? 18 : 20,
             ),
             AnimatedSize(
@@ -772,7 +980,7 @@ class _MainScreenState extends State<MainScreen> {
                       child: Text(
                         label,
                         style: const TextStyle(
-                          color: AppColors.primaryDark,
+                          color: AppColors.primary, // Chữ màu Navy sâu
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
                           height: 1.2,
@@ -792,6 +1000,7 @@ class _MainScreenState extends State<MainScreen> {
     final active = _currentIndex == index;
 
     return GestureDetector(
+      key: _navKeys[index],
       onTap: () => _onTapNav(index),
       child: Transform.translate(
         offset: const Offset(0, -10),
@@ -838,7 +1047,7 @@ class _MainScreenState extends State<MainScreen> {
 
   Widget _buildSubscriptionBadge() {
     final isPremium = _localStorage.getHasActivePremium();
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
@@ -875,6 +1084,22 @@ class _MainScreenState extends State<MainScreen> {
   }
 }
 
+class _NavTourStep {
+  final int navIndex;
+  final IconData icon;
+  final String title;
+  final String description;
+  final String primaryLabel;
+
+  const _NavTourStep({
+    required this.navIndex,
+    required this.icon,
+    required this.title,
+    required this.description,
+    required this.primaryLabel,
+  });
+}
+
 class _FloatingNotificationBanner extends StatefulWidget {
   final String title;
   final String body;
@@ -891,10 +1116,12 @@ class _FloatingNotificationBanner extends StatefulWidget {
   });
 
   @override
-  State<_FloatingNotificationBanner> createState() => _FloatingNotificationBannerState();
+  State<_FloatingNotificationBanner> createState() =>
+      _FloatingNotificationBannerState();
 }
 
-class _FloatingNotificationBannerState extends State<_FloatingNotificationBanner> {
+class _FloatingNotificationBannerState
+    extends State<_FloatingNotificationBanner> {
   bool _isVisible = false;
   Timer? _timer;
 
@@ -926,7 +1153,7 @@ class _FloatingNotificationBannerState extends State<_FloatingNotificationBanner
   @override
   Widget build(BuildContext context) {
     final topPadding = MediaQuery.of(context).padding.top;
-    
+
     IconData icon = Icons.notifications_active_rounded;
     Color iconColor = AppColors.primaryLight;
     Color iconBgColor = AppColors.primary.withOpacity(0.06);
@@ -991,11 +1218,7 @@ class _FloatingNotificationBannerState extends State<_FloatingNotificationBanner
                     color: iconBgColor,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    icon,
-                    color: iconColor,
-                    size: 20,
-                  ),
+                  child: Icon(icon, color: iconColor, size: 20),
                 ),
                 const SizedBox(width: 12),
                 Expanded(

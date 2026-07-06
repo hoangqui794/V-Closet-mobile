@@ -36,12 +36,24 @@ class _EditProfilePageState extends State<EditProfilePage> {
   void initState() {
     super.initState();
     final profile = widget.initialProfile;
-    _nameController = TextEditingController(text: profile['displayName']?.toString() ?? '');
-    _phoneController = TextEditingController(text: profile['phoneNumber']?.toString() ?? '');
-    _addressController = TextEditingController(text: profile['address']?.toString() ?? '');
-    _heightController = TextEditingController(text: profile['heightCm']?.toString() ?? '');
-    _weightController = TextEditingController(text: profile['weightKg']?.toString() ?? '');
-    _countryController = TextEditingController(text: profile['country']?.toString() ?? '');
+    _nameController = TextEditingController(
+      text: profile['displayName']?.toString() ?? '',
+    );
+    _phoneController = TextEditingController(
+      text: profile['phoneNumber']?.toString() ?? '',
+    );
+    _addressController = TextEditingController(
+      text: profile['address']?.toString() ?? '',
+    );
+    _heightController = TextEditingController(
+      text: profile['heightCm']?.toString() ?? '',
+    );
+    _weightController = TextEditingController(
+      text: profile['weightKg']?.toString() ?? '',
+    );
+    _countryController = TextEditingController(
+      text: profile['country']?.toString() ?? '',
+    );
 
     final rawGender = (profile['gender'] ?? profile['Gender'])?.toString();
     if (rawGender == 'Nam' || rawGender?.toLowerCase() == 'male') {
@@ -60,7 +72,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
       } catch (_) {}
     }
 
-    _avatarUrl = profile['avatarUrl']?.toString() ?? _localStorage.getUserAvatar();
+    _avatarUrl =
+        profile['avatarUrl']?.toString() ?? _localStorage.getUserAvatar();
   }
 
   @override
@@ -87,7 +100,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
     try {
       final newAvatar = await _userService.updateAvatar(File(pickedFile.path));
-      
+
       // Cập nhật local storage
       final userId = _localStorage.getUserId() ?? 0;
       final email = _localStorage.getUserEmail() ?? '';
@@ -107,7 +120,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Cập nhật ảnh đại diện thành công!')),
+          const SnackBar(content: Text('Cập nhật ảnh thành công!')),
         );
       }
     } catch (e) {
@@ -182,7 +195,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(msg.replaceAll('Exception: ', ''))),
         );
-        Navigator.pop(context, true); // Quay lại trang Profile và thông báo thay đổi thành công
+        Navigator.pop(
+          context,
+          true,
+        ); // Quay lại trang Profile và thông báo thay đổi thành công
       }
     } catch (e) {
       if (mounted) {
@@ -214,7 +230,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
       ),
       body: SafeArea(
         child: _isLoading
-            ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+            ? const Center(
+                child: CircularProgressIndicator(color: AppColors.primary),
+              )
             : SingleChildScrollView(
                 padding: const EdgeInsets.all(24),
                 child: Column(
@@ -226,9 +244,13 @@ class _EditProfilePageState extends State<EditProfilePage> {
                             CircleAvatar(
                               radius: 54,
                               backgroundColor: AppColors.accent,
-                              backgroundImage: _avatarUrl != null && _avatarUrl!.startsWith('http')
+                              backgroundImage:
+                                  _avatarUrl != null &&
+                                      _avatarUrl!.startsWith('http')
                                   ? NetworkImage(_avatarUrl!) as ImageProvider
-                                  : const AssetImage('assets/images/avatar1.png'),
+                                  : const AssetImage(
+                                      'assets/images/avatar1.png',
+                                    ),
                             ),
                             Positioned(
                               bottom: 0,
@@ -242,7 +264,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                 ),
                                 child: IconButton(
                                   padding: EdgeInsets.zero,
-                                  icon: const Icon(Icons.camera_alt_rounded, size: 18, color: Colors.white),
+                                  icon: const Icon(
+                                    Icons.camera_alt_rounded,
+                                    size: 18,
+                                    color: Colors.white,
+                                  ),
                                   onPressed: _pickAndUploadAvatar,
                                 ),
                               ),
@@ -273,7 +299,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
                               decoration: InputDecoration(
                                 labelText: 'Họ và tên',
                                 hintText: 'Nhập họ tên',
-                                prefixIcon: const Icon(Icons.person_outline_rounded),
+                                prefixIcon: const Icon(
+                                  Icons.person_outline_rounded,
+                                ),
                                 fillColor: const Color(0xFFFAF9F6),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(16),
@@ -302,7 +330,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
                               decoration: InputDecoration(
                                 labelText: 'Địa chỉ',
                                 hintText: 'Nhập địa chỉ của bạn',
-                                prefixIcon: const Icon(Icons.location_on_outlined),
+                                prefixIcon: const Icon(
+                                  Icons.location_on_outlined,
+                                ),
                                 fillColor: const Color(0xFFFAF9F6),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(16),
@@ -316,7 +346,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                 Expanded(
                                   child: TextField(
                                     controller: _heightController,
-                                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                    keyboardType:
+                                        const TextInputType.numberWithOptions(
+                                          decimal: true,
+                                        ),
                                     decoration: InputDecoration(
                                       labelText: 'Chiều cao (cm)',
                                       hintText: 'cm',
@@ -333,11 +366,16 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                 Expanded(
                                   child: TextField(
                                     controller: _weightController,
-                                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                    keyboardType:
+                                        const TextInputType.numberWithOptions(
+                                          decimal: true,
+                                        ),
                                     decoration: InputDecoration(
                                       labelText: 'Cân nặng (kg)',
                                       hintText: 'kg',
-                                      prefixIcon: const Icon(Icons.fitness_center_rounded),
+                                      prefixIcon: const Icon(
+                                        Icons.fitness_center_rounded,
+                                      ),
                                       fillColor: const Color(0xFFFAF9F6),
                                       border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(16),
@@ -361,9 +399,18 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                 ),
                               ),
                               items: const [
-                                DropdownMenuItem(value: 'Male', child: Text('Nam')),
-                                DropdownMenuItem(value: 'Female', child: Text('Nữ')),
-                                DropdownMenuItem(value: 'Other', child: Text('Khác')),
+                                DropdownMenuItem(
+                                  value: 'Male',
+                                  child: Text('Nam'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'Female',
+                                  child: Text('Nữ'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'Other',
+                                  child: Text('Khác'),
+                                ),
                               ],
                               onChanged: (val) {
                                 setState(() {
@@ -391,20 +438,28 @@ class _EditProfilePageState extends State<EditProfilePage> {
                               onTap: _selectDate,
                               borderRadius: BorderRadius.circular(16),
                               child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 18,
+                                ),
                                 decoration: BoxDecoration(
                                   color: const Color(0xFFFAF9F6),
                                   borderRadius: BorderRadius.circular(16),
                                 ),
                                 child: Row(
                                   children: [
-                                    const Icon(Icons.cake_outlined, color: Colors.grey),
+                                    const Icon(
+                                      Icons.cake_outlined,
+                                      color: Colors.grey,
+                                    ),
                                     const SizedBox(width: 12),
                                     Text(
                                       dobText,
                                       style: TextStyle(
                                         fontSize: 16,
-                                        color: _dateOfBirth == null ? Colors.grey : AppColors.primary,
+                                        color: _dateOfBirth == null
+                                            ? Colors.grey
+                                            : AppColors.primary,
                                       ),
                                     ),
                                   ],
@@ -412,9 +467,30 @@ class _EditProfilePageState extends State<EditProfilePage> {
                               ),
                             ),
                             const SizedBox(height: 30),
-                            ElevatedButton(
-                              onPressed: _saveChanges,
-                              child: const Text('Lưu thay đổi'),
+                            GestureDetector(
+                              onTap: _saveChanges,
+                              child: Container(
+                                width: double.infinity,
+                                height: 50,
+                                decoration: BoxDecoration(
+                                  gradient: const LinearGradient(
+                                    colors: [AppColors.primary, AppColors.primaryLight], // Ombre Navy sang Sky Blue
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                child: const Center(
+                                  child: Text(
+                                    'Lưu thay đổi',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ),
                           ],
                         ),

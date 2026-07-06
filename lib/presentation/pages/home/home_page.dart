@@ -48,7 +48,6 @@ class _HomePageState extends State<HomePage> {
   String? _aiStylistAdvice;
   bool _isLoadingAiAdvice = false;
 
-
   @override
   void initState() {
     super.initState();
@@ -124,7 +123,8 @@ class _HomePageState extends State<HomePage> {
           permission = await Geolocator.requestPermission();
         }
 
-        if (permission == LocationPermission.whileInUse || permission == LocationPermission.always) {
+        if (permission == LocationPermission.whileInUse ||
+            permission == LocationPermission.always) {
           Position position = await Geolocator.getCurrentPosition(
             desiredAccuracy: LocationAccuracy.low,
             timeLimit: const Duration(seconds: 8),
@@ -136,7 +136,6 @@ class _HomePageState extends State<HomePage> {
     } catch (e) {
       debugPrint('Không lấy được GPS (sử dụng tọa độ mặc định): $e');
     }
-
 
     try {
       final dio = Dio();
@@ -152,7 +151,8 @@ class _HomePageState extends State<HomePage> {
       if (response.statusCode == 200 && response.data != null) {
         final current = response.data['current'];
         final temp = double.tryParse(current['temperature_2m'].toString());
-        final weatherCode = int.tryParse(current['weather_code'].toString()) ?? 0;
+        final weatherCode =
+            int.tryParse(current['weather_code'].toString()) ?? 0;
 
         String desc = 'Trời mát mẻ';
         IconData icon = Icons.wb_cloudy_rounded;
@@ -217,7 +217,9 @@ class _HomePageState extends State<HomePage> {
     final skinTone = hasStyleDna ? _localStorage.getSkinToneLabel() : null;
     final bodyType = hasStyleDna ? _localStorage.getBodyTypeLabel() : null;
     final stylePref = hasStyleDna ? _localStorage.getStylePref() : null;
-    final suggestedColors = hasStyleDna ? _localStorage.getSuggestedColors() : null;
+    final suggestedColors = hasStyleDna
+        ? _localStorage.getSuggestedColors()
+        : null;
 
     // Tu do thuc te (Week 3)
     final wardrobeNames = _recentItems.isNotEmpty
@@ -268,7 +270,10 @@ class _HomePageState extends State<HomePage> {
       return 'Áo thun';
     } else if (text.contains('áo sơ mi')) {
       return 'Áo sơ mi';
-    } else if (text.contains('áo khoác') || text.contains('áo phao') || text.contains('áo gió') || text.contains('jacket')) {
+    } else if (text.contains('áo khoác') ||
+        text.contains('áo phao') ||
+        text.contains('áo gió') ||
+        text.contains('jacket')) {
       return 'Áo khoác';
     } else if (text.contains('áo polo') || text.contains('áo cổ bẻ')) {
       return 'Áo polo';
@@ -291,11 +296,20 @@ class _HomePageState extends State<HomePage> {
 
   String _getSuggestedBottom() {
     final text = (_aiStylistAdvice ?? '').toLowerCase();
-    if (text.contains('quần short') || text.contains('quần đùi') || text.contains('quần lửng')) {
+    if (text.contains('quần short') ||
+        text.contains('quần đùi') ||
+        text.contains('quần lửng')) {
       return 'Quần short';
-    } else if (text.contains('quần dài') || text.contains('quần tây') || text.contains('quần kaki') || text.contains('quần bò') || text.contains('quần jeans')) {
+    } else if (text.contains('quần dài') ||
+        text.contains('quần tây') ||
+        text.contains('quần kaki') ||
+        text.contains('quần bò') ||
+        text.contains('quần jeans')) {
       return 'Quần dài';
-    } else if (text.contains('chân váy') || text.contains('váy ngắn') || text.contains('váy xòe') || text.contains('váy')) {
+    } else if (text.contains('chân váy') ||
+        text.contains('váy ngắn') ||
+        text.contains('váy xòe') ||
+        text.contains('váy')) {
       return 'Chân váy';
     } else if (text.contains('đầm')) {
       return 'Đầm';
@@ -307,7 +321,6 @@ class _HomePageState extends State<HomePage> {
       return 'Quần dài';
     }
   }
-
 
   Future<void> _refreshData() async {
     await Future.wait([
@@ -332,99 +345,49 @@ class _HomePageState extends State<HomePage> {
           child: CustomScrollView(
             physics: const BouncingScrollPhysics(),
             slivers: [
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // ── Header ──────────────────────────────────
-                      _header(displayName),
-                      const SizedBox(height: 24),
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    // 1. Header (Khung màu Sky Blue, chữ đậm)
+                    _header(displayName),
+                    const SizedBox(height: 16),
 
-                      // ── Banner Premium (chỉ hiện khi FREE) ─────
-                      if (!hasActivePremium) ...[
-                        _premiumBanner(),
-                        const SizedBox(height: 24),
-                      ],
-
-                      // ── Banner Khảo Sát (Chỉ hiện khi chưa hoàn thành) ──
-                      if (!_localStorage.getHasCompletedSurvey()) ...[
-                        _surveyBanner(),
-                        const SizedBox(height: 24),
-                      ],
-
-                      // ── Quick Actions ───────────────────────────
-                      _quickActions(),
-                      const SizedBox(height: 28),
-
-                      // ── Tủ đồ của tôi ──────────────────────────
-                      _sectionHeader(
-                        'Tủ đồ của tôi',
-                        subtitle: itemCount > 0 ? '$itemCount món đồ' : null,
-                        onViewAll: () => widget.onNavigateTo?.call(1),
-                      ),
-                      const SizedBox(height: 14),
+                    // 2. Banner Premium (chỉ hiện khi FREE)
+                    if (!hasActivePremium) ...[
+                      _premiumBanner(),
+                      const SizedBox(height: 16),
                     ],
-                  ),
+
+                    // 3. Banner Khảo Sát (Chỉ hiện khi chưa hoàn thành)
+                    if (!_localStorage.getHasCompletedSurvey()) ...[
+                      _surveyBanner(),
+                      const SizedBox(height: 16),
+                    ],
+
+                    // 4. Quick Actions (Khung nút bấm)
+                    _quickActions(),
+                    const SizedBox(height: 16),
+
+                    // 5. Tủ đồ của tôi (Khung tủ đồ)
+                    _buildWardrobeSection(itemCount),
+                    const SizedBox(height: 16),
+
+                    // 6. Trang phục của tôi (Khung phối đồ)
+                    _buildOutfitsSection(),
+                    const SizedBox(height: 16),
+
+                    // 7. Gợi ý phối đồ hôm nay (Khung gợi ý AI)
+                    _buildAiRecommendationSection(),
+                    const SizedBox(height: 16),
+
+                    // 8. Khám phá xu hướng (Khung xu hướng)
+                    _buildFashionTrendsSection(),
+                    
+                    const SizedBox(height: 120),
+                  ]),
                 ),
               ),
-
-              // ── Grid quần áo gần nhất ─────────────────────────
-              _buildWardrobeSliver(),
-
-              // ── Trang phục của tôi ─────────────────────────────
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 28, 20, 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _sectionHeader(
-                        'Trang phục của tôi',
-                        onViewAll: () => widget.onNavigateTo?.call(1),
-                      ),
-                      const SizedBox(height: 14),
-                      _buildRecentOutfits(),
-                    ],
-                  ),
-                ),
-              ),
-
-              // ── AI Stylist Recommendation ──────────────────────
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 28, 20, 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _sectionHeader('Gợi ý phối đồ hôm nay'),
-                      const SizedBox(height: 14),
-                      _aiStylistRecommendation(),
-                    ],
-                  ),
-                ),
-              ),
-
-              // ── Fashion Tips & Trends ──────────────────────────
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 28, 0, 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: _sectionHeader('Khám phá xu hướng'),
-                      ),
-                      const SizedBox(height: 14),
-                      _fashionTipsCarousel(),
-                    ],
-                  ),
-                ),
-              ),
-
-              const SliverToBoxAdapter(child: SizedBox(height: 110)),
             ],
           ),
         ),
@@ -433,124 +396,152 @@ class _HomePageState extends State<HomePage> {
   }
 
   // ─────────────────────────────────────────────────────────────────
-  // Header
+  // Header (Khung màu Sky Blue, chữ Navy sẫm)
   // ─────────────────────────────────────────────────────────────────
   Widget _header(String displayName) {
     final hour = DateTime.now().hour;
     final greeting = hour < 12
         ? 'Chào buổi sáng'
         : hour < 18
-            ? 'Chào buổi chiều'
-            : 'Chào buổi tối';
+        ? 'Chào buổi chiều'
+        : 'Chào buổi tối';
 
-    return Row(
-      children: [
-        GestureDetector(
-          onTap: () {
-            final scaffold = Scaffold.maybeOf(context);
-            if (scaffold != null && scaffold.hasDrawer) {
-              scaffold.openDrawer();
-            } else {
-              widget.onMenuPressed?.call();
-            }
-          },
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(14),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.primary.withOpacity(0.07),
-                  blurRadius: 14,
-                  offset: const Offset(0, 5),
-                ),
-              ],
-            ),
-            child: const Padding(
-              padding: EdgeInsets.all(10),
-              child: Icon(Icons.menu_rounded, color: AppColors.primary, size: 22),
-            ),
-          ),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [AppColors.primary, AppColors.primaryLight], // Ombre Navy sâu sang Sky Blue
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
-        const SizedBox(width: 14),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '$greeting,',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: AppColors.primary.withOpacity(0.55),
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              Text(
-                displayName,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w900,
-                  color: AppColors.primary,
-                  height: 1.1,
-                ),
-              ),
-            ],
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(0.2),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
           ),
-        ),
-        // Bell icon với badge SignalR
-        Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Container(
+        ],
+      ),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () {
+              final scaffold = Scaffold.maybeOf(context);
+              if (scaffold != null && scaffold.hasDrawer) {
+                scaffold.openDrawer();
+              } else {
+                widget.onMenuPressed?.call();
+              }
+            },
+            child: Container(
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(14),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.primary.withOpacity(0.07),
-                    blurRadius: 14,
-                    offset: const Offset(0, 5),
+                    color: Colors.black.withOpacity(0.04),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
                   ),
                 ],
               ),
-              child: IconButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const NotificationPage()),
-                  ).then((_) => _loadInitialUnreadCount());
-                },
-                icon: const Icon(Icons.notifications_outlined, color: AppColors.primary, size: 22),
+              child: const Padding(
+                padding: EdgeInsets.all(10),
+                child: Icon(
+                  Icons.menu_rounded,
+                  color: AppColors.primary, // Navy sâu
+                  size: 22,
+                ),
               ),
             ),
-            if (_unreadCount > 0)
-              Positioned(
-                top: 4,
-                right: 4,
-                child: Container(
-                  width: 18,
-                  height: 18,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFE45B62),
-                    shape: BoxShape.circle,
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '$greeting,',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.white.withOpacity(0.75), // Chữ trắng mờ trên nền ombre
+                    fontWeight: FontWeight.w600,
                   ),
-                  child: Center(
-                    child: Text(
-                      _unreadCount > 9 ? '9+' : '$_unreadCount',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 9,
-                        fontWeight: FontWeight.w900,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  displayName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white, // Chữ trắng trên nền ombre
+                    height: 1.1,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: IconButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const NotificationPage(),
+                      ),
+                    ).then((_) => _loadInitialUnreadCount());
+                  },
+                  icon: const Icon(
+                    Icons.notifications_outlined,
+                    color: AppColors.primary,
+                    size: 22,
+                  ),
+                ),
+              ),
+              if (_unreadCount > 0)
+                Positioned(
+                  top: -2,
+                  right: -2,
+                  child: Container(
+                    width: 18,
+                    height: 18,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFE45B62),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: Text(
+                        _unreadCount > 9 ? '9+' : '$_unreadCount',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 9,
+                          fontWeight: FontWeight.w900,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-          ],
-        ),
-      ],
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -582,7 +573,11 @@ class _HomePageState extends State<HomePage> {
         ),
         child: Row(
           children: [
-            const Icon(Icons.workspace_premium_rounded, color: Colors.white, size: 36),
+            const Icon(
+              Icons.workspace_premium_rounded,
+              color: Colors.white,
+              size: 36,
+            ),
             const SizedBox(width: 14),
             const Expanded(
               child: Column(
@@ -658,7 +653,9 @@ class _HomePageState extends State<HomePage> {
               Navigator.pop(context); // Close loading dialog
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('🎉 Cảm ơn bạn! Đã cộng 3 lượt thử đồ AI miễn phí.'),
+                  content: Text(
+                    '🎉 Cảm ơn bạn! Đã cộng 3 lượt thử đồ AI miễn phí.',
+                  ),
                   backgroundColor: Colors.green,
                   behavior: SnackBarBehavior.floating,
                 ),
@@ -671,7 +668,9 @@ class _HomePageState extends State<HomePage> {
               Navigator.pop(context); // Close loading dialog
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Không thể nhận phần thưởng: ${e.toString().replaceAll('Exception: ', '')}'),
+                  content: Text(
+                    'Không thể nhận phần thưởng: ${e.toString().replaceAll('Exception: ', '')}',
+                  ),
                   backgroundColor: AppColors.error,
                 ),
               );
@@ -698,7 +697,11 @@ class _HomePageState extends State<HomePage> {
         ),
         child: Row(
           children: [
-            const Icon(Icons.assignment_turned_in_rounded, color: Colors.white, size: 36),
+            const Icon(
+              Icons.assignment_turned_in_rounded,
+              color: Colors.white,
+              size: 36,
+            ),
             const SizedBox(width: 14),
             const Expanded(
               child: Column(
@@ -803,14 +806,19 @@ class _HomePageState extends State<HomePage> {
             showDialog(
               context: context,
               builder: (context) => AlertDialog(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
                 title: Row(
                   children: const [
                     Icon(Icons.forum_rounded, color: AppColors.primary),
                     SizedBox(width: 10),
                     Text(
                       'Chưa có Phong cách',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
                     ),
                   ],
                 ),
@@ -821,18 +829,28 @@ class _HomePageState extends State<HomePage> {
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('Hủy', style: TextStyle(color: Colors.grey)),
+                    child: const Text(
+                      'Hủy',
+                      style: TextStyle(color: Colors.grey),
+                    ),
                   ),
                   ElevatedButton(
                     onPressed: () {
                       Navigator.pop(context);
-                      widget.onNavigateTo?.call(3); // Chuyển sang tab Phong cách (DNA Quiz)
+                      widget.onNavigateTo?.call(
+                        3,
+                      ); // Chuyển sang tab Phong cách (DNA Quiz)
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
-                    child: const Text('Làm ngay', style: TextStyle(color: Colors.white)),
+                    child: const Text(
+                      'Làm ngay',
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
                 ],
               ),
@@ -860,7 +878,9 @@ class _HomePageState extends State<HomePage> {
                 ),
               );
               if (result == 'go_to_studio' && mounted) {
-                widget.onNavigateTo?.call(4); // Chuyển sang tab Studio (Index 4)
+                widget.onNavigateTo?.call(
+                  4,
+                ); // Chuyển sang tab Studio (Index 4)
               }
             }
           } catch (e) {
@@ -868,7 +888,9 @@ class _HomePageState extends State<HomePage> {
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Không thể tải thông tin hồ sơ để bắt đầu chat.'),
+                  content: Text(
+                    'Không thể tải thông tin hồ sơ để bắt đầu chat.',
+                  ),
                   behavior: SnackBarBehavior.floating,
                 ),
               );
@@ -890,7 +912,10 @@ class _HomePageState extends State<HomePage> {
                 decoration: BoxDecoration(
                   color: a.color.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: a.color.withOpacity(0.18), width: 1.2),
+                  border: Border.all(
+                    color: a.color.withOpacity(0.18),
+                    width: 1.2,
+                  ),
                 ),
                 child: Icon(a.icon, color: a.color, size: 26),
               ),
@@ -904,7 +929,11 @@ class _HomePageState extends State<HomePage> {
   // ─────────────────────────────────────────────────────────────────
   // Section header
   // ─────────────────────────────────────────────────────────────────
-  Widget _sectionHeader(String title, {String? subtitle, VoidCallback? onViewAll}) {
+  Widget _sectionHeader(
+    String title, {
+    String? subtitle,
+    VoidCallback? onViewAll,
+  }) {
     return Row(
       children: [
         Expanded(
@@ -950,41 +979,152 @@ class _HomePageState extends State<HomePage> {
   // ─────────────────────────────────────────────────────────────────
   // Wardrobe sliver grid (dữ liệu thật từ API)
   // ─────────────────────────────────────────────────────────────────
-  Widget _buildWardrobeSliver() {
-    if (_isLoadingItems) {
-      return const SliverToBoxAdapter(
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 40),
-          child: Center(child: CircularProgressIndicator(color: AppColors.primary)),
-        ),
-      );
-    }
+  // ─────────────────────────────────────────────────────────────────
+  // Khung Tủ đồ của tôi
+  // ─────────────────────────────────────────────────────────────────
+  Widget _buildWardrobeSection(int itemCount) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppColors.borderLight, width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(0.04),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _sectionHeader(
+            'Tủ đồ của tôi',
+            subtitle: itemCount > 0 ? '$itemCount món đồ' : null,
+            onViewAll: () => widget.onNavigateTo?.call(1),
+          ),
+          const SizedBox(height: 14),
+          if (_isLoadingItems)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 30),
+              child: Center(
+                child: CircularProgressIndicator(color: AppColors.primary),
+              ),
+            )
+          else if (_recentItems.isEmpty)
+            _emptyWardrobe()
+          else
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: _recentItems.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+                childAspectRatio: 0.78,
+              ),
+              itemBuilder: (context, index) {
+                final item = _recentItems[index];
+                return _wardrobeCard(item);
+              },
+            ),
+        ],
+      ),
+    );
+  }
 
-    if (_recentItems.isEmpty) {
-      return SliverToBoxAdapter(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          child: _emptyWardrobe(),
-        ),
-      );
-    }
+  // ─────────────────────────────────────────────────────────────────
+  // Khung Trang phục của tôi
+  // ─────────────────────────────────────────────────────────────────
+  Widget _buildOutfitsSection() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppColors.borderLight, width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(0.04),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _sectionHeader(
+            'Trang phục của tôi',
+            onViewAll: () => widget.onNavigateTo?.call(1),
+          ),
+          const SizedBox(height: 14),
+          _buildRecentOutfits(),
+        ],
+      ),
+    );
+  }
 
-    return SliverPadding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      sliver: SliverGrid(
-        delegate: SliverChildBuilderDelegate(
-          (context, index) {
-            final item = _recentItems[index];
-            return _wardrobeCard(item);
-          },
-          childCount: _recentItems.length,
-        ),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3,
-          crossAxisSpacing: 10,
-          mainAxisSpacing: 10,
-          childAspectRatio: 0.78,
-        ),
+  // ─────────────────────────────────────────────────────────────────
+  // Khung Gợi ý phối đồ hôm nay
+  // ─────────────────────────────────────────────────────────────────
+  Widget _buildAiRecommendationSection() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppColors.borderLight, width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(0.04),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _sectionHeader('Gợi ý phối đồ hôm nay'),
+          const SizedBox(height: 14),
+          _aiStylistRecommendation(),
+        ],
+      ),
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────────
+  // Khung Khám phá xu hướng
+  // ─────────────────────────────────────────────────────────────────
+  Widget _buildFashionTrendsSection() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppColors.borderLight, width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(0.04),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: _sectionHeader('Khám phá xu hướng'),
+          ),
+          const SizedBox(height: 14),
+          _fashionTipsCarousel(),
+        ],
       ),
     );
   }
@@ -1016,21 +1156,32 @@ class _HomePageState extends State<HomePage> {
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) => Container(
                           color: AppColors.secondary,
-                          child: const Icon(Icons.checkroom_rounded, color: AppColors.primary, size: 28),
+                          child: const Icon(
+                            Icons.checkroom_rounded,
+                            color: AppColors.primary,
+                            size: 28,
+                          ),
                         ),
                         loadingBuilder: (context, child, progress) {
                           if (progress == null) return child;
                           return Container(
                             color: AppColors.secondary.withOpacity(0.4),
                             child: const Center(
-                              child: CircularProgressIndicator(strokeWidth: 1.5, color: AppColors.primary),
+                              child: CircularProgressIndicator(
+                                strokeWidth: 1.5,
+                                color: AppColors.primary,
+                              ),
                             ),
                           );
                         },
                       )
                     : Container(
                         color: AppColors.secondary,
-                        child: const Icon(Icons.checkroom_rounded, color: AppColors.primary, size: 28),
+                        child: const Icon(
+                          Icons.checkroom_rounded,
+                          color: AppColors.primary,
+                          size: 28,
+                        ),
                       ),
               ),
               Padding(
@@ -1056,33 +1207,33 @@ class _HomePageState extends State<HomePage> {
   Widget _emptyWardrobe() {
     return GestureDetector(
       onTap: () => widget.onNavigateTo?.call(1),
-      child: Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: AppColors.primary.withOpacity(0.08)),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.primary.withOpacity(0.04),
-              blurRadius: 14,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16),
         child: Column(
           children: [
-            Icon(Icons.checkroom_outlined, size: 52, color: AppColors.primary.withOpacity(0.25)),
+            Icon(
+              Icons.checkroom_outlined,
+              size: 52,
+              color: AppColors.primary.withOpacity(0.25),
+            ),
             const SizedBox(height: 12),
             const Text(
               'Tủ đồ còn trống',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.primary),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w800,
+                color: AppColors.primary,
+              ),
             ),
             const SizedBox(height: 6),
             Text(
               'Thêm quần áo đầu tiên của bạn vào tủ đồ số để bắt đầu phối đồ với AI',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13, color: AppColors.primary.withOpacity(0.5), height: 1.4),
+              style: TextStyle(
+                fontSize: 13,
+                color: AppColors.primary.withOpacity(0.5),
+                height: 1.4,
+              ),
             ),
             const SizedBox(height: 16),
             Container(
@@ -1096,7 +1247,14 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   Icon(Icons.add_rounded, color: Colors.white, size: 18),
                   SizedBox(width: 6),
-                  Text('Thêm món đồ ngay', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 13)),
+                  Text(
+                    'Thêm món đồ ngay',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 13,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -1113,7 +1271,9 @@ class _HomePageState extends State<HomePage> {
     if (_isLoadingOutfits) {
       return const SizedBox(
         height: 160,
-        child: Center(child: CircularProgressIndicator(color: AppColors.primary)),
+        child: Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
+        ),
       );
     }
 
@@ -1121,15 +1281,18 @@ class _HomePageState extends State<HomePage> {
       return Container(
         height: 120,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.muted.withOpacity(0.25),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppColors.primary.withOpacity(0.08)),
         ),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.style_outlined, color: AppColors.primary.withOpacity(0.25), size: 36),
+              Icon(
+                Icons.style_outlined,
+                color: AppColors.primary.withOpacity(0.25),
+                size: 36,
+              ),
               const SizedBox(height: 8),
               Text(
                 'Chưa có trang phục phối sẵn nào',
@@ -1154,8 +1317,12 @@ class _HomePageState extends State<HomePage> {
         separatorBuilder: (context, index) => const SizedBox(width: 14),
         itemBuilder: (context, index) {
           final outfit = _recentOutfits[index];
-          final String title = outfit['Title']?.toString() ?? outfit['title']?.toString() ?? 'Trang phục';
-          final String? snapshotUrl = outfit['CanvasSnapshotUrl']?.toString() ??
+          final String title =
+              outfit['Title']?.toString() ??
+              outfit['title']?.toString() ??
+              'Trang phục';
+          final String? snapshotUrl =
+              outfit['CanvasSnapshotUrl']?.toString() ??
               outfit['canvasSnapshotUrl']?.toString() ??
               outfit['snapshotUrl']?.toString();
 
@@ -1185,19 +1352,30 @@ class _HomePageState extends State<HomePage> {
                       child: Container(
                         color: const Color(0xFFF8F9FA),
                         child: snapshotUrl == null || snapshotUrl.isEmpty
-                            ? const Icon(Icons.style_rounded, color: AppColors.primary, size: 36)
+                            ? const Icon(
+                                Icons.style_rounded,
+                                color: AppColors.primary,
+                                size: 36,
+                              )
                             : Image.network(
                                 snapshotUrl,
                                 fit: BoxFit.contain,
                                 errorBuilder: (context, error, stackTrace) =>
-                                    const Icon(Icons.broken_image_outlined, color: AppColors.primary, size: 36),
+                                    const Icon(
+                                      Icons.broken_image_outlined,
+                                      color: AppColors.primary,
+                                      size: 36,
+                                    ),
                                 loadingBuilder: (context, child, progress) {
                                   if (progress == null) return child;
                                   return const Center(
                                     child: SizedBox(
                                       width: 20,
                                       height: 20,
-                                      child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: AppColors.primary,
+                                      ),
                                     ),
                                   );
                                 },
@@ -1205,7 +1383,10 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 8,
+                      ),
                       child: Text(
                         title,
                         maxLines: 1,
@@ -1235,7 +1416,10 @@ class _HomePageState extends State<HomePage> {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFF4A69BB), Color(0xFFF3B085)], // Đồng bộ với logo xanh lam - cam đào
+          colors: [
+            Color(0xFF4A69BB),
+            Color(0xFFF3B085),
+          ], // Đồng bộ với logo xanh lam - cam đào
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -1259,7 +1443,11 @@ class _HomePageState extends State<HomePage> {
                   color: Colors.white.withOpacity(0.2),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 20),
+                child: const Icon(
+                  Icons.auto_awesome_rounded,
+                  color: Colors.white,
+                  size: 20,
+                ),
               ),
               const SizedBox(width: 10),
               const Expanded(
@@ -1277,7 +1465,10 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(width: 8),
               Flexible(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(12),
@@ -1289,17 +1480,22 @@ class _HomePageState extends State<HomePage> {
                       const SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          _temperature != null ? '${_temperature!.toStringAsFixed(1)}°C · $_weatherDescription' : 'Đang lấy thời tiết...',
+                          _temperature != null
+                              ? '${_temperature!.toStringAsFixed(1)}°C · $_weatherDescription'
+                              : 'Đang lấy thời tiết...',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
               ),
-
             ],
           ),
           const SizedBox(height: 12),
@@ -1310,9 +1506,11 @@ class _HomePageState extends State<HomePage> {
               child: Row(
                 children: [
                   SizedBox(
-                    width: 16, height: 16,
+                    width: 16,
+                    height: 16,
                     child: CircularProgressIndicator(
-                      color: Colors.white, strokeWidth: 2,
+                      color: Colors.white,
+                      strokeWidth: 2,
                     ),
                   ),
                   SizedBox(width: 10),
@@ -1336,16 +1534,26 @@ class _HomePageState extends State<HomePage> {
             GestureDetector(
               onTap: _fetchAiStylistAdvice,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.18),
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.3),
+                    width: 1,
+                  ),
                 ),
                 child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 16),
+                    Icon(
+                      Icons.auto_awesome_rounded,
+                      color: Colors.white,
+                      size: 16,
+                    ),
                     SizedBox(width: 8),
                     Text(
                       'Nhận lời khuyên AI hôm nay ✨',
@@ -1373,7 +1581,11 @@ class _HomePageState extends State<HomePage> {
                       _getSuggestedTop(),
                       Icons.checkroom_rounded,
                     ),
-                    const Icon(Icons.add_rounded, color: Colors.white, size: 14),
+                    const Icon(
+                      Icons.add_rounded,
+                      color: Colors.white,
+                      size: 14,
+                    ),
                     _suggestedItemBubble(
                       _getSuggestedBottom(),
                       Icons.checkroom_rounded,
@@ -1388,14 +1600,25 @@ class _HomePageState extends State<HomePage> {
                   backgroundColor: Colors.white,
                   foregroundColor: const Color(0xFF4A69BB),
                   minimumSize: const Size(0, 40),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                   elevation: 0,
                 ),
                 child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('Mặc thử', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                    Text(
+                      'Mặc thử',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
                     SizedBox(width: 4),
                     Icon(Icons.arrow_forward_rounded, size: 14),
                   ],
@@ -1422,7 +1645,11 @@ class _HomePageState extends State<HomePage> {
           const SizedBox(width: 6),
           Text(
             label,
-            style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ],
       ),
@@ -1462,7 +1689,7 @@ class _HomePageState extends State<HomePage> {
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: tips.map((tip) {
@@ -1476,12 +1703,12 @@ class _HomePageState extends State<HomePage> {
                 borderRadius: BorderRadius.circular(22),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.primary.withOpacity(0.04),
-                    blurRadius: 14,
-                    offset: const Offset(0, 6),
+                    color: AppColors.primary.withOpacity(0.03),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
                   ),
                 ],
-                border: Border.all(color: AppColors.primary.withOpacity(0.05)),
+                border: Border.all(color: AppColors.borderLight, width: 1.2),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1490,7 +1717,10 @@ class _HomePageState extends State<HomePage> {
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: categoryColor.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(30),
@@ -1532,7 +1762,11 @@ class _HomePageState extends State<HomePage> {
                       CircleAvatar(
                         radius: 12,
                         backgroundColor: categoryColor.withOpacity(0.1),
-                        child: Icon(tip['icon'] as IconData, color: categoryColor, size: 12),
+                        child: Icon(
+                          tip['icon'] as IconData,
+                          color: categoryColor,
+                          size: 12,
+                        ),
                       ),
                       const SizedBox(width: 8),
                       const Text(
@@ -1544,7 +1778,11 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                       const SizedBox(width: 4),
-                      const Icon(Icons.arrow_forward_rounded, color: AppColors.primaryLight, size: 12),
+                      const Icon(
+                        Icons.arrow_forward_rounded,
+                        color: AppColors.primaryLight,
+                        size: 12,
+                      ),
                     ],
                   ),
                 ],

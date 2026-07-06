@@ -238,140 +238,165 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
             ),
             const SizedBox(height: 16),
 
-            // Illustration comparison row (Nên vs Không nên)
-            Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    height: 110,
-                    decoration: BoxDecoration(
-                      color: Colors.green.shade50.withOpacity(0.6),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.green.shade200, width: 1),
-                    ),
-                    child: Stack(
-                      children: [
-                        Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.accessibility_new_rounded, size: 36, color: Colors.green.shade700),
-                              const SizedBox(height: 6),
-                              const Text(
-                                'Chuẩn chính diện',
-                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.green),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                'Đứng thẳng, rõ thân',
-                                style: TextStyle(fontSize: 9, color: Colors.green.shade800),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const Positioned(
-                          top: 8,
-                          right: 8,
-                          child: Icon(Icons.check_circle_rounded, color: Colors.green, size: 18),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Container(
-                    height: 110,
-                    decoration: BoxDecoration(
-                      color: Colors.red.shade50.withOpacity(0.6),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.red.shade200, width: 1),
-                    ),
-                    child: Stack(
-                      children: [
-                        Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.person_off_rounded, size: 36, color: Colors.red.shade700),
-                              const SizedBox(height: 6),
-                              Text(
-                                'Không nên chọn',
-                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.red.shade700),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                'Nghiêng, bị che khuất',
-                                style: TextStyle(fontSize: 9, color: Colors.red.shade800),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const Positioned(
-                          top: 8,
-                          right: 8,
-                          child: Icon(Icons.cancel_rounded, color: Colors.red, size: 18),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
             const SizedBox(height: 16),
 
-            // Detailed text guidelines
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppColors.accent.withOpacity(0.3)),
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+            // Detailed text guidelines (tách riêng Nên và Không nên theo chiều dọc, viết ít keyword kèm icon)
+            Builder(
+              builder: (context) {
+                Widget buildKeywordItem(IconData icon, Color color, String keyword) {
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.check_circle_rounded, color: Colors.green, size: 16),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: RichText(
-                          text: const TextSpan(
-                            style: TextStyle(fontSize: 12, color: AppColors.primary, height: 1.4),
-                            children: [
-                              TextSpan(text: 'Nên: ', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
-                              TextSpan(text: 'Chọn ảnh chụp chính diện, đứng thẳng, rõ thân người. Mặc quần áo ôm sát sườn hoặc thon gọn (áo phông mỏng, quần/váy ôm).'),
-                            ],
-                          ),
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.04),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
+                        child: Icon(icon, color: color, size: 20),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        keyword,
+                        style: const TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.primary,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
                     ],
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 10),
-                    child: Divider(),
-                  ),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Icon(Icons.cancel_rounded, color: Colors.red, size: 16),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: RichText(
-                          text: const TextSpan(
-                            style: TextStyle(fontSize: 12, color: AppColors.primary, height: 1.4),
+                  );
+                }
+
+                return Column(
+                  children: [
+                    // Nên làm
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
+                      decoration: BoxDecoration(
+                        color: Colors.green.shade50.withOpacity(0.4),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.green.shade200, width: 1),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
                             children: [
-                              TextSpan(text: 'Tránh: ', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
-                              TextSpan(text: 'Ảnh đứng nghiêng/chụp xéo góc, tay khoanh trước ngực, tay che người hoặc tay đút túi. Không mặc quần áo quá phồng, quá rộng hoặc áo khoác phao dày.'),
+                              Icon(Icons.check_circle_rounded, color: Colors.green.shade700, size: 18),
+                              const SizedBox(width: 6),
+                              Text(
+                                'NÊN LÀM',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w900,
+                                  color: Colors.green.shade800,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
                             ],
                           ),
-                        ),
+                          const SizedBox(height: 12),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Expanded(
+                                child: buildKeywordItem(
+                                  Icons.accessibility_new_rounded,
+                                  Colors.green.shade600,
+                                  'Đứng thẳng',
+                                ),
+                              ),
+                              Expanded(
+                                child: buildKeywordItem(
+                                  Icons.checkroom_rounded,
+                                  Colors.green.shade600,
+                                  'Đồ ôm sát',
+                                ),
+                              ),
+                              Expanded(
+                                child: buildKeywordItem(
+                                  Icons.center_focus_strong_rounded,
+                                  Colors.green.shade600,
+                                  'Rõ vóc dáng',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ],
-              ),
+                    ),
+                    const SizedBox(height: 12),
+                    // Tránh làm
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
+                      decoration: BoxDecoration(
+                        color: Colors.red.shade50.withOpacity(0.4),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.red.shade200, width: 1),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.cancel_rounded, color: Colors.red.shade700, size: 18),
+                              const SizedBox(width: 6),
+                              Text(
+                                'NÊN TRÁNH',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w900,
+                                  color: Colors.red.shade800,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Expanded(
+                                child: buildKeywordItem(
+                                  Icons.directions_run_rounded,
+                                  Colors.red.shade600,
+                                  'Đứng nghiêng',
+                                ),
+                              ),
+                              Expanded(
+                                child: buildKeywordItem(
+                                  Icons.front_hand_rounded,
+                                  Colors.red.shade600,
+                                  'Tay che người',
+                                ),
+                              ),
+                              Expanded(
+                                child: buildKeywordItem(
+                                  Icons.layers_clear_rounded,
+                                  Colors.red.shade600,
+                                  'Đồ rộng/dày',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
             const SizedBox(height: 24),
 
@@ -1744,13 +1769,47 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
   }
 
   Widget _buildTryOnNotes() {
+    Widget buildMiniBadge(IconData icon, String text) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.03),
+                  blurRadius: 4,
+                  offset: const Offset(0, 1),
+                ),
+              ],
+            ),
+            child: Icon(icon, color: AppColors.primaryLight, size: 18),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            text,
+            style: const TextStyle(
+              fontSize: 9,
+              fontWeight: FontWeight.w800,
+              color: AppColors.primary,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      );
+    }
+
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
       decoration: BoxDecoration(
-        color: AppColors.secondary.withOpacity(0.5),
+        color: AppColors.secondary.withOpacity(0.35),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.accent.withOpacity(0.5)),
+        border: Border.all(color: AppColors.accent.withOpacity(0.4)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1760,55 +1819,97 @@ class _OutfitPageState extends State<OutfitPage> with TickerProviderStateMixin {
               const Icon(
                 Icons.tips_and_updates_rounded,
                 color: AppColors.primaryLight,
-                size: 20,
+                size: 18,
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 6),
               const Text(
-                'Lưu ý để phối đồ AI đẹp nhất:',
+                'Mẹo phối đồ AI đẹp nhất:',
                 style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w800,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w900,
                   color: AppColors.primary,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          _buildNoteItem(
-            Icons.person_pin_rounded,
-            'Ảnh người mẫu: Chụp thẳng, rõ nét, đủ sáng, tư thế đứng thẳng tự nhiên (tay buông thõng hai bên, không che thân). Tránh mặc đồ quá rộng/phồng.',
+          const SizedBox(height: 14),
+          
+          // Section 1: Người mẫu
+          Row(
+            children: [
+              Container(
+                width: 48,
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Center(
+                  child: Text(
+                    'MẪU',
+                    style: TextStyle(
+                      fontSize: 9,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Expanded(child: buildMiniBadge(Icons.accessibility_new_rounded, 'Chụp thẳng')),
+                    Expanded(child: buildMiniBadge(Icons.wb_sunny_rounded, 'Đủ ánh sáng')),
+                    Expanded(child: buildMiniBadge(Icons.checkroom_rounded, 'Đồ ôm sát')),
+                  ],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 8),
-          _buildNoteItem(
-            Icons.checkroom_rounded,
-            'Ảnh trang phục: Chọn ảnh rõ nét, chụp phẳng (Flat Lay) hoặc ảnh sản phẩm chụp trên nền trơn/trắng.',
+          
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 10),
+            child: Divider(height: 1, thickness: 0.5, color: AppColors.primaryLight),
+          ),
+          
+          // Section 2: Trang phục
+          Row(
+            children: [
+              Container(
+                width: 48,
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Center(
+                  child: Text(
+                    'ĐỒ',
+                    style: TextStyle(
+                      fontSize: 9,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Expanded(child: buildMiniBadge(Icons.wallpaper_rounded, 'Nền đơn sắc')),
+                    Expanded(child: buildMiniBadge(Icons.aspect_ratio_rounded, 'Chụp phẳng')),
+                    Expanded(child: buildMiniBadge(Icons.high_quality_rounded, 'Ảnh rõ nét')),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildNoteItem(IconData icon, String text) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(
-          icon,
-          size: 16,
-          color: AppColors.primaryLight.withOpacity(0.8),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            text,
-            style: const TextStyle(
-              fontSize: 12,
-              color: AppColors.primary,
-              height: 1.4,
-            ),
-          ),
-        ),
-      ],
     );
   }
 
