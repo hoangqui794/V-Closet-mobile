@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
 
@@ -14,7 +14,7 @@ class AppTourOverlay {
     required String title,
     required String description,
     required String primaryLabel,
-    String secondaryLabel = 'Kết thúc',
+    String secondaryLabel = 'Káº¿t thĂºc',
   }) {
     final targetRect = _findTargetRect(targetKey);
 
@@ -264,7 +264,7 @@ class _CoachCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
-                  'Thiết lập tủ đồ',
+                  'Thiáº¿t láº­p tá»§ Ä‘á»“',
                   style: TextStyle(
                     color: AppColors.primary.withOpacity(0.78),
                     fontSize: 11,

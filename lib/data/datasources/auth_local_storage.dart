@@ -1,4 +1,4 @@
-import 'package:shared_preferences/shared_preferences.dart';
+﻿import 'package:shared_preferences/shared_preferences.dart';
 
 enum NewUserGuideStep {
   addItem,
@@ -44,7 +44,7 @@ class AuthLocalStorage {
   static const String _kHasSeenStoreGuide = 'has_seen_store_guide';
   static const String _kNewUserGuideStep = 'new_user_guide_step';
 
-  // ── Style DNA Quiz ───────────────────────────────────────────────
+  // â”€â”€ Style DNA Quiz â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   static const String _kHasCompletedStyleQuiz = 'has_completed_style_quiz';
   static const String _kSkinTone =
       'style_skin_tone'; // sang / trung_binh / ngam / toi
@@ -88,7 +88,7 @@ class AuthLocalStorage {
   String? getUserEmail() => _prefs.getString(_kUserEmail);
   String? getUserName() => _prefs.getString(_kUserName);
 
-  /// Alias dùng cho UI hiển thị tên
+  /// Alias dĂ¹ng cho UI hiá»ƒn thá»‹ tĂªn
   String? getDisplayName() => _prefs.getString(_kUserName);
   String? getUserAvatar() => _prefs.getString(_kUserAvatar);
   String? getUserRole() => _prefs.getString(_kUserRole);
@@ -263,7 +263,7 @@ class AuthLocalStorage {
     await _prefs.setString(_kSurveyUrl, url);
   }
 
-  // ── Style DNA Quiz ───────────────────────────────────────────────
+  // â”€â”€ Style DNA Quiz â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   bool getHasCompletedStyleQuiz() =>
       _prefs.getBool(_kHasCompletedStyleQuiz) ?? false;
   Future<void> saveHasCompletedStyleQuiz(bool value) async =>
@@ -287,51 +287,51 @@ class AuthLocalStorage {
     await _prefs.setBool(_kHasCompletedStyleQuiz, true);
   }
 
-  /// Trả về mô tả màu da phù hợp để dùng trong prompt AI
+  /// Tráº£ vá» mĂ´ táº£ mĂ u da phĂ¹ há»£p Ä‘á»ƒ dĂ¹ng trong prompt AI
   String getSkinToneLabel() {
     switch (getSkinTone()) {
       case 'sang':
-        return 'da sáng (fair skin)';
+        return 'da sĂ¡ng (fair skin)';
       case 'trung_binh':
-        return 'da trung bình (medium skin)';
+        return 'da trung bĂ¬nh (medium skin)';
       case 'ngam':
-        return 'da ngăm (olive/tan skin)';
+        return 'da ngÄƒm (olive/tan skin)';
       case 'toi':
-        return 'da tối (deep/dark skin)';
+        return 'da tá»‘i (deep/dark skin)';
       default:
-        return 'da trung bình';
+        return 'da trung bĂ¬nh';
     }
   }
 
-  /// Trả về mô tả vóc người để dùng trong prompt AI
+  /// Tráº£ vá» mĂ´ táº£ vĂ³c ngÆ°á»i Ä‘á»ƒ dĂ¹ng trong prompt AI
   String getBodyTypeLabel() {
     switch (getBodyType()) {
       case 'nho_nhan':
-        return 'vóc người nhỏ nhắn/petite';
+        return 'vĂ³c ngÆ°á»i nhá» nháº¯n/petite';
       case 'trung_binh':
-        return 'vóc người trung bình';
+        return 'vĂ³c ngÆ°á»i trung bĂ¬nh';
       case 'cao_rao':
-        return 'vóc người cao ráo';
+        return 'vĂ³c ngÆ°á»i cao rĂ¡o';
       case 'day_dan':
-        return 'vóc người đầy đặn/curvy';
+        return 'vĂ³c ngÆ°á»i Ä‘áº§y Ä‘áº·n/curvy';
       default:
-        return 'vóc người trung bình';
+        return 'vĂ³c ngÆ°á»i trung bĂ¬nh';
     }
   }
 
-  /// Trả về màu sắc gợi ý tôn da dựa trên skin tone
+  /// Tráº£ vá» mĂ u sáº¯c gá»£i Ă½ tĂ´n da dá»±a trĂªn skin tone
   String getSuggestedColors() {
     switch (getSkinTone()) {
       case 'sang':
-        return 'màu pastel nhạt, màu navy, burgundy, forest green';
+        return 'mĂ u pastel nháº¡t, mĂ u navy, burgundy, forest green';
       case 'trung_binh':
-        return 'màu earth tone, olive, dusty rose, camel';
+        return 'mĂ u earth tone, olive, dusty rose, camel';
       case 'ngam':
-        return 'màu trắng, đỏ đất, cam ấm, vàng mù tạt, cobalt blue';
+        return 'mĂ u tráº¯ng, Ä‘á» Ä‘áº¥t, cam áº¥m, vĂ ng mĂ¹ táº¡t, cobalt blue';
       case 'toi':
-        return 'màu trắng sáng, vàng kim, đỏ tươi, electric blue, màu metallic';
+        return 'mĂ u tráº¯ng sĂ¡ng, vĂ ng kim, Ä‘á» tÆ°Æ¡i, electric blue, mĂ u metallic';
       default:
-        return 'màu trung tính';
+        return 'mĂ u trung tĂ­nh';
     }
   }
 }
