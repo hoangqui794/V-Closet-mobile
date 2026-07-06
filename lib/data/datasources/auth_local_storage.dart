@@ -1,4 +1,13 @@
-import 'package:shared_preferences/shared_preferences.dart';
+﻿import 'package:shared_preferences/shared_preferences.dart';
+
+enum NewUserGuideStep {
+  addItem,
+  viewCloset,
+  createOutfit,
+  saveOutfit,
+  tryAi,
+  completed,
+}
 
 class AuthLocalStorage {
   final SharedPreferences _prefs;
@@ -24,13 +33,27 @@ class AuthLocalStorage {
   static const String _kHasAcceptedTerms = 'has_accepted_terms_v2';
   static const String _kSurveyUrl = 'survey_url';
   static const String _kHasCompletedSurvey = 'has_completed_survey';
+  static const String _kHasSeenNewUserGuide = 'has_seen_new_user_guide';
+  static const String _kHasSeenClosetActionGuide =
+      'has_seen_closet_action_guide';
+  static const String _kHasSeenOutfitCreateGuide =
+      'has_seen_outfit_create_guide';
+  static const String _kHasSeenStudioActionGuide =
+      'has_seen_studio_action_guide';
+  static const String _kHasSeenColorTestGuide = 'has_seen_color_test_guide';
+  static const String _kHasSeenStoreGuide = 'has_seen_store_guide';
+  static const String _kNewUserGuideStep = 'new_user_guide_step';
 
-  // ── Style DNA Quiz ───────────────────────────────────────────────
+  // â”€â”€ Style DNA Quiz â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   static const String _kHasCompletedStyleQuiz = 'has_completed_style_quiz';
-  static const String _kSkinTone = 'style_skin_tone';       // sang / trung_binh / ngam / toi
-  static const String _kBodyType = 'style_body_type';       // nho_nhan / trung_binh / cao_rao / day_dan
-  static const String _kStylePref = 'style_pref';           // casual / cong_so / streetwear / thanh_lich / sporty
-  static const String _kColorPref = 'style_color_pref';    // pastel / trung_tinh / toi_mau / mau_noi
+  static const String _kSkinTone =
+      'style_skin_tone'; // sang / trung_binh / ngam / toi
+  static const String _kBodyType =
+      'style_body_type'; // nho_nhan / trung_binh / cao_rao / day_dan
+  static const String _kStylePref =
+      'style_pref'; // casual / cong_so / streetwear / thanh_lich / sporty
+  static const String _kColorPref =
+      'style_color_pref'; // pastel / trung_tinh / toi_mau / mau_noi
 
   Future<void> saveTokens(String accessToken, String refreshToken) async {
     await _prefs.setString(_kAccessToken, accessToken);
@@ -64,15 +87,74 @@ class AuthLocalStorage {
   int? getUserId() => _prefs.getInt(_kUserId);
   String? getUserEmail() => _prefs.getString(_kUserEmail);
   String? getUserName() => _prefs.getString(_kUserName);
-  /// Alias dùng cho UI hiển thị tên
+
+  /// Alias dĂ¹ng cho UI hiá»ƒn thá»‹ tĂªn
   String? getDisplayName() => _prefs.getString(_kUserName);
   String? getUserAvatar() => _prefs.getString(_kUserAvatar);
   String? getUserRole() => _prefs.getString(_kUserRole);
-  bool isOnboardingCompleted() => _prefs.getBool(_kIsOnboardingCompleted) ?? false;
+  bool isOnboardingCompleted() =>
+      _prefs.getBool(_kIsOnboardingCompleted) ?? false;
   bool isPasswordSet() => _prefs.getBool(_kIsPasswordSet) ?? true;
   int getWardrobeItemCount() => _prefs.getInt(_kWardrobeItemCount) ?? 0;
   bool getHasCompletedSurvey() => _prefs.getBool(_kHasCompletedSurvey) ?? false;
-  Future<void> saveHasCompletedSurvey(bool value) async => await _prefs.setBool(_kHasCompletedSurvey, value);
+  Future<void> saveHasCompletedSurvey(bool value) async =>
+      await _prefs.setBool(_kHasCompletedSurvey, value);
+  bool getHasSeenNewUserGuide() =>
+      _prefs.getBool(_kHasSeenNewUserGuide) ?? false;
+  Future<void> saveHasSeenNewUserGuide(bool value) async =>
+      await _prefs.setBool(_kHasSeenNewUserGuide, value);
+  bool getHasSeenClosetActionGuide() =>
+      _prefs.getBool(_kHasSeenClosetActionGuide) ?? false;
+  Future<void> saveHasSeenClosetActionGuide(bool value) async =>
+      await _prefs.setBool(_kHasSeenClosetActionGuide, value);
+  bool getHasSeenOutfitCreateGuide() =>
+      _prefs.getBool(_kHasSeenOutfitCreateGuide) ?? false;
+  Future<void> saveHasSeenOutfitCreateGuide(bool value) async =>
+      await _prefs.setBool(_kHasSeenOutfitCreateGuide, value);
+  bool getHasSeenStudioActionGuide() =>
+      _prefs.getBool(_kHasSeenStudioActionGuide) ?? false;
+  Future<void> saveHasSeenStudioActionGuide(bool value) async =>
+      await _prefs.setBool(_kHasSeenStudioActionGuide, value);
+  bool getHasSeenColorTestGuide() =>
+      _prefs.getBool(_kHasSeenColorTestGuide) ?? false;
+  Future<void> saveHasSeenColorTestGuide(bool value) async =>
+      await _prefs.setBool(_kHasSeenColorTestGuide, value);
+  bool getHasSeenStoreGuide() => _prefs.getBool(_kHasSeenStoreGuide) ?? false;
+  Future<void> saveHasSeenStoreGuide(bool value) async =>
+      await _prefs.setBool(_kHasSeenStoreGuide, value);
+
+  NewUserGuideStep getNewUserGuideStep() {
+    final savedIndex = _prefs.getInt(_kNewUserGuideStep);
+    if (savedIndex == null ||
+        savedIndex < 0 ||
+        savedIndex >= NewUserGuideStep.values.length) {
+      return NewUserGuideStep.addItem;
+    }
+    return NewUserGuideStep.values[savedIndex];
+  }
+
+  bool hasNewUserGuideProgress() => _prefs.containsKey(_kNewUserGuideStep);
+
+  Future<void> saveNewUserGuideStep(NewUserGuideStep step) async {
+    await _prefs.setInt(_kNewUserGuideStep, step.index);
+  }
+
+  bool getIsNewUserGuideCompleted() =>
+      getNewUserGuideStep() == NewUserGuideStep.completed;
+
+  Future<void> completeNewUserGuide() async {
+    await saveNewUserGuideStep(NewUserGuideStep.completed);
+  }
+
+  Future<void> markGuidesSeenForExistingUser() async {
+    await completeNewUserGuide();
+    await saveHasSeenNewUserGuide(true);
+    await saveHasSeenClosetActionGuide(true);
+    await saveHasSeenOutfitCreateGuide(true);
+    await saveHasSeenStudioActionGuide(true);
+    await saveHasSeenColorTestGuide(true);
+    await saveHasSeenStoreGuide(true);
+  }
 
   Future<void> setOnboardingCompleted(bool completed) async {
     await _prefs.setBool(_kIsOnboardingCompleted, completed);
@@ -101,6 +183,13 @@ class AuthLocalStorage {
     await _prefs.remove(_kOutfitLimit);
     await _prefs.remove(_kHasAcceptedTerms);
     await _prefs.remove(_kHasCompletedSurvey);
+    await _prefs.remove(_kHasSeenNewUserGuide);
+    await _prefs.remove(_kHasSeenClosetActionGuide);
+    await _prefs.remove(_kHasSeenOutfitCreateGuide);
+    await _prefs.remove(_kHasSeenStudioActionGuide);
+    await _prefs.remove(_kHasSeenColorTestGuide);
+    await _prefs.remove(_kHasSeenStoreGuide);
+    await _prefs.remove(_kNewUserGuideStep);
     await _prefs.remove(_kHasCompletedStyleQuiz);
     await _prefs.remove(_kSkinTone);
     await _prefs.remove(_kBodyType);
@@ -118,7 +207,8 @@ class AuthLocalStorage {
     await _prefs.setBool(_kHasAcceptedTerms, value);
   }
 
-  String getSubscriptionType() => _prefs.getString(_kSubscriptionType) ?? 'free';
+  String getSubscriptionType() =>
+      _prefs.getString(_kSubscriptionType) ?? 'free';
   int getBgRemovalCredits() => _prefs.getInt(_kBgRemovalCredits) ?? 1;
   int getTryOnCredits() => _prefs.getInt(_kTryOnCredits) ?? 1;
   bool getHasActivePremium() => _prefs.getBool(_kHasActivePremium) ?? false;
@@ -129,7 +219,11 @@ class AuthLocalStorage {
     await _prefs.setBool(_kHasActivePremium, value);
   }
 
-  Future<void> saveSubscription(String type, int bgCredits, int tryonCredits) async {
+  Future<void> saveSubscription(
+    String type,
+    int bgCredits,
+    int tryonCredits,
+  ) async {
     await _prefs.setString(_kSubscriptionType, type);
     await _prefs.setInt(_kBgRemovalCredits, bgCredits);
     await _prefs.setInt(_kTryOnCredits, tryonCredits);
@@ -161,15 +255,17 @@ class AuthLocalStorage {
   }
 
   String getSurveyUrl() {
-    return _prefs.getString(_kSurveyUrl) ?? 'https://forms.gle/YOUR_GOOGLE_FORM_LINK';
+    return _prefs.getString(_kSurveyUrl) ??
+        'https://forms.gle/YOUR_GOOGLE_FORM_LINK';
   }
 
   Future<void> saveSurveyUrl(String url) async {
     await _prefs.setString(_kSurveyUrl, url);
   }
 
-  // ── Style DNA Quiz ───────────────────────────────────────────────
-  bool getHasCompletedStyleQuiz() => _prefs.getBool(_kHasCompletedStyleQuiz) ?? false;
+  // â”€â”€ Style DNA Quiz â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  bool getHasCompletedStyleQuiz() =>
+      _prefs.getBool(_kHasCompletedStyleQuiz) ?? false;
   Future<void> saveHasCompletedStyleQuiz(bool value) async =>
       await _prefs.setBool(_kHasCompletedStyleQuiz, value);
 
@@ -191,36 +287,51 @@ class AuthLocalStorage {
     await _prefs.setBool(_kHasCompletedStyleQuiz, true);
   }
 
-  /// Trả về mô tả màu da phù hợp để dùng trong prompt AI
+  /// Tráº£ vá» mĂ´ táº£ mĂ u da phĂ¹ há»£p Ä‘á»ƒ dĂ¹ng trong prompt AI
   String getSkinToneLabel() {
     switch (getSkinTone()) {
-      case 'sang':        return 'da sáng (fair skin)';
-      case 'trung_binh':  return 'da trung bình (medium skin)';
-      case 'ngam':        return 'da ngăm (olive/tan skin)';
-      case 'toi':         return 'da tối (deep/dark skin)';
-      default:            return 'da trung bình';
+      case 'sang':
+        return 'da sĂ¡ng (fair skin)';
+      case 'trung_binh':
+        return 'da trung bĂ¬nh (medium skin)';
+      case 'ngam':
+        return 'da ngÄƒm (olive/tan skin)';
+      case 'toi':
+        return 'da tá»‘i (deep/dark skin)';
+      default:
+        return 'da trung bĂ¬nh';
     }
   }
 
-  /// Trả về mô tả vóc người để dùng trong prompt AI
+  /// Tráº£ vá» mĂ´ táº£ vĂ³c ngÆ°á»i Ä‘á»ƒ dĂ¹ng trong prompt AI
   String getBodyTypeLabel() {
     switch (getBodyType()) {
-      case 'nho_nhan':  return 'vóc người nhỏ nhắn/petite';
-      case 'trung_binh': return 'vóc người trung bình';
-      case 'cao_rao':   return 'vóc người cao ráo';
-      case 'day_dan':   return 'vóc người đầy đặn/curvy';
-      default:          return 'vóc người trung bình';
+      case 'nho_nhan':
+        return 'vĂ³c ngÆ°á»i nhá» nháº¯n/petite';
+      case 'trung_binh':
+        return 'vĂ³c ngÆ°á»i trung bĂ¬nh';
+      case 'cao_rao':
+        return 'vĂ³c ngÆ°á»i cao rĂ¡o';
+      case 'day_dan':
+        return 'vĂ³c ngÆ°á»i Ä‘áº§y Ä‘áº·n/curvy';
+      default:
+        return 'vĂ³c ngÆ°á»i trung bĂ¬nh';
     }
   }
 
-  /// Trả về màu sắc gợi ý tôn da dựa trên skin tone
+  /// Tráº£ vá» mĂ u sáº¯c gá»£i Ă½ tĂ´n da dá»±a trĂªn skin tone
   String getSuggestedColors() {
     switch (getSkinTone()) {
-      case 'sang':        return 'màu pastel nhạt, màu navy, burgundy, forest green';
-      case 'trung_binh':  return 'màu earth tone, olive, dusty rose, camel';
-      case 'ngam':        return 'màu trắng, đỏ đất, cam ấm, vàng mù tạt, cobalt blue';
-      case 'toi':         return 'màu trắng sáng, vàng kim, đỏ tươi, electric blue, màu metallic';
-      default:            return 'màu trung tính';
+      case 'sang':
+        return 'mĂ u pastel nháº¡t, mĂ u navy, burgundy, forest green';
+      case 'trung_binh':
+        return 'mĂ u earth tone, olive, dusty rose, camel';
+      case 'ngam':
+        return 'mĂ u tráº¯ng, Ä‘á» Ä‘áº¥t, cam áº¥m, vĂ ng mĂ¹ táº¡t, cobalt blue';
+      case 'toi':
+        return 'mĂ u tráº¯ng sĂ¡ng, vĂ ng kim, Ä‘á» tÆ°Æ¡i, electric blue, mĂ u metallic';
+      default:
+        return 'mĂ u trung tĂ­nh';
     }
   }
 }
