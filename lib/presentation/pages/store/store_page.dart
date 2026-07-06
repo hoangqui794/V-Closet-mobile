@@ -376,8 +376,8 @@ class _StorePageState extends State<StorePage> {
                       },
                       label: Text(cat),
                       labelStyle: TextStyle(
-                        color: active ? Colors.white : AppColors.primary,
-                        fontWeight: active ? FontWeight.w700 : FontWeight.w600,
+                        color: AppColors.primary,
+                        fontWeight: active ? FontWeight.w800 : FontWeight.w600,
                       ),
                     ),
                   );

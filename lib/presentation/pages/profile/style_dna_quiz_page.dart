@@ -752,49 +752,68 @@ class _StyleDnaQuizPageState extends State<StyleDnaQuizPage>
               child: SizedBox(
                 width: double.infinity,
                 height: 56,
-                child: ElevatedButton(
-                  onPressed: _canProceed && !_isSaving ? _nextStep : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    disabledBackgroundColor: AppColors.primary.withOpacity(
-                      0.25,
-                    ),
-                    shape: RoundedRectangleBorder(
+                child: GestureDetector(
+                  onTap: (_canProceed && !_isSaving) ? _nextStep : null,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: (_canProceed && !_isSaving)
+                          ? const LinearGradient(
+                              colors: [AppColors.primary, AppColors.primaryLight], // Ombre Navy sang Sky Blue
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            )
+                          : null,
+                      color: (_canProceed && !_isSaving)
+                          ? null
+                          : AppColors.primary.withOpacity(0.12),
                       borderRadius: BorderRadius.circular(18),
+                      boxShadow: (_canProceed && !_isSaving)
+                          ? [
+                              BoxShadow(
+                                color: AppColors.primary.withOpacity(0.2),
+                                blurRadius: 16,
+                                offset: const Offset(0, 6),
+                              ),
+                            ]
+                          : null,
                     ),
-                    elevation: _canProceed ? 4 : 0,
-                    shadowColor: AppColors.primary.withOpacity(0.4),
-                  ),
-                  child: _isSaving
-                      ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2.5,
-                          ),
-                        )
-                      : Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              isLastStep ? '🎉  Hoàn thành!' : 'Tiếp theo',
-                              style: const TextStyle(
+                    child: Center(
+                      child: _isSaving
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
                                 color: Colors.white,
-                                fontWeight: FontWeight.w800,
-                                fontSize: 16,
+                                strokeWidth: 2.5,
                               ),
+                            )
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  isLastStep ? '🎉  Hoàn thành!' : 'Tiếp theo',
+                                  style: TextStyle(
+                                    color: (_canProceed && !_isSaving)
+                                        ? Colors.white
+                                        : AppColors.primary.withOpacity(0.4),
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                if (!isLastStep) ...[
+                                  const SizedBox(width: 8),
+                                  Icon(
+                                    Icons.arrow_forward_rounded,
+                                    color: (_canProceed && !_isSaving)
+                                        ? Colors.white
+                                        : AppColors.primary.withOpacity(0.4),
+                                    size: 18,
+                                  ),
+                                ],
+                              ],
                             ),
-                            if (!isLastStep) ...[
-                              const SizedBox(width: 8),
-                              const Icon(
-                                Icons.arrow_forward_rounded,
-                                color: Colors.white,
-                                size: 18,
-                              ),
-                            ],
-                          ],
-                        ),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -1337,10 +1356,10 @@ class _StyleDnaQuizPageState extends State<StyleDnaQuizPage>
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
       decoration: BoxDecoration(
         gradient: isSelected
-            ? LinearGradient(
+            ? const LinearGradient(
                 colors: [
                   AppColors.primary,
-                  AppColors.primary.withOpacity(0.85),
+                  AppColors.primaryLight,
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,

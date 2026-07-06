@@ -513,7 +513,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                         ).showSnackBar(
                                           const SnackBar(
                                             content: Text(
-                                              '🎉 Đã cập nhật Phong cách cá nhân thành công!',
+                                              'Cập nhật Phong cách cá nhân thành công!',
                                             ),
                                             backgroundColor: Colors.green,
                                             behavior: SnackBarBehavior.floating,
@@ -657,7 +657,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                         ).showSnackBar(
                                           const SnackBar(
                                             content: Text(
-                                              '🎉 Cảm ơn bạn đã đóng góp ý kiến! Đã cộng 3 lượt thử đồ AI miễn phí.',
+                                              'Cảm ơn bạn đã đóng góp ý kiến! Đã cộng 3 lượt thử đồ AI miễn phí.',
                                             ),
                                             backgroundColor: Colors.green,
                                             behavior: SnackBarBehavior.floating,

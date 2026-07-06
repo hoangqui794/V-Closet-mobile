@@ -493,7 +493,11 @@ class _SubscriptionPageState extends State<SubscriptionPage>
                   indicatorSize: TabBarIndicatorSize.tab,
                   dividerColor: Colors.transparent,
                   indicator: BoxDecoration(
-                    color: AppColors.primary,
+                    gradient: const LinearGradient(
+                      colors: [AppColors.primary, AppColors.primaryLight], // Ombre Navy sang Sky Blue
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   labelColor: Colors.white,
@@ -1481,21 +1485,26 @@ class _SubscriptionPageState extends State<SubscriptionPage>
             ),
           ),
           const SizedBox(width: 10),
-          ElevatedButton(
-            onPressed: onPressed,
-            style: ElevatedButton.styleFrom(
-              minimumSize: const Size(0, 0),
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              elevation: 0,
+          GestureDetector(
+            onTap: onPressed,
+            child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              shape: RoundedRectangleBorder(
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [AppColors.primary, AppColors.primaryLight], // Ombre Navy sang Sky Blue
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
                 borderRadius: BorderRadius.circular(12),
               ),
-            ),
-            child: const Text(
-              'Mua',
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+              child: const Text(
+                'Mua',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ),
         ],

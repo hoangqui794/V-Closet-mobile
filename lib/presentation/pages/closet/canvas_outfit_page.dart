@@ -540,29 +540,37 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 54,
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context, {
+                      'title': title,
+                      'isPublic': isPublic.toString(),
+                    }),
+                    child: Container(
+                      width: double.infinity,
+                      height: 54,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [AppColors.primary, AppColors.primaryLight], // Ombre Navy sang Sky Blue
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
+                        borderRadius: BorderRadius.circular(14),
                       ),
-                      icon: const Icon(Icons.save_rounded),
-                      label: const Text(
-                        'Lưu trang phục',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                        ),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.save_rounded, color: Colors.white),
+                          SizedBox(width: 8),
+                          Text(
+                            'Lưu trang phục',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
                       ),
-                      onPressed: () => Navigator.pop(context, {
-                        'title': title,
-                        'isPublic': isPublic.toString(),
-                      }),
                     ),
                   ),
                   const SizedBox(height: 28),
@@ -642,23 +650,37 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
                 )
               : Padding(
                   padding: const EdgeInsets.only(right: 12),
-                  child: TextButton.icon(
-                    onPressed: _saveOutfit,
-                    style: TextButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                  child: Center(
+                    child: GestureDetector(
+                      onTap: _saveOutfit,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [AppColors.primary, AppColors.primaryLight], // Ombre Navy sang Sky Blue
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.save_rounded, color: Colors.white, size: 18),
+                            SizedBox(width: 6),
+                            Text(
+                              'Lưu',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 8,
-                      ),
-                    ),
-                    icon: const Icon(Icons.save_rounded, size: 18),
-                    label: const Text(
-                      'Lưu',
-                      style: TextStyle(fontWeight: FontWeight.w700),
                     ),
                   ),
                 ),
@@ -722,9 +744,9 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
                 return Center(
                   child: ChoiceChip(
                     selected: active,
-                    label: Text(label, style: TextStyle(fontSize: 12)),
-                    labelStyle: TextStyle(
-                      color: active ? Colors.white : AppColors.primary,
+                    label: Text(label, style: const TextStyle(fontSize: 12)),
+                    labelStyle: const TextStyle(
+                      color: AppColors.primary,
                       fontWeight: FontWeight.w600,
                     ),
                     onSelected: (val) {

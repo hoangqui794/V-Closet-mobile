@@ -98,13 +98,13 @@ class AppTheme {
       ),
       chipTheme: ChipThemeData(
         backgroundColor: Colors.white,
-        selectedColor: AppColors.primary,
-        secondarySelectedColor: AppColors.primary,
+        selectedColor: AppColors.primaryLight,
+        secondarySelectedColor: AppColors.primaryLight,
         disabledColor: const Color(0xFFE9E1D8),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         labelStyle: textTheme.labelLarge ?? const TextStyle(),
         secondaryLabelStyle: (textTheme.labelLarge ?? const TextStyle())
-            .copyWith(color: AppColors.onPrimary),
+            .copyWith(color: AppColors.primary),
         side: const BorderSide(color: Color(0x1A4A3728)),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
       ),

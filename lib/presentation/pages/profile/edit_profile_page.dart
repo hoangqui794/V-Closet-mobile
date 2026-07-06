@@ -120,7 +120,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Cập nhật ảnh đại diện thành công!')),
+          const SnackBar(content: Text('Cập nhật ảnh thành công!')),
         );
       }
     } catch (e) {
@@ -467,9 +467,30 @@ class _EditProfilePageState extends State<EditProfilePage> {
                               ),
                             ),
                             const SizedBox(height: 30),
-                            ElevatedButton(
-                              onPressed: _saveChanges,
-                              child: const Text('Lưu thay đổi'),
+                            GestureDetector(
+                              onTap: _saveChanges,
+                              child: Container(
+                                width: double.infinity,
+                                height: 50,
+                                decoration: BoxDecoration(
+                                  gradient: const LinearGradient(
+                                    colors: [AppColors.primary, AppColors.primaryLight], // Ombre Navy sang Sky Blue
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                child: const Center(
+                                  child: Text(
+                                    'Lưu thay đổi',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ),
                           ],
                         ),

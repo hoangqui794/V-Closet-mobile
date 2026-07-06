@@ -345,99 +345,49 @@ class _HomePageState extends State<HomePage> {
           child: CustomScrollView(
             physics: const BouncingScrollPhysics(),
             slivers: [
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // ── Header ──────────────────────────────────
-                      _header(displayName),
-                      const SizedBox(height: 24),
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    // 1. Header (Khung màu Sky Blue, chữ đậm)
+                    _header(displayName),
+                    const SizedBox(height: 16),
 
-                      // ── Banner Premium (chỉ hiện khi FREE) ─────
-                      if (!hasActivePremium) ...[
-                        _premiumBanner(),
-                        const SizedBox(height: 24),
-                      ],
-
-                      // ── Banner Khảo Sát (Chỉ hiện khi chưa hoàn thành) ──
-                      if (!_localStorage.getHasCompletedSurvey()) ...[
-                        _surveyBanner(),
-                        const SizedBox(height: 24),
-                      ],
-
-                      // ── Quick Actions ───────────────────────────
-                      _quickActions(),
-                      const SizedBox(height: 28),
-
-                      // ── Tủ đồ của tôi ──────────────────────────
-                      _sectionHeader(
-                        'Tủ đồ của tôi',
-                        subtitle: itemCount > 0 ? '$itemCount món đồ' : null,
-                        onViewAll: () => widget.onNavigateTo?.call(1),
-                      ),
-                      const SizedBox(height: 14),
+                    // 2. Banner Premium (chỉ hiện khi FREE)
+                    if (!hasActivePremium) ...[
+                      _premiumBanner(),
+                      const SizedBox(height: 16),
                     ],
-                  ),
+
+                    // 3. Banner Khảo Sát (Chỉ hiện khi chưa hoàn thành)
+                    if (!_localStorage.getHasCompletedSurvey()) ...[
+                      _surveyBanner(),
+                      const SizedBox(height: 16),
+                    ],
+
+                    // 4. Quick Actions (Khung nút bấm)
+                    _quickActions(),
+                    const SizedBox(height: 16),
+
+                    // 5. Tủ đồ của tôi (Khung tủ đồ)
+                    _buildWardrobeSection(itemCount),
+                    const SizedBox(height: 16),
+
+                    // 6. Trang phục của tôi (Khung phối đồ)
+                    _buildOutfitsSection(),
+                    const SizedBox(height: 16),
+
+                    // 7. Gợi ý phối đồ hôm nay (Khung gợi ý AI)
+                    _buildAiRecommendationSection(),
+                    const SizedBox(height: 16),
+
+                    // 8. Khám phá xu hướng (Khung xu hướng)
+                    _buildFashionTrendsSection(),
+                    
+                    const SizedBox(height: 120),
+                  ]),
                 ),
               ),
-
-              // ── Grid quần áo gần nhất ─────────────────────────
-              _buildWardrobeSliver(),
-
-              // ── Trang phục của tôi ─────────────────────────────
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 28, 20, 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _sectionHeader(
-                        'Trang phục của tôi',
-                        onViewAll: () => widget.onNavigateTo?.call(1),
-                      ),
-                      const SizedBox(height: 14),
-                      _buildRecentOutfits(),
-                    ],
-                  ),
-                ),
-              ),
-
-              // ── AI Stylist Recommendation ──────────────────────
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 28, 20, 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _sectionHeader('Gợi ý phối đồ hôm nay'),
-                      const SizedBox(height: 14),
-                      _aiStylistRecommendation(),
-                    ],
-                  ),
-                ),
-              ),
-
-              // ── Fashion Tips & Trends ──────────────────────────
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 28, 0, 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: _sectionHeader('Khám phá xu hướng'),
-                      ),
-                      const SizedBox(height: 14),
-                      _fashionTipsCarousel(),
-                    ],
-                  ),
-                ),
-              ),
-
-              const SliverToBoxAdapter(child: SizedBox(height: 110)),
             ],
           ),
         ),
@@ -446,7 +396,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   // ─────────────────────────────────────────────────────────────────
-  // Header
+  // Header (Khung màu Sky Blue, chữ Navy sẫm)
   // ─────────────────────────────────────────────────────────────────
   Widget _header(String displayName) {
     final hour = DateTime.now().hour;
@@ -456,124 +406,142 @@ class _HomePageState extends State<HomePage> {
         ? 'Chào buổi chiều'
         : 'Chào buổi tối';
 
-    return Row(
-      children: [
-        GestureDetector(
-          onTap: () {
-            final scaffold = Scaffold.maybeOf(context);
-            if (scaffold != null && scaffold.hasDrawer) {
-              scaffold.openDrawer();
-            } else {
-              widget.onMenuPressed?.call();
-            }
-          },
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(14),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.primary.withOpacity(0.07),
-                  blurRadius: 14,
-                  offset: const Offset(0, 5),
-                ),
-              ],
-            ),
-            child: const Padding(
-              padding: EdgeInsets.all(10),
-              child: Icon(
-                Icons.menu_rounded,
-                color: AppColors.primary,
-                size: 22,
-              ),
-            ),
-          ),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [AppColors.primary, AppColors.primaryLight], // Ombre Navy sâu sang Sky Blue
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
-        const SizedBox(width: 14),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '$greeting,',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: AppColors.primary.withOpacity(0.55),
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              Text(
-                displayName,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w900,
-                  color: AppColors.primary,
-                  height: 1.1,
-                ),
-              ),
-            ],
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(0.2),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
           ),
-        ),
-        // Bell icon với badge SignalR
-        Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Container(
+        ],
+      ),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () {
+              final scaffold = Scaffold.maybeOf(context);
+              if (scaffold != null && scaffold.hasDrawer) {
+                scaffold.openDrawer();
+              } else {
+                widget.onMenuPressed?.call();
+              }
+            },
+            child: Container(
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(14),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.primary.withOpacity(0.07),
-                    blurRadius: 14,
-                    offset: const Offset(0, 5),
+                    color: Colors.black.withOpacity(0.04),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
                   ),
                 ],
               ),
-              child: IconButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const NotificationPage(),
-                    ),
-                  ).then((_) => _loadInitialUnreadCount());
-                },
-                icon: const Icon(
-                  Icons.notifications_outlined,
-                  color: AppColors.primary,
+              child: const Padding(
+                padding: EdgeInsets.all(10),
+                child: Icon(
+                  Icons.menu_rounded,
+                  color: AppColors.primary, // Navy sâu
                   size: 22,
                 ),
               ),
             ),
-            if (_unreadCount > 0)
-              Positioned(
-                top: 4,
-                right: 4,
-                child: Container(
-                  width: 18,
-                  height: 18,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFE45B62),
-                    shape: BoxShape.circle,
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '$greeting,',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.white.withOpacity(0.75), // Chữ trắng mờ trên nền ombre
+                    fontWeight: FontWeight.w600,
                   ),
-                  child: Center(
-                    child: Text(
-                      _unreadCount > 9 ? '9+' : '$_unreadCount',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 9,
-                        fontWeight: FontWeight.w900,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  displayName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white, // Chữ trắng trên nền ombre
+                    height: 1.1,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: IconButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const NotificationPage(),
+                      ),
+                    ).then((_) => _loadInitialUnreadCount());
+                  },
+                  icon: const Icon(
+                    Icons.notifications_outlined,
+                    color: AppColors.primary,
+                    size: 22,
+                  ),
+                ),
+              ),
+              if (_unreadCount > 0)
+                Positioned(
+                  top: -2,
+                  right: -2,
+                  child: Container(
+                    width: 18,
+                    height: 18,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFE45B62),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: Text(
+                        _unreadCount > 9 ? '9+' : '$_unreadCount',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 9,
+                          fontWeight: FontWeight.w900,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-          ],
-        ),
-      ],
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -1011,40 +979,152 @@ class _HomePageState extends State<HomePage> {
   // ─────────────────────────────────────────────────────────────────
   // Wardrobe sliver grid (dữ liệu thật từ API)
   // ─────────────────────────────────────────────────────────────────
-  Widget _buildWardrobeSliver() {
-    if (_isLoadingItems) {
-      return const SliverToBoxAdapter(
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 40),
-          child: Center(
-            child: CircularProgressIndicator(color: AppColors.primary),
+  // ─────────────────────────────────────────────────────────────────
+  // Khung Tủ đồ của tôi
+  // ─────────────────────────────────────────────────────────────────
+  Widget _buildWardrobeSection(int itemCount) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppColors.borderLight, width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(0.04),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
           ),
-        ),
-      );
-    }
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _sectionHeader(
+            'Tủ đồ của tôi',
+            subtitle: itemCount > 0 ? '$itemCount món đồ' : null,
+            onViewAll: () => widget.onNavigateTo?.call(1),
+          ),
+          const SizedBox(height: 14),
+          if (_isLoadingItems)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 30),
+              child: Center(
+                child: CircularProgressIndicator(color: AppColors.primary),
+              ),
+            )
+          else if (_recentItems.isEmpty)
+            _emptyWardrobe()
+          else
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: _recentItems.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+                childAspectRatio: 0.78,
+              ),
+              itemBuilder: (context, index) {
+                final item = _recentItems[index];
+                return _wardrobeCard(item);
+              },
+            ),
+        ],
+      ),
+    );
+  }
 
-    if (_recentItems.isEmpty) {
-      return SliverToBoxAdapter(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          child: _emptyWardrobe(),
-        ),
-      );
-    }
+  // ─────────────────────────────────────────────────────────────────
+  // Khung Trang phục của tôi
+  // ─────────────────────────────────────────────────────────────────
+  Widget _buildOutfitsSection() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppColors.borderLight, width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(0.04),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _sectionHeader(
+            'Trang phục của tôi',
+            onViewAll: () => widget.onNavigateTo?.call(1),
+          ),
+          const SizedBox(height: 14),
+          _buildRecentOutfits(),
+        ],
+      ),
+    );
+  }
 
-    return SliverPadding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      sliver: SliverGrid(
-        delegate: SliverChildBuilderDelegate((context, index) {
-          final item = _recentItems[index];
-          return _wardrobeCard(item);
-        }, childCount: _recentItems.length),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3,
-          crossAxisSpacing: 10,
-          mainAxisSpacing: 10,
-          childAspectRatio: 0.78,
-        ),
+  // ─────────────────────────────────────────────────────────────────
+  // Khung Gợi ý phối đồ hôm nay
+  // ─────────────────────────────────────────────────────────────────
+  Widget _buildAiRecommendationSection() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppColors.borderLight, width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(0.04),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _sectionHeader('Gợi ý phối đồ hôm nay'),
+          const SizedBox(height: 14),
+          _aiStylistRecommendation(),
+        ],
+      ),
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────────
+  // Khung Khám phá xu hướng
+  // ─────────────────────────────────────────────────────────────────
+  Widget _buildFashionTrendsSection() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppColors.borderLight, width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(0.04),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: _sectionHeader('Khám phá xu hướng'),
+          ),
+          const SizedBox(height: 14),
+          _fashionTipsCarousel(),
+        ],
       ),
     );
   }
@@ -1127,20 +1207,8 @@ class _HomePageState extends State<HomePage> {
   Widget _emptyWardrobe() {
     return GestureDetector(
       onTap: () => widget.onNavigateTo?.call(1),
-      child: Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: AppColors.primary.withOpacity(0.08)),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.primary.withOpacity(0.04),
-              blurRadius: 14,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16),
         child: Column(
           children: [
             Icon(
@@ -1213,9 +1281,8 @@ class _HomePageState extends State<HomePage> {
       return Container(
         height: 120,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.muted.withOpacity(0.25),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppColors.primary.withOpacity(0.08)),
         ),
         child: Center(
           child: Column(
@@ -1622,7 +1689,7 @@ class _HomePageState extends State<HomePage> {
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: tips.map((tip) {
@@ -1636,12 +1703,12 @@ class _HomePageState extends State<HomePage> {
                 borderRadius: BorderRadius.circular(22),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.primary.withOpacity(0.04),
-                    blurRadius: 14,
-                    offset: const Offset(0, 6),
+                    color: AppColors.primary.withOpacity(0.03),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
                   ),
                 ],
-                border: Border.all(color: AppColors.primary.withOpacity(0.05)),
+                border: Border.all(color: AppColors.borderLight, width: 1.2),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

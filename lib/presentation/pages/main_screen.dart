@@ -908,17 +908,21 @@ class _MainScreenState extends State<MainScreen> {
         child: Container(
           height: 64,
           decoration: BoxDecoration(
-            color: AppColors.primaryDark,
+            gradient: const LinearGradient(
+              colors: [AppColors.primary, AppColors.primaryLight], // Ombre ngang Navy sâu sang Sky Blue
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+            ),
             borderRadius: BorderRadius.circular(32),
             boxShadow: [
               BoxShadow(
-                color: AppColors.primaryDark.withOpacity(0.45),
+                color: AppColors.primary.withOpacity(0.3),
                 blurRadius: 24,
                 spreadRadius: 0,
                 offset: const Offset(0, 8),
               ),
               BoxShadow(
-                color: Colors.black.withOpacity(0.18),
+                color: Colors.black.withOpacity(0.15),
                 blurRadius: 10,
                 offset: const Offset(0, 3),
               ),
@@ -936,7 +940,7 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  /// Item thường: icon trắng mờ → khi active hiện pill kem + icon nâu + label
+  /// Item thường: icon trắng mờ → khi active hiện pill trắng + icon Navy sâu + label
   Widget _buildNavItem(int index) {
     final active = _currentIndex == index;
     final (icon, label) = _navItems[index];
@@ -953,7 +957,7 @@ class _MainScreenState extends State<MainScreen> {
             : const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
         decoration: BoxDecoration(
           color: active
-              ? AppColors.secondary.withOpacity(0.90)
+              ? Colors.white.withOpacity(0.90) // Pill màu trắng nổi bật trên nền ombre
               : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
         ),
@@ -963,8 +967,8 @@ class _MainScreenState extends State<MainScreen> {
             Icon(
               icon,
               color: active
-                  ? AppColors.primaryDark
-                  : Colors.white.withOpacity(0.60),
+                  ? AppColors.primary // Icon màu Navy sâu
+                  : Colors.white.withOpacity(0.70), // Icon màu trắng mờ
               size: active ? 18 : 20,
             ),
             AnimatedSize(
@@ -976,7 +980,7 @@ class _MainScreenState extends State<MainScreen> {
                       child: Text(
                         label,
                         style: const TextStyle(
-                          color: AppColors.primaryDark,
+                          color: AppColors.primary, // Chữ màu Navy sâu
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
                           height: 1.2,
