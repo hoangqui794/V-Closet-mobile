@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:get_it/get_it.dart';
 import '../../../core/theme/app_colors.dart';
@@ -329,7 +329,7 @@ class _StorePageState extends State<StorePage> {
                     widget.onMenuPressed?.call();
                   }
                 },
-                icon: const Icon(Icons.menu_rounded, color: AppColors.primary),
+                icon: const Icon(Icons.menu_rounded, color: AppColors.brandText),
               ),
             ),
           ),
@@ -339,7 +339,7 @@ class _StorePageState extends State<StorePage> {
           style: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.w800,
-            color: AppColors.primary,
+            color: AppColors.brandText,
           ),
         ),
       ),
@@ -376,7 +376,7 @@ class _StorePageState extends State<StorePage> {
                       },
                       label: Text(cat),
                       labelStyle: TextStyle(
-                        color: AppColors.primary,
+                        color: AppColors.brandText,
                         fontWeight: active ? FontWeight.w800 : FontWeight.w600,
                       ),
                     ),
@@ -436,7 +436,7 @@ class _StorePageState extends State<StorePage> {
                     )
                   : RefreshIndicator(
                       onRefresh: _fetchProducts,
-                      color: AppColors.primary,
+                      color: AppColors.brandText,
                       child: _filteredProducts.isEmpty
                           ? ListView(
                               physics: const AlwaysScrollableScrollPhysics(),
@@ -500,7 +500,7 @@ class _StorePageState extends State<StorePage> {
                                         borderRadius: BorderRadius.circular(22),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: AppColors.primary
+                                            color: AppColors.brandText
                                                 .withOpacity(0.05),
                                             blurRadius: 18,
                                             offset: const Offset(0, 8),
@@ -634,7 +634,7 @@ class _StorePageState extends State<StorePage> {
                                                   style: const TextStyle(
                                                     fontWeight: FontWeight.w800,
                                                     fontSize: 13,
-                                                    color: AppColors.primary,
+                                                    color: AppColors.brandText,
                                                   ),
                                                 ),
                                                 const SizedBox(height: 4),

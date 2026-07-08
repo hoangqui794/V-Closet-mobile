@@ -99,7 +99,7 @@ Yêu cầu câu trả lời:
             options: Options(
               headers: {'Content-Type': 'application/json'},
               sendTimeout: const Duration(seconds: 12),
-              receiveTimeout: const Duration(seconds: 12),
+              receiveTimeout: const Duration(seconds: 20),
             ),
             data: {
               'contents': [
@@ -385,7 +385,7 @@ Quy tắc ứng xử và phản hồi:
             options: Options(
               headers: {'Content-Type': 'application/json'},
               sendTimeout: const Duration(seconds: 12),
-              receiveTimeout: const Duration(seconds: 12),
+              receiveTimeout: const Duration(seconds: 20),
             ),
             data: {
               'contents': contents,
@@ -394,23 +394,40 @@ Quy tắc ứng xử và phản hồi:
                   {'text': systemInstruction},
                 ],
               },
-              'generationConfig': {'temperature': 0.7, 'maxOutputTokens': 800},
+              'generationConfig': {'temperature': 0.7, 'maxOutputTokens': 1200},
             },
           );
 
           if (response.statusCode == 200 && response.data != null) {
             final candidates = response.data['candidates'] as List<dynamic>;
             if (candidates.isNotEmpty) {
+              final finishReason = candidates[0]['finishReason']?.toString();
+              if (finishReason != null && finishReason != 'STOP') {
+                debugPrint(
+                  '[GeminiApiService] Chat response did not finish cleanly ($finishReason), trying next model/key.',
+                );
+                continue;
+              }
               final content = candidates[0]['content'];
               if (content != null) {
                 final parts = content['parts'] as List<dynamic>;
                 if (parts.isNotEmpty) {
-                  final text = parts[0]['text'] as String?;
-                  if (text != null && text.trim().isNotEmpty) {
+                  final text = parts
+                      .map((part) => part['text'])
+                      .whereType<String>()
+                      .join('\n')
+                      .trim();
+                  if (text.isNotEmpty) {
+                    if (_looksIncompleteResponse(text)) {
+                      debugPrint(
+                        '[GeminiApiService] Chat response looks incomplete, trying next model/key: $text',
+                      );
+                      continue;
+                    }
                     debugPrint(
                       '[GeminiApiService] Phản hồi từ model $model thành công với key $keyDisplay.',
                     );
-                    return text.trim();
+                    return text;
                   }
                 }
               }
@@ -424,6 +441,33 @@ Quy tắc ứng xử và phản hồi:
       }
     }
     return null;
+  }
+
+  bool _looksIncompleteResponse(String text) {
+    final trimmed = text.trim();
+    if (trimmed.isEmpty) return true;
+    if (RegExp(r'[.!?…)"”]$').hasMatch(trimmed)) return false;
+
+    final lower = trimmed.toLowerCase();
+    final wordCount = trimmed.split(RegExp(r'\s+')).length;
+    const danglingEndings = [
+      'diện',
+      'mặc',
+      'phối',
+      'kết hợp',
+      'chọn',
+      'với',
+      'cùng',
+      'và',
+      'hoặc',
+      'như',
+      'gồm',
+      'là',
+      ':',
+    ];
+
+    if (wordCount > 8) return true;
+    return danglingEndings.any(lower.endsWith);
   }
 
   /// Nâng cấp tự động đặt tên cho bộ phối đồ bằng AI dựa trên danh mục của các món đồ đi kèm

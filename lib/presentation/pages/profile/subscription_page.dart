@@ -121,7 +121,7 @@ class _SubscriptionPageState extends State<SubscriptionPage>
                 child: Text(
                   title,
                   style: const TextStyle(
-                    color: AppColors.primary,
+                    color: AppColors.brandText,
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
                   ),
@@ -132,7 +132,7 @@ class _SubscriptionPageState extends State<SubscriptionPage>
           content: Text(
             message,
             style: const TextStyle(
-              color: AppColors.primary,
+              color: AppColors.brandText,
               fontSize: 14,
               height: 1.4,
             ),
@@ -275,7 +275,7 @@ class _SubscriptionPageState extends State<SubscriptionPage>
       context: context,
       barrierDismissible: false,
       builder: (context) => const Center(
-        child: CircularProgressIndicator(color: AppColors.primary),
+        child: CircularProgressIndicator(color: AppColors.brandText),
       ),
     );
 
@@ -372,14 +372,14 @@ class _SubscriptionPageState extends State<SubscriptionPage>
           leading: IconButton(
             icon: const Icon(
               Icons.arrow_back_ios_new_rounded,
-              color: AppColors.primary,
+              color: AppColors.brandText,
             ),
             onPressed: () => Navigator.pop(context),
           ),
           title: const Text(
             'Gói dịch vụ & Hạn mức',
             style: TextStyle(
-              color: AppColors.primary,
+              color: AppColors.brandText,
               fontWeight: FontWeight.w900,
               fontSize: 20,
             ),
@@ -493,15 +493,11 @@ class _SubscriptionPageState extends State<SubscriptionPage>
                   indicatorSize: TabBarIndicatorSize.tab,
                   dividerColor: Colors.transparent,
                   indicator: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [AppColors.primary, AppColors.primaryLight], // Ombre Navy sang Sky Blue
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
+                    color: AppColors.primary,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  labelColor: Colors.white,
-                  unselectedLabelColor: AppColors.textMuted,
+                  labelColor: AppColors.onPrimary,      // Trắng trên nền indicator tím đậm
+                  unselectedLabelColor: AppColors.brandText, // Tím Violet 600 — đọc rõ trên trắng
                   labelStyle: const TextStyle(
                     fontWeight: FontWeight.w800,
                     fontSize: 13,
@@ -588,7 +584,7 @@ class _SubscriptionPageState extends State<SubscriptionPage>
   Widget _buildPlansTab(String currentPlan, bool hasActivePremium) {
     if (_isLoadingPlans) {
       return const Center(
-        child: CircularProgressIndicator(color: AppColors.primary),
+        child: CircularProgressIndicator(color: AppColors.brandText),
       );
     }
 
@@ -597,7 +593,7 @@ class _SubscriptionPageState extends State<SubscriptionPage>
 
       return RefreshIndicator(
         onRefresh: _loadSubscriptionData,
-        color: AppColors.primary,
+        color: AppColors.brandText,
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           children: [
@@ -743,7 +739,7 @@ class _SubscriptionPageState extends State<SubscriptionPage>
   Widget _buildTopupTab() {
     if (_isLoadingPlans) {
       return const Center(
-        child: CircularProgressIndicator(color: AppColors.primary),
+        child: CircularProgressIndicator(color: AppColors.brandText),
       );
     }
 
@@ -768,7 +764,7 @@ class _SubscriptionPageState extends State<SubscriptionPage>
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
+                  color: AppColors.brandText,
                 ),
               ),
               const SizedBox(height: 4),
@@ -785,7 +781,7 @@ class _SubscriptionPageState extends State<SubscriptionPage>
 
       return RefreshIndicator(
         onRefresh: _loadSubscriptionData,
-        color: AppColors.primary,
+        color: AppColors.brandText,
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           children: [
@@ -894,7 +890,7 @@ class _SubscriptionPageState extends State<SubscriptionPage>
   Widget _buildTransactionsTab() {
     if (_isLoadingTransactions) {
       return const Center(
-        child: CircularProgressIndicator(color: AppColors.primary),
+        child: CircularProgressIndicator(color: AppColors.brandText),
       );
     }
 
@@ -915,7 +911,7 @@ class _SubscriptionPageState extends State<SubscriptionPage>
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
+                  color: AppColors.brandText,
                 ),
               ),
               const SizedBox(height: 4),
@@ -932,7 +928,7 @@ class _SubscriptionPageState extends State<SubscriptionPage>
 
       return RefreshIndicator(
         onRefresh: _loadSubscriptionData,
-        color: AppColors.primary,
+        color: AppColors.brandText,
         child: ListView.builder(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           itemCount: _transactions.length,
@@ -999,7 +995,7 @@ class _SubscriptionPageState extends State<SubscriptionPage>
                             style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
-                              color: AppColors.primary,
+                              color: AppColors.brandText,
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -1030,7 +1026,7 @@ class _SubscriptionPageState extends State<SubscriptionPage>
                           style: const TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w900,
-                            color: AppColors.primary,
+                            color: AppColors.brandText,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -1188,7 +1184,7 @@ class _SubscriptionPageState extends State<SubscriptionPage>
                         style: TextStyle(
                           fontSize: 9,
                           fontWeight: FontWeight.w800,
-                          color: AppColors.primary,
+                          color: AppColors.brandText,
                           letterSpacing: 0.5,
                         ),
                       ),
@@ -1249,7 +1245,7 @@ class _SubscriptionPageState extends State<SubscriptionPage>
                           style: const TextStyle(
                             fontSize: 26,
                             fontWeight: FontWeight.w900,
-                            color: AppColors.primary,
+                            color: AppColors.brandText,
                           ),
                         ),
                         const TextSpan(text: ' '),
@@ -1283,7 +1279,7 @@ class _SubscriptionPageState extends State<SubscriptionPage>
                                 feature,
                                 style: const TextStyle(
                                   fontSize: 13,
-                                  color: AppColors.primary,
+                                  color: AppColors.brandText,
                                   fontWeight: FontWeight.w500,
                                   height: 1.3,
                                 ),
@@ -1374,7 +1370,7 @@ class _SubscriptionPageState extends State<SubscriptionPage>
             ),
             child: const Icon(
               Icons.auto_awesome_rounded,
-              color: AppColors.primary,
+              color: AppColors.brandText,
               size: 28,
             ),
           ),
@@ -1391,7 +1387,7 @@ class _SubscriptionPageState extends State<SubscriptionPage>
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.primary,
+                      color: AppColors.brandText,
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: const Text(
@@ -1408,7 +1404,7 @@ class _SubscriptionPageState extends State<SubscriptionPage>
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w800,
-                    color: AppColors.primary,
+                    color: AppColors.brandText,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -1466,7 +1462,7 @@ class _SubscriptionPageState extends State<SubscriptionPage>
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w900,
-                          color: AppColors.primary,
+                          color: AppColors.brandText,
                         ),
                       ),
                       const TextSpan(text: '   '),
@@ -1636,7 +1632,7 @@ class _OutOfCreditsSheetState extends State<_OutOfCreditsSheet> {
           context: context,
           barrierDismissible: false,
           builder: (context) => const Center(
-            child: CircularProgressIndicator(color: AppColors.primary),
+            child: CircularProgressIndicator(color: AppColors.brandText),
           ),
         );
 
@@ -1706,7 +1702,7 @@ class _OutOfCreditsSheetState extends State<_OutOfCreditsSheet> {
                   children: [
                     const Icon(
                       Icons.play_circle_fill_rounded,
-                      color: AppColors.primary,
+                      color: AppColors.brandText,
                       size: 54,
                     ),
                     const SizedBox(height: 16),
@@ -1716,7 +1712,7 @@ class _OutOfCreditsSheetState extends State<_OutOfCreditsSheet> {
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.primary,
+                        color: AppColors.brandText,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -1757,7 +1753,7 @@ class _OutOfCreditsSheetState extends State<_OutOfCreditsSheet> {
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w900,
-                    color: AppColors.primary,
+                    color: AppColors.brandText,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -1812,9 +1808,9 @@ class _OutOfCreditsSheetState extends State<_OutOfCreditsSheet> {
                     child: OutlinedButton(
                       onPressed: _watchAdForCredit,
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.primary,
+                        foregroundColor: AppColors.brandText,
                         side: const BorderSide(
-                          color: AppColors.primary,
+                          color: AppColors.brandText,
                           width: 1.5,
                         ),
                         shape: RoundedRectangleBorder(
@@ -1964,14 +1960,14 @@ class _PaymentVerificationSheetState extends State<_PaymentVerificationSheet> {
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-          const Icon(Icons.payment_rounded, color: AppColors.primary, size: 48),
+          const Icon(Icons.payment_rounded, color: AppColors.brandText, size: 48),
           const SizedBox(height: 16),
           const Text(
             'Đang thực hiện thanh toán...',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w900,
-              color: AppColors.primary,
+              color: AppColors.brandText,
             ),
           ),
           const SizedBox(height: 8),
@@ -2008,7 +2004,7 @@ class _PaymentVerificationSheetState extends State<_PaymentVerificationSheet> {
                         height: 150,
                         child: Center(
                           child: CircularProgressIndicator(
-                            color: AppColors.primary,
+                            color: AppColors.brandText,
                           ),
                         ),
                       );
@@ -2238,7 +2234,7 @@ class _PaymentGatewaySelectorSheetState
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w900,
-                  color: AppColors.primary,
+                  color: AppColors.brandText,
                 ),
               ),
               const SizedBox(height: 6),
@@ -2284,7 +2280,7 @@ class _PaymentGatewaySelectorSheetState
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
+                          color: AppColors.brandText,
                         ),
                       ),
                     ),
@@ -2294,7 +2290,7 @@ class _PaymentGatewaySelectorSheetState
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: AppColors.primary,
+                          color: AppColors.brandText,
                         ),
                       )
                     else
@@ -2304,7 +2300,7 @@ class _PaymentGatewaySelectorSheetState
                           'Áp dụng',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: AppColors.primary,
+                            color: AppColors.brandText,
                           ),
                         ),
                       ),
@@ -2377,7 +2373,7 @@ class _PaymentGatewaySelectorSheetState
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.primary,
+                        color: AppColors.brandText,
                       ),
                     ),
                     Column(
@@ -2397,7 +2393,7 @@ class _PaymentGatewaySelectorSheetState
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w900,
-                            color: AppColors.primary,
+                            color: AppColors.brandText,
                           ),
                         ),
                       ],
@@ -2424,7 +2420,7 @@ class _PaymentGatewaySelectorSheetState
                 gateway: 'manual_transfer',
                 title: 'Chuyển khoản thủ công (VietQR)',
                 subtitle: 'Chuyển khoản ngân hàng 24/7 bằng mã VietQR hoặc STK',
-                iconColor: AppColors.primary,
+                iconColor: AppColors.brandText,
                 logoText: 'Bank',
                 logoBgColor: AppColors.primary.withOpacity(0.08),
               ),
@@ -2502,7 +2498,7 @@ class _PaymentGatewaySelectorSheetState
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.primary,
+                      color: AppColors.brandText,
                     ),
                   ),
                   const SizedBox(height: 4),

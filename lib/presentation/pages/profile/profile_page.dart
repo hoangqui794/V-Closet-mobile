@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../data/datasources/auth_local_storage.dart';
@@ -186,10 +186,10 @@ class _ProfilePageState extends State<ProfilePage> {
       body: SafeArea(
         child: _isLoading
             ? const Center(
-                child: CircularProgressIndicator(color: AppColors.primary),
+                child: CircularProgressIndicator(color: AppColors.brandText),
               )
             : RefreshIndicator(
-                color: AppColors.primary,
+                color: AppColors.brandText,
                 onRefresh: _fetchProfileData,
                 child: CustomScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
@@ -204,7 +204,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 onPressed: () => Navigator.pop(context),
                                 icon: const Icon(
                                   Icons.arrow_back_ios_new_rounded,
-                                  color: AppColors.primary,
+                                  color: AppColors.brandText,
                                   size: 20,
                                 ),
                               ),
@@ -213,7 +213,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.w800,
-                                  color: AppColors.primary,
+                                  color: AppColors.brandText,
                                 ),
                               ),
                             ],
@@ -423,7 +423,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                             style: const TextStyle(
                                               fontSize: 15,
                                               fontWeight: FontWeight.w800,
-                                              color: AppColors.primary,
+                                              color: AppColors.brandText,
                                             ),
                                           ),
                                         ],
@@ -464,7 +464,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                             style: const TextStyle(
                                               fontSize: 15,
                                               fontWeight: FontWeight.w800,
-                                              color: AppColors.primary,
+                                              color: AppColors.brandText,
                                             ),
                                           ),
                                         ],
@@ -489,7 +489,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.w800,
-                                color: AppColors.primary,
+                                color: AppColors.brandText,
                               ),
                             ),
                             const SizedBox(height: 10),
@@ -636,7 +636,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                         barrierDismissible: false,
                                         builder: (context) => const Center(
                                           child: CircularProgressIndicator(
-                                            color: AppColors.primary,
+                                            color: AppColors.brandText,
                                           ),
                                         ),
                                       );
@@ -706,7 +706,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.w800,
-                                color: AppColors.primary,
+                                color: AppColors.brandText,
                               ),
                             ),
                             const SizedBox(height: 10),
@@ -742,7 +742,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   barrierDismissible: false,
                                   builder: (context) => const Center(
                                     child: CircularProgressIndicator(
-                                      color: AppColors.primary,
+                                      color: AppColors.brandText,
                                     ),
                                   ),
                                 );
@@ -796,17 +796,17 @@ class _ProfilePageState extends State<ProfilePage> {
         ],
       ),
       child: ListTile(
-        leading: Icon(icon, color: AppColors.primary),
+        leading: Icon(icon, color: AppColors.brandText),
         title: Text(
           title,
           style: const TextStyle(
-            color: AppColors.primary,
+            color: AppColors.brandText,
             fontWeight: FontWeight.w700,
           ),
         ),
         trailing: const Icon(
           Icons.chevron_right_rounded,
-          color: AppColors.primary,
+          color: AppColors.brandText,
         ),
         onTap: onTap,
       ),

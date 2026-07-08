@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -146,21 +146,21 @@ class _CameraPageState extends State<CameraPage> {
               children: [
                 const Row(
                   children: [
-                    Icon(Icons.info_outline_rounded, color: AppColors.primary, size: 22),
+                    Icon(Icons.info_outline_rounded, color: AppColors.brandText, size: 22),
                     SizedBox(width: 8),
                     Text(
                       'Lưu ý chụp ảnh tách nền',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.primary,
+                        color: AppColors.brandText,
                       ),
                     ),
                   ],
                 ),
                 IconButton(
                   onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.close_rounded, color: AppColors.primary),
+                  icon: const Icon(Icons.close_rounded, color: AppColors.brandText),
                 ),
               ],
             ),
@@ -195,7 +195,7 @@ class _CameraPageState extends State<CameraPage> {
                         style: const TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w800,
-                          color: AppColors.primary,
+                          color: AppColors.brandText,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -430,7 +430,7 @@ class _CameraPageState extends State<CameraPage> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Phân loại đồ', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.primary)),
+                    const Text('Phân loại đồ', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.brandText)),
                     const SizedBox(height: 20),
                     Center(
                       child: ClipRRect(
@@ -454,7 +454,7 @@ class _CameraPageState extends State<CameraPage> {
                           Expanded(
                             child: Text(
                               'Mẹo: Ảnh quần áo phẳng phiu, nền đơn sắc sẽ tách nền sạch đẹp nhất.',
-                              style: TextStyle(fontSize: 11, color: AppColors.primary, height: 1.3),
+                              style: TextStyle(fontSize: 11, color: AppColors.brandText, height: 1.3),
                             ),
                           ),
                         ],
@@ -680,7 +680,7 @@ class _CameraPageState extends State<CameraPage> {
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.primary,
+                      color: AppColors.brandText,
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -730,7 +730,7 @@ class _CameraPageState extends State<CameraPage> {
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
+                        color: AppColors.brandText,
                       ),
                     ),
                   ),

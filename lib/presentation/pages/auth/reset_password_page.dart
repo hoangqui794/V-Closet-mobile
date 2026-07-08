@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -175,7 +175,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         title: const Text('Đặt lại mật khẩu'),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        foregroundColor: AppColors.primary,
+        foregroundColor: AppColors.brandText,
         toolbarHeight: isSmallScreen ? 48 : 56,
       ),
       body: SafeArea(
@@ -193,7 +193,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                   style: TextStyle(
                     fontSize: titleFontSize,
                     fontWeight: FontWeight.w800,
-                    color: AppColors.primary,
+                    color: AppColors.brandText,
                   ),
                 ),
               ),
@@ -322,7 +322,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                       if (_isLoading)
                         const Center(
                           child: CircularProgressIndicator(
-                            color: AppColors.primary,
+                            color: AppColors.brandText,
                           ),
                         )
                       else ...[
@@ -366,7 +366,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                                     height: 14,
                                     child: CircularProgressIndicator(
                                       strokeWidth: 2,
-                                      color: AppColors.primary,
+                                      color: AppColors.brandText,
                                     ),
                                   )
                                 : GestureDetector(
@@ -374,7 +374,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                                     child: Text(
                                       'Gửi lại ngay',
                                       style: TextStyle(
-                                        color: AppColors.primary,
+                                        color: AppColors.brandText,
                                         fontWeight: FontWeight.bold,
                                         decoration: TextDecoration.underline,
                                         fontSize: isSmallScreen ? 13.0 : 14.0,

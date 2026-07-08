@@ -56,14 +56,14 @@ class _StyleDnaPageState extends State<StyleDnaPage> {
         elevation: 0,
         leading: widget.onMenuPressed != null
             ? IconButton(
-                icon: const Icon(Icons.menu_rounded, color: AppColors.primary),
+                icon: const Icon(Icons.menu_rounded, color: AppColors.brandText),
                 onPressed: widget.onMenuPressed,
               )
             : null,
         title: const Text(
           'Phong cách',
           style: TextStyle(
-            color: AppColors.primary,
+            color: AppColors.brandText,
             fontWeight: FontWeight.w900,
             fontSize: 17,
           ),
@@ -71,9 +71,9 @@ class _StyleDnaPageState extends State<StyleDnaPage> {
         centerTitle: true,
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+          ? const Center(child: CircularProgressIndicator(color: AppColors.brandText))
           : RefreshIndicator(
-              color: AppColors.primary,
+              color: AppColors.brandText,
               onRefresh: _fetchProfileData,
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
@@ -106,8 +106,8 @@ class _StyleDnaPageState extends State<StyleDnaPage> {
                               ),
                             ),
                             style: OutlinedButton.styleFrom(
-                              foregroundColor: AppColors.primary,
-                              side: const BorderSide(color: AppColors.primary, width: 1.5),
+                              foregroundColor: AppColors.brandText,
+                              side: const BorderSide(color: AppColors.brandText, width: 1.5),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
                               ),
@@ -150,7 +150,7 @@ class _StyleDnaPageState extends State<StyleDnaPage> {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w900,
-              color: AppColors.primary,
+              color: AppColors.brandText,
             ),
           ),
           const SizedBox(height: 8),
@@ -219,8 +219,8 @@ class _StyleDnaPageState extends State<StyleDnaPage> {
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [
-            AppColors.primary,
-            AppColors.primaryLight,
+            AppColors.aiGradientStart,
+            AppColors.aiGradientEnd,
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -228,7 +228,7 @@ class _StyleDnaPageState extends State<StyleDnaPage> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withOpacity(0.25),
+            color: AppColors.aiGradientStart.withOpacity(0.25),
             blurRadius: 16,
             offset: const Offset(0, 8),
           ),
@@ -338,7 +338,7 @@ class _StyleDnaPageState extends State<StyleDnaPage> {
                           Text(
                             'Trò chuyện ngay',
                             style: TextStyle(
-                              color: AppColors.primary,
+                              color: AppColors.brandText,
                               fontSize: 13,
                               fontWeight: FontWeight.w800,
                             ),
@@ -346,7 +346,7 @@ class _StyleDnaPageState extends State<StyleDnaPage> {
                           SizedBox(width: 6),
                           Icon(
                             Icons.arrow_forward_ios_rounded,
-                            color: AppColors.primary,
+                            color: AppColors.brandText,
                             size: 12,
                           ),
                         ],

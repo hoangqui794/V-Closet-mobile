@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -226,12 +226,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
         title: const Text('Chỉnh sửa hồ sơ'),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        foregroundColor: AppColors.primary,
+        foregroundColor: AppColors.brandText,
       ),
       body: SafeArea(
         child: _isLoading
             ? const Center(
-                child: CircularProgressIndicator(color: AppColors.primary),
+                child: CircularProgressIndicator(color: AppColors.brandText),
               )
             : SingleChildScrollView(
                 padding: const EdgeInsets.all(24),
@@ -259,7 +259,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                 height: 36,
                                 width: 36,
                                 decoration: const BoxDecoration(
-                                  color: AppColors.primary,
+                                  color: AppColors.brandText,
                                   shape: BoxShape.circle,
                                 ),
                                 child: IconButton(

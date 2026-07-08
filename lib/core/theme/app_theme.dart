@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 
@@ -60,8 +60,8 @@ class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           minimumSize: const Size(double.infinity, 44),
-          foregroundColor: AppColors.primary,
-          side: const BorderSide(color: Color(0x1F4A3728)),
+          foregroundColor: AppColors.brandText,
+          side: const BorderSide(color: AppColors.borderLight),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
           ),
@@ -78,37 +78,37 @@ class AppTheme {
           vertical: 14,
         ),
         hintStyle: textTheme.bodyMedium?.copyWith(
-          color: const Color(0x994A3728),
+          color: AppColors.textMuted.withOpacity(0.6),
         ),
         labelStyle: textTheme.bodyMedium?.copyWith(
-          color: const Color(0xB34A3728),
+          color: AppColors.textMuted,
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: Color(0x1A4A3728)),
+          borderSide: const BorderSide(color: AppColors.borderLight),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: Color(0x1A4A3728)),
+          borderSide: const BorderSide(color: AppColors.borderLight),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+          borderSide: const BorderSide(color: AppColors.brandText, width: 1.5),
         ),
       ),
       chipTheme: ChipThemeData(
         backgroundColor: Colors.white,
         selectedColor: AppColors.primaryLight,
         secondarySelectedColor: AppColors.primaryLight,
-        disabledColor: const Color(0xFFE9E1D8),
+        disabledColor: AppColors.muted,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         labelStyle: textTheme.labelLarge ?? const TextStyle(),
         secondaryLabelStyle: (textTheme.labelLarge ?? const TextStyle())
-            .copyWith(color: AppColors.primary),
-        side: const BorderSide(color: Color(0x1A4A3728)),
+            .copyWith(color: AppColors.brandText),
+        side: const BorderSide(color: AppColors.borderLight),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
       ),
-      dividerColor: const Color(0x1F4A3728),
+      dividerColor: AppColors.borderLight,
       snackBarTheme: SnackBarThemeData(
         backgroundColor: AppColors.primary,
         contentTextStyle: textTheme.bodyMedium?.copyWith(color: Colors.white),

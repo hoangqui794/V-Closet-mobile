@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -108,7 +108,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         title: const Text('Quên mật khẩu'),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        foregroundColor: AppColors.primary,
+        foregroundColor: AppColors.brandText,
         toolbarHeight: isSmallScreen ? 48 : 56,
       ),
       body: SafeArea(
@@ -126,7 +126,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 child: Icon(
                   Icons.lock_open_rounded,
                   size: logoSize,
-                  color: AppColors.primary,
+                  color: AppColors.brandText,
                 ),
               ),
               SizedBox(height: spacingMedium),
@@ -139,7 +139,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                       style: TextStyle(
                         fontSize: titleFontSize,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.primary,
+                        color: AppColors.brandText,
                       ),
                     ),
                     SizedBox(height: spacingTiny),
@@ -179,7 +179,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                         style: TextStyle(
                           fontSize: isSmallScreen ? 13.0 : 14.0,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.primary,
+                          color: AppColors.brandText,
                         ),
                       ),
                       SizedBox(height: spacingTiny),
@@ -212,7 +212,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                       if (_isLoading)
                         const Center(
                           child: CircularProgressIndicator(
-                            color: AppColors.primary,
+                            color: AppColors.brandText,
                           ),
                         )
                       else

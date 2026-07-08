@@ -1,4 +1,4 @@
-import 'package:animate_do/animate_do.dart';
+﻿import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -135,7 +135,7 @@ class _RegisterPageState extends State<RegisterPage> {
         title: const Text('Đăng ký'),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        foregroundColor: AppColors.primary,
+        foregroundColor: AppColors.brandText,
         toolbarHeight: isSmallScreen ? 48 : 56,
       ),
       body: SafeArea(
@@ -159,7 +159,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       return Icon(
                         Icons.checkroom_rounded,
                         size: logoSize,
-                        color: AppColors.primary,
+                        color: AppColors.brandText,
                       );
                     },
                   ),
@@ -171,7 +171,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 style: TextStyle(
                   fontSize: titleFontSize,
                   fontWeight: FontWeight.w800,
-                  color: AppColors.primary,
+                  color: AppColors.brandText,
                 ),
               ),
               SizedBox(height: spacingTiny / 2),
@@ -346,7 +346,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                     'Điều khoản dịch vụ',
                                     style: TextStyle(
                                       fontSize: 13.0,
-                                      color: AppColors.primary,
+                                      color: AppColors.brandText,
                                       fontWeight: FontWeight.bold,
                                       decoration: TextDecoration.underline,
                                     ),
@@ -367,7 +367,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                     'Chính sách bảo mật',
                                     style: TextStyle(
                                       fontSize: 13.0,
-                                      color: AppColors.primary,
+                                      color: AppColors.brandText,
                                       fontWeight: FontWeight.bold,
                                       decoration: TextDecoration.underline,
                                     ),
@@ -382,7 +382,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       if (_isLoading)
                         const Center(
                           child: CircularProgressIndicator(
-                            color: AppColors.primary,
+                            color: AppColors.brandText,
                           ),
                         )
                       else

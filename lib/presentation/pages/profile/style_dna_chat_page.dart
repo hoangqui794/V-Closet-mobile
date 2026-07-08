@@ -98,7 +98,10 @@ class _StyleDnaChatPageState extends State<StyleDnaChatPage> {
     // Gọi Gemini API
     try {
       final response = await _geminiService.chatStyle(
-        messages: _messages,
+        messages: _messages.where((msg) {
+          if (msg['role'] != 'model') return true;
+          return !_looksIncompleteAiText(msg['text'] ?? '');
+        }).toList(),
         userDisplayName:
             widget.profileData['displayName']?.toString() ??
             widget.profileData['DisplayName']?.toString() ??
@@ -124,8 +127,14 @@ class _StyleDnaChatPageState extends State<StyleDnaChatPage> {
       );
 
       if (response != null) {
+        final cleanResponse = response.trim();
         setState(() {
-          _messages.add({'role': 'model', 'text': response});
+          _messages.add({
+            'role': 'model',
+            'text': _looksIncompleteAiText(cleanResponse)
+                ? 'Mình vừa nhận phản hồi chưa đầy đủ từ AI Stylist. Bạn gửi lại câu hỏi giúp mình nhé, mình sẽ tư vấn lại cho trọn vẹn hơn.'
+                : cleanResponse,
+          });
         });
       } else {
         setState(() {
@@ -148,6 +157,42 @@ class _StyleDnaChatPageState extends State<StyleDnaChatPage> {
       setState(() => _isLoading = false);
       _scrollToBottom();
     }
+  }
+
+  void _close([Object? result]) {
+    FocusManager.instance.primaryFocus?.unfocus();
+    final navigator = Navigator.of(context);
+    if (navigator.canPop()) {
+      navigator.pop(result);
+      return;
+    }
+    Navigator.of(context, rootNavigator: true).maybePop(result);
+  }
+
+  bool _looksIncompleteAiText(String text) {
+    final trimmed = text.trim();
+    if (trimmed.isEmpty) return true;
+    if (RegExp(r'[.!?…)"”]$').hasMatch(trimmed)) return false;
+
+    final lower = trimmed.toLowerCase();
+    final wordCount = trimmed.split(RegExp(r'\s+')).length;
+    const danglingEndings = [
+      'diện',
+      'mặc',
+      'phối',
+      'kết hợp',
+      'chọn',
+      'với',
+      'cùng',
+      'và',
+      'hoặc',
+      'như',
+      'gồm',
+      'là',
+      ':',
+    ];
+
+    return danglingEndings.any(lower.endsWith) || wordCount > 8;
   }
 
   @override
@@ -181,12 +226,13 @@ class _StyleDnaChatPageState extends State<StyleDnaChatPage> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0.5,
+        titleSpacing: 0,
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: AppColors.primary,
+            color: AppColors.brandText,
           ),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => _close(),
         ),
         title: Row(
           children: [
@@ -210,13 +256,14 @@ class _StyleDnaChatPageState extends State<StyleDnaChatPage> {
               ),
             ),
             const SizedBox(width: 12),
-            Column(
+            Expanded(
+              child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: const [
                 Text(
                   'AI Stylist cá nhân',
                   style: TextStyle(
-                    color: AppColors.primary,
+                    color: AppColors.brandText,
                     fontWeight: FontWeight.w900,
                     fontSize: 16,
                   ),
@@ -231,14 +278,18 @@ class _StyleDnaChatPageState extends State<StyleDnaChatPage> {
                   ),
                 ),
               ],
+              ),
             ),
           ],
         ),
         actions: [
-          Padding(
+          SizedBox(
+            width: 104,
+            height: kToolbarHeight,
+            child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
             child: ElevatedButton.icon(
-              onPressed: () => Navigator.pop(context, 'go_to_studio'),
+              onPressed: () => _close('go_to_studio'),
               icon: const Icon(
                 Icons.auto_awesome_rounded,
                 size: 12,
@@ -260,6 +311,7 @@ class _StyleDnaChatPageState extends State<StyleDnaChatPage> {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
+            ),
             ),
           ),
         ],

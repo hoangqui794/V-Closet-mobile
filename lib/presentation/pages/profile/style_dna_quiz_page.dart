@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/app_routes.dart';
@@ -673,7 +673,7 @@ class _StyleDnaQuizPageState extends State<StyleDnaQuizPage>
                         ),
                         child: const Icon(
                           Icons.arrow_back_rounded,
-                          color: AppColors.primary,
+                          color: AppColors.brandText,
                           size: 20,
                         ),
                       ),
@@ -882,7 +882,7 @@ class _StyleDnaQuizPageState extends State<StyleDnaQuizPage>
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.w900,
-            color: AppColors.primary,
+            color: AppColors.brandText,
             height: 1.2,
           ),
         ),
@@ -922,7 +922,7 @@ class _StyleDnaQuizPageState extends State<StyleDnaQuizPage>
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.w900,
-            color: AppColors.primary,
+            color: AppColors.brandText,
             height: 1.2,
           ),
         ),
@@ -958,14 +958,14 @@ class _StyleDnaQuizPageState extends State<StyleDnaQuizPage>
                 children: [
                   const Row(
                     children: [
-                      Icon(Icons.height_rounded, color: AppColors.primary),
+                      Icon(Icons.height_rounded, color: AppColors.brandText),
                       SizedBox(width: 8),
                       Text(
                         'Chiều cao',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
+                          color: AppColors.brandText,
                         ),
                       ),
                     ],
@@ -975,7 +975,7 @@ class _StyleDnaQuizPageState extends State<StyleDnaQuizPage>
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w900,
-                      color: AppColors.primary,
+                      color: AppColors.brandText,
                     ),
                   ),
                 ],
@@ -1020,14 +1020,14 @@ class _StyleDnaQuizPageState extends State<StyleDnaQuizPage>
                 children: [
                   const Row(
                     children: [
-                      Icon(Icons.scale_rounded, color: AppColors.primary),
+                      Icon(Icons.scale_rounded, color: AppColors.brandText),
                       SizedBox(width: 8),
                       Text(
                         'Cân nặng',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
+                          color: AppColors.brandText,
                         ),
                       ),
                     ],
@@ -1037,7 +1037,7 @@ class _StyleDnaQuizPageState extends State<StyleDnaQuizPage>
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w900,
-                      color: AppColors.primary,
+                      color: AppColors.brandText,
                     ),
                   ),
                 ],
@@ -1074,7 +1074,7 @@ class _StyleDnaQuizPageState extends State<StyleDnaQuizPage>
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.w900,
-            color: AppColors.primary,
+            color: AppColors.brandText,
             height: 1.2,
           ),
         ),
@@ -1113,7 +1113,7 @@ class _StyleDnaQuizPageState extends State<StyleDnaQuizPage>
                   ),
                   child: const Icon(
                     Icons.cake_rounded,
-                    color: AppColors.primary,
+                    color: AppColors.brandText,
                     size: 40,
                   ),
                 ),
@@ -1123,7 +1123,7 @@ class _StyleDnaQuizPageState extends State<StyleDnaQuizPage>
                   style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.w900,
-                    color: AppColors.primary,
+                    color: AppColors.brandText,
                     letterSpacing: 0.5,
                   ),
                 ),
@@ -1176,7 +1176,7 @@ class _StyleDnaQuizPageState extends State<StyleDnaQuizPage>
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.w900,
-            color: AppColors.primary,
+            color: AppColors.brandText,
             height: 1.2,
           ),
         ),
@@ -1265,7 +1265,7 @@ class _StyleDnaQuizPageState extends State<StyleDnaQuizPage>
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
+                          color: AppColors.brandText,
                         ),
                       ),
                     ],
@@ -1330,7 +1330,7 @@ class _StyleDnaQuizPageState extends State<StyleDnaQuizPage>
           style: const TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.w900,
-            color: AppColors.primary,
+            color: AppColors.brandText,
             height: 1.2,
           ),
         ),
@@ -1449,7 +1449,7 @@ class _StyleDnaQuizPageState extends State<StyleDnaQuizPage>
                 ? const Icon(
                     Icons.check_rounded,
                     size: 14,
-                    color: AppColors.primary,
+                    color: AppColors.brandText,
                   )
                 : null,
           ),

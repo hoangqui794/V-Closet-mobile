@@ -1,4 +1,4 @@
-import 'package:animate_do/animate_do.dart';
+﻿import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get_it/get_it.dart';
@@ -178,7 +178,7 @@ class _LoginPageState extends State<LoginPage> {
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: _isLoading
-            ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+            ? const Center(child: CircularProgressIndicator(color: AppColors.brandText))
             : SingleChildScrollView(
                 child: Padding(
                   padding: EdgeInsets.symmetric(
@@ -207,7 +207,7 @@ class _LoginPageState extends State<LoginPage> {
                         style: TextStyle(
                           fontSize: titleFontSize,
                           fontWeight: FontWeight.w900,
-                          color: AppColors.primary,
+                          color: AppColors.brandText,
                           letterSpacing: 2,
                         ),
                       ),
@@ -221,7 +221,7 @@ class _LoginPageState extends State<LoginPage> {
                               style: TextStyle(
                                 fontSize: isSmallScreen ? 15.0 : 17.0,
                                 fontWeight: FontWeight.bold,
-                                color: AppColors.primary,
+                                color: AppColors.brandText,
                               ),
                             ),
                             SizedBox(height: spacingTiny / 2),
@@ -260,7 +260,7 @@ class _LoginPageState extends State<LoginPage> {
                                 style: TextStyle(
                                   fontSize: isSmallScreen ? 13.0 : 14.0,
                                   fontWeight: FontWeight.w700,
-                                  color: AppColors.primary,
+                                  color: AppColors.brandText,
                                 ),
                               ),
                               SizedBox(height: spacingTiny),
@@ -292,7 +292,7 @@ class _LoginPageState extends State<LoginPage> {
                                     style: TextStyle(
                                       fontSize: isSmallScreen ? 13.0 : 14.0,
                                       fontWeight: FontWeight.w700,
-                                      color: AppColors.primary,
+                                      color: AppColors.brandText,
                                     ),
                                   ),
                                   TextButton(
@@ -419,7 +419,7 @@ class _LoginPageState extends State<LoginPage> {
                               TextSpan(
                                 text: 'Điều khoản Dịch vụ',
                                 style: const TextStyle(
-                                  color: AppColors.primary,
+                                  color: AppColors.brandText,
                                   fontWeight: FontWeight.bold,
                                   decoration: TextDecoration.underline,
                                 ),
@@ -430,7 +430,7 @@ class _LoginPageState extends State<LoginPage> {
                               TextSpan(
                                 text: 'Chính sách bảo mật',
                                 style: const TextStyle(
-                                  color: AppColors.primary,
+                                  color: AppColors.brandText,
                                   fontWeight: FontWeight.bold,
                                   decoration: TextDecoration.underline,
                                 ),
@@ -468,7 +468,7 @@ class _LoginPageState extends State<LoginPage> {
                               style: TextStyle(
                                 fontSize: isSmallScreen ? 13.0 : 15.0,
                                 fontWeight: FontWeight.w800,
-                                color: AppColors.primary,
+                                color: AppColors.brandText,
                               ),
                             ),
                           ),
@@ -511,7 +511,7 @@ class _LoginPageState extends State<LoginPage> {
             Text(
               label,
               style: TextStyle(
-                color: AppColors.primary,
+                color: AppColors.brandText,
                 fontWeight: FontWeight.w700,
                 fontSize: isSmallScreen ? 12.0 : 13.0,
               ),

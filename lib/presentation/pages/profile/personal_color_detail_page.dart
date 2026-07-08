@@ -1,4 +1,4 @@
-import 'dart:math' as math;
+﻿import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -121,7 +121,7 @@ class _PersonalColorDetailPageState extends State<PersonalColorDetailPage> {
                 onPressed: () => Navigator.pop(context),
                 icon: const Icon(
                   Icons.arrow_back_ios_new_rounded,
-                  color: AppColors.primary,
+                  color: AppColors.brandText,
                 ),
                 padding: EdgeInsets.zero,
                 alignment: Alignment.centerLeft,
@@ -308,7 +308,7 @@ class _PersonalColorDetailPageState extends State<PersonalColorDetailPage> {
                       style: TextStyle(fontWeight: FontWeight.w800),
                     ),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.primary,
+                      foregroundColor: AppColors.brandText,
                       side: BorderSide(
                         color: AppColors.primary.withOpacity(0.35),
                         width: 1.3,
@@ -338,7 +338,7 @@ class _PersonalColorDetailPageState extends State<PersonalColorDetailPage> {
       child: Text(
         label,
         style: const TextStyle(
-          color: AppColors.primary,
+          color: AppColors.brandText,
           fontSize: 12,
           fontWeight: FontWeight.w800,
         ),
@@ -364,7 +364,7 @@ class _PersonalColorDetailPageState extends State<PersonalColorDetailPage> {
         children: [
           Row(
             children: [
-              Icon(icon, color: AppColors.primary, size: 18),
+              Icon(icon, color: AppColors.brandText, size: 18),
               const SizedBox(width: 8),
               Text(
                 title,
@@ -701,14 +701,14 @@ class _ExpandableParagraphState extends State<_ExpandableParagraph> {
                 Text(
                   _isExpanded ? 'Thu gọn' : 'Xem thêm...',
                   style: const TextStyle(
-                    color: AppColors.primary,
+                    color: AppColors.brandText,
                     fontSize: 10.5,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
                 Icon(
                   _isExpanded ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
-                  color: AppColors.primary,
+                  color: AppColors.brandText,
                   size: 14,
                 ),
               ],

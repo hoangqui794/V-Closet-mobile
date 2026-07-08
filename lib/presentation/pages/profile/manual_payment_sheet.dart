@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -110,7 +110,7 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
+                  color: AppColors.brandText,
                 ),
               ),
               const SizedBox(height: 20),
@@ -160,14 +160,14 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
         ),
         child: Column(
           children: [
-            Icon(icon, color: AppColors.primary, size: 32),
+            Icon(icon, color: AppColors.brandText, size: 32),
             const SizedBox(height: 8),
             Text(
               label,
               style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.bold,
-                color: AppColors.primary,
+                color: AppColors.brandText,
               ),
             ),
           ],
@@ -269,7 +269,7 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w900,
-              color: AppColors.primary,
+              color: AppColors.brandText,
             ),
             textAlign: TextAlign.center,
           ),
@@ -316,14 +316,14 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const SizedBox(height: 40),
-          const CircularProgressIndicator(color: AppColors.primary),
+          const CircularProgressIndicator(color: AppColors.brandText),
           const SizedBox(height: 24),
           const Text(
             'Đang xử lý giao dịch...',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: AppColors.primary,
+              color: AppColors.brandText,
             ),
           ),
           const SizedBox(height: 12),
@@ -365,11 +365,11 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w900,
-                  color: AppColors.primary,
+                  color: AppColors.brandText,
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.close, color: AppColors.primary),
+                icon: const Icon(Icons.close, color: AppColors.brandText),
                 onPressed: () => Navigator.pop(context),
               ),
             ],
@@ -408,7 +408,7 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
                             style: const TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w900,
-                              color: AppColors.primary,
+                              color: AppColors.brandText,
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -429,7 +429,7 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w900,
-                          color: AppColors.primary,
+                          color: AppColors.brandText,
                         ),
                       ),
                     ],
@@ -446,7 +446,7 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
+                          color: AppColors.brandText,
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -478,7 +478,7 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
                                 color: const Color(0xFFFAF9F6),
                                 child: const Center(
                                   child: CircularProgressIndicator(
-                                    color: AppColors.primary,
+                                    color: AppColors.brandText,
                                   ),
                                 ),
                               );
@@ -509,7 +509,7 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
+                    color: AppColors.brandText,
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -551,7 +551,7 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
+                    color: AppColors.brandText,
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -580,7 +580,7 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
                     hintText: 'Nhập ghi chú hoặc lời nhắn cho admin...',
                     fillColor: Colors.white,
                     filled: true,
-                    labelStyle: const TextStyle(color: AppColors.primary),
+                    labelStyle: const TextStyle(color: AppColors.brandText),
                     floatingLabelBehavior: FloatingLabelBehavior.always,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
@@ -590,7 +590,7 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: AppColors.primary),
+                      borderSide: const BorderSide(color: AppColors.brandText),
                     ),
                   ),
                 ),
@@ -659,7 +659,7 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
+                  color: AppColors.brandText,
                 ),
               ),
               const SizedBox(height: 4),
@@ -702,7 +702,7 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
+                    color: AppColors.brandText,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -777,7 +777,7 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
                     fontWeight: isHighlighted
                         ? FontWeight.w900
                         : FontWeight.bold,
-                    color: AppColors.primary,
+                    color: AppColors.brandText,
                   ),
                 ),
               ],
@@ -787,7 +787,7 @@ class _ManualPaymentSheetState extends State<ManualPaymentSheet> {
             IconButton(
               icon: const Icon(
                 Icons.copy_rounded,
-                color: AppColors.primary,
+                color: AppColors.brandText,
                 size: 20,
               ),
               onPressed: () => _copyToClipboard(copyValue, label),

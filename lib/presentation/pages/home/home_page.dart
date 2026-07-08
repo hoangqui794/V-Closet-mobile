@@ -341,7 +341,7 @@ class _HomePageState extends State<HomePage> {
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: _refreshData,
-          color: AppColors.primary,
+          color: AppColors.brandText,
           child: CustomScrollView(
             physics: const BouncingScrollPhysics(),
             slivers: [
@@ -450,7 +450,7 @@ class _HomePageState extends State<HomePage> {
                 padding: EdgeInsets.all(10),
                 child: Icon(
                   Icons.menu_rounded,
-                  color: AppColors.primary, // Navy sâu
+                  color: AppColors.brandText, // Navy sâu
                   size: 22,
                 ),
               ),
@@ -510,7 +510,7 @@ class _HomePageState extends State<HomePage> {
                   },
                   icon: const Icon(
                     Icons.notifications_outlined,
-                    color: AppColors.primary,
+                    color: AppColors.brandText,
                     size: 22,
                   ),
                 ),
@@ -643,7 +643,7 @@ class _HomePageState extends State<HomePage> {
             context: context,
             barrierDismissible: false,
             builder: (context) => const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
+              child: CircularProgressIndicator(color: AppColors.brandText),
             ),
           );
 
@@ -758,7 +758,7 @@ class _HomePageState extends State<HomePage> {
       _QuickAction(
         icon: Icons.door_sliding_rounded,
         label: 'Tủ đồ',
-        color: AppColors.primary,
+        color: AppColors.brandText,
         onTap: () => widget.onNavigateTo?.call(1),
       ),
       _QuickAction(
@@ -811,7 +811,7 @@ class _HomePageState extends State<HomePage> {
                 ),
                 title: Row(
                   children: const [
-                    Icon(Icons.forum_rounded, color: AppColors.primary),
+                    Icon(Icons.forum_rounded, color: AppColors.brandText),
                     SizedBox(width: 10),
                     Text(
                       'Chưa có Phong cách',
@@ -862,7 +862,7 @@ class _HomePageState extends State<HomePage> {
             context: context,
             barrierDismissible: false,
             builder: (context) => const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
+              child: CircularProgressIndicator(color: AppColors.brandText),
             ),
           );
 
@@ -945,7 +945,7 @@ class _HomePageState extends State<HomePage> {
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w900,
-                  color: AppColors.primary,
+                  color: AppColors.brandText,
                 ),
               ),
               if (subtitle != null)
@@ -968,7 +968,7 @@ class _HomePageState extends State<HomePage> {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
-                color: AppColors.primaryLight,
+                color: AppColors.notificationAction,
               ),
             ),
           ),
@@ -1010,7 +1010,7 @@ class _HomePageState extends State<HomePage> {
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 30),
               child: Center(
-                child: CircularProgressIndicator(color: AppColors.primary),
+                child: CircularProgressIndicator(color: AppColors.brandText),
               ),
             )
           else if (_recentItems.isEmpty)
@@ -1158,7 +1158,7 @@ class _HomePageState extends State<HomePage> {
                           color: AppColors.secondary,
                           child: const Icon(
                             Icons.checkroom_rounded,
-                            color: AppColors.primary,
+                            color: AppColors.brandText,
                             size: 28,
                           ),
                         ),
@@ -1169,7 +1169,7 @@ class _HomePageState extends State<HomePage> {
                             child: const Center(
                               child: CircularProgressIndicator(
                                 strokeWidth: 1.5,
-                                color: AppColors.primary,
+                                color: AppColors.brandText,
                               ),
                             ),
                           );
@@ -1179,7 +1179,7 @@ class _HomePageState extends State<HomePage> {
                         color: AppColors.secondary,
                         child: const Icon(
                           Icons.checkroom_rounded,
-                          color: AppColors.primary,
+                          color: AppColors.brandText,
                           size: 28,
                         ),
                       ),
@@ -1193,7 +1193,7 @@ class _HomePageState extends State<HomePage> {
                   style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.primary,
+                    color: AppColors.brandText,
                   ),
                 ),
               ),
@@ -1222,7 +1222,7 @@ class _HomePageState extends State<HomePage> {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w800,
-                color: AppColors.primary,
+                color: AppColors.brandText,
               ),
             ),
             const SizedBox(height: 6),
@@ -1239,7 +1239,7 @@ class _HomePageState extends State<HomePage> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               decoration: BoxDecoration(
-                color: AppColors.primary,
+                color: AppColors.brandText,
                 borderRadius: BorderRadius.circular(30),
               ),
               child: const Row(
@@ -1272,7 +1272,7 @@ class _HomePageState extends State<HomePage> {
       return const SizedBox(
         height: 160,
         child: Center(
-          child: CircularProgressIndicator(color: AppColors.primary),
+          child: CircularProgressIndicator(color: AppColors.brandText),
         ),
       );
     }
@@ -1354,7 +1354,7 @@ class _HomePageState extends State<HomePage> {
                         child: snapshotUrl == null || snapshotUrl.isEmpty
                             ? const Icon(
                                 Icons.style_rounded,
-                                color: AppColors.primary,
+                                color: AppColors.brandText,
                                 size: 36,
                               )
                             : Image.network(
@@ -1363,7 +1363,7 @@ class _HomePageState extends State<HomePage> {
                                 errorBuilder: (context, error, stackTrace) =>
                                     const Icon(
                                       Icons.broken_image_outlined,
-                                      color: AppColors.primary,
+                                      color: AppColors.brandText,
                                       size: 36,
                                     ),
                                 loadingBuilder: (context, child, progress) {
@@ -1374,7 +1374,7 @@ class _HomePageState extends State<HomePage> {
                                       height: 20,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2,
-                                        color: AppColors.primary,
+                                        color: AppColors.brandText,
                                       ),
                                     ),
                                   );
@@ -1394,7 +1394,7 @@ class _HomePageState extends State<HomePage> {
                         style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.primary,
+                          color: AppColors.brandText,
                         ),
                       ),
                     ),
@@ -1417,7 +1417,7 @@ class _HomePageState extends State<HomePage> {
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [
-            Color(0xFF4A69BB),
+            AppColors.primaryLight,
             Color(0xFFF3B085),
           ], // Đồng bộ với logo xanh lam - cam đào
           begin: Alignment.topLeft,
@@ -1426,7 +1426,7 @@ class _HomePageState extends State<HomePage> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF4A69BB).withOpacity(0.25),
+            color: AppColors.primaryLight.withOpacity(0.25),
             blurRadius: 18,
             offset: const Offset(0, 8),
           ),
@@ -1598,7 +1598,7 @@ class _HomePageState extends State<HomePage> {
                 onPressed: () => widget.onNavigateTo?.call(4), // Sang AI Studio
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,
-                  foregroundColor: const Color(0xFF4A69BB),
+                  foregroundColor: AppColors.primaryLight,
                   minimumSize: const Size(0, 40),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
@@ -1752,7 +1752,7 @@ class _HomePageState extends State<HomePage> {
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.primary,
+                      color: AppColors.brandText,
                       height: 1.3,
                     ),
                   ),

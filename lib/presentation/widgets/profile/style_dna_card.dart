@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../data/datasources/auth_local_storage.dart';
@@ -84,7 +84,7 @@ class StyleDnaCard extends StatelessWidget {
                     ),
                     child: const Icon(
                       Icons.auto_awesome_rounded,
-                      color: AppColors.primary,
+                      color: AppColors.brandText,
                       size: 20,
                     ),
                   ),
@@ -94,7 +94,7 @@ class StyleDnaCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w900,
-                      color: AppColors.primary,
+                      color: AppColors.brandText,
                     ),
                   ),
                 ],
@@ -210,7 +210,7 @@ class StyleDnaCard extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
-                                color: AppColors.primary,
+                                color: AppColors.brandText,
                                 fontSize: 13,
                                 fontWeight: FontWeight.w900,
                               ),
@@ -231,7 +231,7 @@ class StyleDnaCard extends StatelessWidget {
                       ),
                       const Icon(
                         Icons.chevron_right_rounded,
-                        color: AppColors.primary,
+                        color: AppColors.brandText,
                       ),
                     ],
                   ),
@@ -258,7 +258,7 @@ class StyleDnaCard extends StatelessWidget {
                       children: const [
                         Icon(
                           Icons.palette_rounded,
-                          color: AppColors.primary,
+                          color: AppColors.brandText,
                           size: 14,
                         ),
                         SizedBox(width: 6),
@@ -267,7 +267,7 @@ class StyleDnaCard extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w800,
-                            color: AppColors.primary,
+                            color: AppColors.brandText,
                           ),
                         ),
                       ],
@@ -353,7 +353,7 @@ class StyleDnaCard extends StatelessWidget {
                       children: const [
                         Icon(
                           Icons.straighten_rounded,
-                          color: AppColors.primary,
+                          color: AppColors.brandText,
                           size: 14,
                         ),
                         SizedBox(width: 6),
@@ -362,7 +362,7 @@ class StyleDnaCard extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w800,
-                            color: AppColors.primary,
+                            color: AppColors.brandText,
                           ),
                         ),
                       ],
@@ -406,7 +406,7 @@ class StyleDnaCard extends StatelessWidget {
         style: const TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w800,
-          color: AppColors.primary,
+          color: AppColors.brandText,
         ),
       ),
     );
@@ -510,7 +510,7 @@ class StyleDnaCard extends StatelessWidget {
             style: const TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w700,
-              color: AppColors.primary,
+              color: AppColors.brandText,
             ),
           ),
         ],

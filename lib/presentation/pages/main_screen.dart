@@ -181,7 +181,7 @@ class _MainScreenState extends State<MainScreen> {
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w900,
-                      color: AppColors.primary,
+                      color: AppColors.brandText,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -489,7 +489,7 @@ class _MainScreenState extends State<MainScreen> {
                     width: 72,
                     height: 72,
                     decoration: BoxDecoration(
-                      color: AppColors.primary,
+                      color: AppColors.brandText,
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
@@ -510,7 +510,7 @@ class _MainScreenState extends State<MainScreen> {
                   const Text(
                     'V-Closet',
                     style: TextStyle(
-                      color: AppColors.primary,
+                      color: AppColors.brandText,
                       fontWeight: FontWeight.w900,
                       fontSize: 22,
                       letterSpacing: 0.5,
@@ -530,7 +530,7 @@ class _MainScreenState extends State<MainScreen> {
                     child: const Text(
                       'Phiên bản 1.0.0',
                       style: TextStyle(
-                        color: AppColors.primary,
+                        color: AppColors.brandText,
                         fontWeight: FontWeight.w800,
                         fontSize: 10,
                       ),
@@ -566,7 +566,7 @@ class _MainScreenState extends State<MainScreen> {
                                 padding: EdgeInsets.all(12.0),
                                 child: Icon(
                                   Icons.door_sliding_rounded,
-                                  color: AppColors.primary,
+                                  color: AppColors.brandText,
                                   size: 48,
                                 ),
                               ),
@@ -632,11 +632,7 @@ class _MainScreenState extends State<MainScreen> {
             // Drawer Header
             UserAccountsDrawerHeader(
               decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [AppColors.primary, AppColors.primaryLight],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
+                color: AppColors.primary,
               ),
               currentAccountPicture: CircleAvatar(
                 backgroundColor: AppColors.accent,
@@ -676,12 +672,12 @@ class _MainScreenState extends State<MainScreen> {
             ),
             // Menu Items
             ListTile(
-              leading: const Icon(Icons.home_rounded, color: AppColors.primary),
+              leading: const Icon(Icons.home_rounded, color: AppColors.brandText),
               title: const Text(
                 'Trang chủ',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
+                  color: AppColors.brandText,
                 ),
               ),
               onTap: () {
@@ -692,13 +688,13 @@ class _MainScreenState extends State<MainScreen> {
             ListTile(
               leading: const Icon(
                 Icons.door_sliding_rounded,
-                color: AppColors.primary,
+                color: AppColors.brandText,
               ),
               title: const Text(
                 'Tủ đồ cá nhân',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
+                  color: AppColors.brandText,
                 ),
               ),
               onTap: () {
@@ -709,13 +705,13 @@ class _MainScreenState extends State<MainScreen> {
             ListTile(
               leading: const Icon(
                 Icons.palette_rounded,
-                color: AppColors.primary,
+                color: AppColors.brandText,
               ),
               title: const Text(
                 'Phong cách cá nhân',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
+                  color: AppColors.brandText,
                 ),
               ),
               onTap: () {
@@ -726,13 +722,13 @@ class _MainScreenState extends State<MainScreen> {
             ListTile(
               leading: const Icon(
                 Icons.auto_awesome_rounded,
-                color: AppColors.primary,
+                color: AppColors.brandText,
               ),
               title: const Text(
                 'Studio Phối Đồ AI',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
+                  color: AppColors.brandText,
                 ),
               ),
               onTap: () {
@@ -743,13 +739,13 @@ class _MainScreenState extends State<MainScreen> {
             ListTile(
               leading: const Icon(
                 Icons.shopping_bag_rounded,
-                color: AppColors.primary,
+                color: AppColors.brandText,
               ),
               title: const Text(
                 'Cửa hàng',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
+                  color: AppColors.brandText,
                 ),
               ),
               onTap: () {
@@ -787,13 +783,13 @@ class _MainScreenState extends State<MainScreen> {
             ListTile(
               leading: const Icon(
                 Icons.person_rounded,
-                color: AppColors.primary,
+                color: AppColors.brandText,
               ),
               title: const Text(
                 'Hồ sơ cá nhân',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
+                  color: AppColors.brandText,
                 ),
               ),
               onTap: () {
@@ -809,13 +805,13 @@ class _MainScreenState extends State<MainScreen> {
             ListTile(
               leading: const Icon(
                 Icons.info_outline_rounded,
-                color: AppColors.primary,
+                color: AppColors.brandText,
               ),
               title: const Text(
                 'Giới thiệu V-Closet',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
+                  color: AppColors.brandText,
                 ),
               ),
               onTap: () {
@@ -840,7 +836,7 @@ class _MainScreenState extends State<MainScreen> {
                   context: context,
                   barrierDismissible: false,
                   builder: (context) => const Center(
-                    child: CircularProgressIndicator(color: AppColors.primary),
+                    child: CircularProgressIndicator(color: AppColors.brandText),
                   ),
                 );
 
@@ -908,21 +904,17 @@ class _MainScreenState extends State<MainScreen> {
         child: Container(
           height: 64,
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [AppColors.primary, AppColors.primaryLight], // Ombre ngang Navy sâu sang Sky Blue
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-            ),
+            color: AppColors.primary,
             borderRadius: BorderRadius.circular(32),
             boxShadow: [
               BoxShadow(
-                color: AppColors.primary.withOpacity(0.3),
+                color: AppColors.primary.withOpacity(0.35),
                 blurRadius: 24,
                 spreadRadius: 0,
                 offset: const Offset(0, 8),
               ),
               BoxShadow(
-                color: Colors.black.withOpacity(0.15),
+                color: Colors.black.withOpacity(0.10),
                 blurRadius: 10,
                 offset: const Offset(0, 3),
               ),
@@ -967,7 +959,7 @@ class _MainScreenState extends State<MainScreen> {
             Icon(
               icon,
               color: active
-                  ? AppColors.primary // Icon màu Navy sâu
+                  ? AppColors.brandText // Icon màu tối (tím đen)
                   : Colors.white.withOpacity(0.70), // Icon màu trắng mờ
               size: active ? 18 : 20,
             ),
@@ -980,7 +972,7 @@ class _MainScreenState extends State<MainScreen> {
                       child: Text(
                         label,
                         style: const TextStyle(
-                          color: AppColors.primary, // Chữ màu Navy sâu
+                          color: AppColors.brandText, // Chữ màu tối (tím đen)
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
                           height: 1.2,
@@ -1011,13 +1003,7 @@ class _MainScreenState extends State<MainScreen> {
           height: 52,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            gradient: LinearGradient(
-              colors: active
-                  ? [AppColors.primaryLight, AppColors.primary]
-                  : [AppColors.primary, AppColors.primaryDark],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+            color: AppColors.primary,
             border: Border.all(
               color: Colors.white.withOpacity(active ? 0.35 : 0.20),
               width: 2.0,
@@ -1231,7 +1217,7 @@ class _FloatingNotificationBannerState
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          color: AppColors.primary,
+                          color: AppColors.brandText,
                           fontWeight: FontWeight.w900,
                           fontSize: 14,
                         ),

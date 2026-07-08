@@ -1,4 +1,4 @@
-import 'dart:typed_data';
+﻿import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -497,7 +497,7 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w800,
-                          color: AppColors.primary,
+                          color: AppColors.brandText,
                         ),
                       ),
                     ],
@@ -596,14 +596,14 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: AppColors.primary,
+            color: AppColors.brandText,
           ),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           'Tạo trang phục',
           style: TextStyle(
-            color: AppColors.primary,
+            color: AppColors.brandText,
             fontWeight: FontWeight.w800,
             fontSize: 18,
           ),
@@ -621,7 +621,7 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
             IconButton(
               icon: const Icon(
                 Icons.download_rounded,
-                color: AppColors.primary,
+                color: AppColors.brandText,
               ),
               tooltip: 'Tải ảnh về máy',
               onPressed: _downloadCanvasImage,
@@ -644,7 +644,7 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
                     height: 22,
                     child: CircularProgressIndicator(
                       strokeWidth: 2.5,
-                      color: AppColors.primary,
+                      color: AppColors.brandText,
                     ),
                   ),
                 )
@@ -710,7 +710,7 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
                 const Icon(
                   Icons.touch_app_rounded,
                   size: 16,
-                  color: AppColors.primary,
+                  color: AppColors.brandText,
                 ),
                 const SizedBox(width: 6),
                 Expanded(
@@ -746,7 +746,7 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
                     selected: active,
                     label: Text(label, style: const TextStyle(fontSize: 12)),
                     labelStyle: const TextStyle(
-                      color: AppColors.primary,
+                      color: AppColors.brandText,
                       fontWeight: FontWeight.w600,
                     ),
                     onSelected: (val) {
@@ -974,7 +974,7 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
                     decoration: isSelected
                         ? BoxDecoration(
                             border: Border.all(
-                              color: AppColors.primary,
+                              color: AppColors.brandText,
                               width: 2,
                             ),
                             borderRadius: BorderRadius.circular(12),
@@ -988,7 +988,7 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
                               child: const Icon(
                                 Icons.checkroom_rounded,
                                 size: 48,
-                                color: AppColors.primary,
+                                color: AppColors.brandText,
                               ),
                             )
                           : Image.network(
@@ -1043,7 +1043,7 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
                     width: 24,
                     height: 24,
                     decoration: BoxDecoration(
-                      color: AppColors.primary,
+                      color: AppColors.brandText,
                       shape: BoxShape.circle,
                       border: Border.all(color: Colors.white, width: 2),
                     ),
@@ -1136,7 +1136,7 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
                       color: AppColors.secondary,
                       child: const Icon(
                         Icons.checkroom_rounded,
-                        color: AppColors.primary,
+                        color: AppColors.brandText,
                         size: 30,
                       ),
                     )
@@ -1153,7 +1153,7 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
                               child: const Icon(
                                 Icons.broken_image_outlined,
                                 size: 28,
-                                color: AppColors.primary,
+                                color: AppColors.brandText,
                               ),
                             ),
                       ),
@@ -1166,7 +1166,7 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
                       width: 22,
                       height: 22,
                       decoration: const BoxDecoration(
-                        color: AppColors.primary,
+                        color: AppColors.brandText,
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
@@ -1190,7 +1190,7 @@ class _CanvasOutfitPageState extends State<CanvasOutfitPage> {
               style: const TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w800,
-                color: AppColors.primary,
+                color: AppColors.brandText,
               ),
             ),
           ),

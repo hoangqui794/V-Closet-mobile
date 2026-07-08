@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import '../../../core/theme/app_colors.dart';
 
@@ -71,7 +71,7 @@ class _SurveyPageState extends State<SurveyPage> {
             Text(
               'Cảm ơn bạn!',
               style: TextStyle(
-                color: AppColors.primary,
+                color: AppColors.brandText,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -92,7 +92,7 @@ class _SurveyPageState extends State<SurveyPage> {
             child: const Text(
               'Xác nhận',
               style: TextStyle(
-                color: AppColors.primary,
+                color: AppColors.brandText,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -110,7 +110,7 @@ class _SurveyPageState extends State<SurveyPage> {
         title: const Text(
           'Khảo sát ý kiến',
           style: TextStyle(
-            color: AppColors.primary,
+            color: AppColors.brandText,
             fontWeight: FontWeight.bold,
             fontSize: 18,
           ),
@@ -119,7 +119,7 @@ class _SurveyPageState extends State<SurveyPage> {
         elevation: 0.5,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.close_rounded, color: AppColors.primary),
+          icon: const Icon(Icons.close_rounded, color: AppColors.brandText),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -134,13 +134,13 @@ class _SurveyPageState extends State<SurveyPage> {
               child: LinearProgressIndicator(
                 value: _loadingProgress,
                 backgroundColor: Colors.grey[200],
-                color: AppColors.primary,
+                color: AppColors.brandText,
                 minHeight: 3,
               ),
             ),
           if (_isLoading && _loadingProgress < 0.3)
             const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
+              child: CircularProgressIndicator(color: AppColors.brandText),
             ),
         ],
       ),

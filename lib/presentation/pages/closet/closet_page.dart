@@ -429,7 +429,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
                             _selectedClosetId != null
                                 ? Icons.arrow_back_rounded
                                 : Icons.menu_rounded,
-                            color: AppColors.primary,
+                            color: AppColors.brandText,
                           ),
                         ),
                       ),
@@ -445,7 +445,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
                                   style: const TextStyle(
                                     fontSize: 20,
                                     fontWeight: FontWeight.w800,
-                                    color: AppColors.primary,
+                                    color: AppColors.brandText,
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -458,7 +458,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.w800,
-                                color: AppColors.primary,
+                                color: AppColors.brandText,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -479,7 +479,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
                                     onPressed: _fetchItems,
                                     icon: const Icon(
                                       Icons.refresh_rounded,
-                                      color: AppColors.primary,
+                                      color: AppColors.brandText,
                                       size: 28,
                                     ),
                                     tooltip: 'Làm mới',
@@ -490,7 +490,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
                                     onPressed: _pickAndAddClothes,
                                     icon: const Icon(
                                       Icons.add_circle_outline_rounded,
-                                      color: AppColors.primary,
+                                      color: AppColors.brandText,
                                       size: 28,
                                     ),
                                     tooltip: 'Thêm đồ',
@@ -499,7 +499,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
                                   onPressed: _fetchItems,
                                   icon: const Icon(
                                     Icons.refresh_rounded,
-                                    color: AppColors.primary,
+                                    color: AppColors.brandText,
                                     size: 28,
                                   ),
                                   tooltip: 'Làm mới',
@@ -515,7 +515,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
                                 onPressed: _openCanvasBuilder,
                                 icon: const Icon(
                                   Icons.add_circle_outline_rounded,
-                                  color: AppColors.primary,
+                                  color: AppColors.brandText,
                                   size: 28,
                                 ),
                                 tooltip: 'Tạo bộ phối mới',
@@ -524,7 +524,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
                                 onPressed: _fetchOutfits,
                                 icon: const Icon(
                                   Icons.refresh_rounded,
-                                  color: AppColors.primary,
+                                  color: AppColors.brandText,
                                   size: 28,
                                 ),
                                 tooltip: 'Làm mới',
@@ -551,15 +551,13 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
                     child: TabBar(
                       controller: _tabController,
                       indicator: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [AppColors.primary, AppColors.primaryLight],
-                        ),
+                        color: AppColors.primary,
                         borderRadius: BorderRadius.circular(14),
                       ),
                       indicatorSize: TabBarIndicatorSize.tab,
                       dividerColor: Colors.transparent,
-                      labelColor: Colors.white,
-                      unselectedLabelColor: AppColors.primary,
+                      labelColor: AppColors.onPrimary,      // Trắng trên nền indicator tím đậm
+                      unselectedLabelColor: AppColors.brandText, // Tím Violet 600 — đọc rõ trên trắng
                       labelStyle: const TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 14,
@@ -863,14 +861,14 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
             children: const [
               Icon(
                 Icons.door_sliding_outlined,
-                color: AppColors.primary,
+                color: AppColors.brandText,
                 size: 20,
               ),
               SizedBox(width: 12),
               Text(
                 'Xem tủ đồ',
                 style: TextStyle(
-                  color: AppColors.primary,
+                  color: AppColors.brandText,
                   fontWeight: FontWeight.w600,
                   fontSize: 14,
                 ),
@@ -884,14 +882,14 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
             children: const [
               Icon(
                 Icons.checkroom_outlined,
-                color: AppColors.primary,
+                color: AppColors.brandText,
                 size: 20,
               ),
               SizedBox(width: 12),
               Text(
                 'Xem các món đồ',
                 style: TextStyle(
-                  color: AppColors.primary,
+                  color: AppColors.brandText,
                   fontWeight: FontWeight.w600,
                   fontSize: 14,
                 ),
@@ -911,14 +909,14 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
               style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
-                color: AppColors.primary,
+                color: AppColors.brandText,
               ),
             ),
           ),
           const SizedBox(width: 4),
           const Icon(
             Icons.keyboard_arrow_down_rounded,
-            color: AppColors.primary,
+            color: AppColors.brandText,
             size: 24,
           ),
         ],
@@ -1003,7 +1001,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
                       ),
                     ],
                   ),
-                  child: Icon(icon, color: AppColors.primary, size: 24),
+                  child: Icon(icon, color: AppColors.brandText, size: 24),
                 ),
                 if (badgeText != null)
                   Positioned(
@@ -1041,7 +1039,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
               style: const TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
-                color: AppColors.primary,
+                color: AppColors.brandText,
                 height: 1.2,
               ),
             ),
@@ -1133,7 +1131,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w800,
-                          color: AppColors.primary,
+                          color: AppColors.brandText,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -1174,7 +1172,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
                                 Icon(
                                   Icons.edit_rounded,
                                   size: 18,
-                                  color: AppColors.primary,
+                                  color: AppColors.brandText,
                                 ),
                                 SizedBox(width: 10),
                                 Text(
@@ -1182,7 +1180,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
                                   style: TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w600,
-                                    color: AppColors.primary,
+                                    color: AppColors.brandText,
                                   ),
                                 ),
                               ],
@@ -1391,7 +1389,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w800,
-                          color: AppColors.primary,
+                          color: AppColors.brandText,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -1567,7 +1565,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w800,
-                      color: AppColors.primary,
+                      color: AppColors.brandText,
                     ),
                   ),
                   const Spacer(),
@@ -1594,7 +1592,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
             'Tạo tủ đồ mới',
             style: TextStyle(
               fontWeight: FontWeight.w800,
-              color: AppColors.primary,
+              color: AppColors.brandText,
             ),
           ),
           content: TextField(
@@ -1603,7 +1601,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
               hintText: 'Nhập tên tủ đồ (ví dụ: Đồ đi tiệc, Đồ mùa đông)',
               hintStyle: TextStyle(fontSize: 13, color: AppColors.muted),
               focusedBorder: UnderlineInputBorder(
-                borderSide: BorderSide(color: AppColors.primary),
+                borderSide: BorderSide(color: AppColors.brandText),
               ),
             ),
           ),
@@ -1676,7 +1674,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
             'Đổi tên tủ đồ',
             style: TextStyle(
               fontWeight: FontWeight.w800,
-              color: AppColors.primary,
+              color: AppColors.brandText,
             ),
           ),
           content: TextField(
@@ -1684,7 +1682,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
             decoration: const InputDecoration(
               labelText: 'Tên tủ đồ mới',
               focusedBorder: UnderlineInputBorder(
-                borderSide: BorderSide(color: AppColors.primary),
+                borderSide: BorderSide(color: AppColors.brandText),
               ),
             ),
             autofocus: true,
@@ -1872,7 +1870,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
-                  color: AppColors.primary,
+                  color: AppColors.brandText,
                 ),
               ),
               const SizedBox(height: 6),
@@ -1910,7 +1908,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
               title,
               style: const TextStyle(
                 fontWeight: FontWeight.w600,
-                color: AppColors.primary,
+                color: AppColors.brandText,
                 fontSize: 13,
               ),
             ),
@@ -1921,7 +1919,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
               child: LinearProgressIndicator(
                 value: percentage,
                 backgroundColor: AppColors.primary.withOpacity(0.06),
-                color: AppColors.primary,
+                color: AppColors.brandText,
                 minHeight: 8,
               ),
             ),
@@ -2187,7 +2185,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w800,
-                          color: AppColors.primary,
+                          color: AppColors.brandText,
                         ),
                       ),
                       Text(
@@ -2208,7 +2206,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
                     vertical: 5,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.primary,
+                    color: AppColors.brandText,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -2376,7 +2374,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
                       color: AppColors.secondary.withOpacity(0.3),
                       child: const Icon(
                         Icons.checkroom_rounded,
-                        color: AppColors.primary,
+                        color: AppColors.brandText,
                         size: 32,
                       ),
                     )
@@ -2410,7 +2408,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
               style: const TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w700,
-                color: AppColors.primary,
+                color: AppColors.brandText,
               ),
             ),
           ),
@@ -2429,7 +2427,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(color: AppColors.primary),
+            CircularProgressIndicator(color: AppColors.brandText),
             const SizedBox(height: 16),
             Text(
               'Đang tải bộ phối...',
@@ -2966,13 +2964,13 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: AppColors.primary,
+                            color: AppColors.brandText,
                           ),
                         ),
                         IconButton(
                           icon: const Icon(
                             Icons.close_rounded,
-                            color: AppColors.primary,
+                            color: AppColors.brandText,
                           ),
                           onPressed: () => Navigator.pop(context),
                         ),
@@ -3044,7 +3042,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
                                           Icon(
                                             Icons.download_rounded,
                                             size: 16,
-                                            color: AppColors.primary,
+                                            color: AppColors.brandText,
                                           ),
                                           SizedBox(width: 4),
                                           Text(
@@ -3052,7 +3050,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
                                             style: TextStyle(
                                               fontSize: 11,
                                               fontWeight: FontWeight.bold,
-                                              color: AppColors.primary,
+                                              color: AppColors.brandText,
                                             ),
                                           ),
                                         ],
@@ -3084,7 +3082,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
+                          color: AppColors.brandText,
                         ),
                       ),
                       const SizedBox(height: 14),
@@ -3159,7 +3157,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
                                     style: const TextStyle(
                                       fontSize: 10,
                                       fontWeight: FontWeight.bold,
-                                      color: AppColors.primary,
+                                      color: AppColors.brandText,
                                     ),
                                   ),
                                 ),
@@ -3205,10 +3203,10 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
                           child: OutlinedButton.icon(
                             style: OutlinedButton.styleFrom(
                               side: const BorderSide(
-                                color: AppColors.primary,
+                                color: AppColors.brandText,
                                 width: 1.5,
                               ),
-                              foregroundColor: AppColors.primary,
+                              foregroundColor: AppColors.brandText,
                               padding: const EdgeInsets.symmetric(vertical: 14),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14),
@@ -3458,7 +3456,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w800,
-              color: AppColors.primary,
+              color: AppColors.brandText,
             ),
           ),
           const SizedBox(height: 4),
@@ -3486,7 +3484,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const CircularProgressIndicator(color: AppColors.primary),
+                const CircularProgressIndicator(color: AppColors.brandText),
                 const SizedBox(width: 20),
                 Text(
                   message,
@@ -3536,13 +3534,13 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.primary,
+                      color: AppColors.brandText,
                     ),
                   ),
                   IconButton(
                     icon: const Icon(
                       Icons.close_rounded,
-                      color: AppColors.primary,
+                      color: AppColors.brandText,
                     ),
                     onPressed: () => Navigator.pop(context),
                   ),
@@ -3671,7 +3669,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
                                       style: TextStyle(
                                         fontSize: 11,
                                         fontWeight: FontWeight.w700,
-                                        color: AppColors.primary,
+                                        color: AppColors.brandText,
                                       ),
                                     ),
                                   ],
@@ -3708,7 +3706,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
                                       style: TextStyle(
                                         fontSize: 11,
                                         fontWeight: FontWeight.w700,
-                                        color: AppColors.primary,
+                                        color: AppColors.brandText,
                                       ),
                                     ),
                                   ],
@@ -3744,7 +3742,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
                                       style: TextStyle(
                                         fontSize: 11,
                                         fontWeight: FontWeight.w700,
-                                        color: AppColors.primary,
+                                        color: AppColors.brandText,
                                       ),
                                     ),
                                   ],
@@ -3780,7 +3778,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
                                       style: TextStyle(
                                         fontSize: 11,
                                         fontWeight: FontWeight.w700,
-                                        color: AppColors.primary,
+                                        color: AppColors.brandText,
                                       ),
                                     ),
                                   ],
@@ -3822,7 +3820,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
               color: AppColors.primary.withOpacity(0.08),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, color: AppColors.primary, size: 18),
+            child: Icon(icon, color: AppColors.brandText, size: 18),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -3843,7 +3841,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
+                    color: AppColors.brandText,
                   ),
                 ),
               ],
@@ -3889,7 +3887,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
             ),
             child: const Icon(
               Icons.folder_open_rounded,
-              color: AppColors.primary,
+              color: AppColors.brandText,
               size: 18,
             ),
           ),
@@ -3912,7 +3910,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
+                    color: AppColors.brandText,
                   ),
                 ),
               ],
@@ -4080,13 +4078,13 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
-                              color: AppColors.primary,
+                              color: AppColors.brandText,
                             ),
                           ),
                           IconButton(
                             icon: const Icon(
                               Icons.close_rounded,
-                              color: AppColors.primary,
+                              color: AppColors.brandText,
                             ),
                             onPressed: () => Navigator.pop(context),
                           ),
@@ -4127,7 +4125,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
                             borderSide: const BorderSide(
-                              color: AppColors.primary,
+                              color: AppColors.brandText,
                               width: 1.5,
                             ),
                           ),
@@ -4169,7 +4167,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
                             borderSide: const BorderSide(
-                              color: AppColors.primary,
+                              color: AppColors.brandText,
                               width: 1.5,
                             ),
                           ),
@@ -4211,7 +4209,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
                             borderSide: const BorderSide(
-                              color: AppColors.primary,
+                              color: AppColors.brandText,
                               width: 1.5,
                             ),
                           ),
@@ -4238,10 +4236,10 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
                             child: OutlinedButton(
                               style: OutlinedButton.styleFrom(
                                 side: const BorderSide(
-                                  color: AppColors.primary,
+                                  color: AppColors.brandText,
                                   width: 1.5,
                                 ),
-                                foregroundColor: AppColors.primary,
+                                foregroundColor: AppColors.brandText,
                                 padding: const EdgeInsets.symmetric(
                                   vertical: 14,
                                 ),
@@ -4404,7 +4402,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
+                        color: AppColors.brandText,
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -4580,7 +4578,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
                   children: [
                     Icon(
                       Icons.info_outline_rounded,
-                      color: AppColors.primary,
+                      color: AppColors.brandText,
                       size: 22,
                     ),
                     SizedBox(width: 8),
@@ -4589,7 +4587,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.primary,
+                        color: AppColors.brandText,
                       ),
                     ),
                   ],
@@ -4598,7 +4596,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
                   onPressed: () => Navigator.pop(context),
                   icon: const Icon(
                     Icons.close_rounded,
-                    color: AppColors.primary,
+                    color: AppColors.brandText,
                   ),
                 ),
               ],
@@ -4634,7 +4632,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
                         style: const TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w800,
-                          color: AppColors.primary,
+                          color: AppColors.brandText,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -4876,7 +4874,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  CircularProgressIndicator(color: AppColors.primary),
+                  CircularProgressIndicator(color: AppColors.brandText),
                   SizedBox(height: 16),
                   Text(
                     'Đang tách nền & lưu vào tủ đồ...',
@@ -4983,7 +4981,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
+                        color: AppColors.brandText,
                       ),
                     ),
                     const SizedBox(height: 6),
@@ -5036,7 +5034,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
+                          color: AppColors.brandText,
                         ),
                       ),
                     ),
@@ -5150,7 +5148,7 @@ class _ClosetPageState extends State<ClosetPage> with TickerProviderStateMixin {
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w800,
-              color: AppColors.primary,
+              color: AppColors.brandText,
             ),
           ),
           const SizedBox(height: 4),
@@ -5271,7 +5269,7 @@ class _InteractiveClothingItemCardState
                         color: AppColors.secondary,
                         child: const Icon(
                           Icons.image_not_supported_outlined,
-                          color: AppColors.primary,
+                          color: AppColors.brandText,
                         ),
                       )
                     else
@@ -5288,7 +5286,7 @@ class _InteractiveClothingItemCardState
                                 color: AppColors.secondary,
                                 child: const Icon(
                                   Icons.broken_image_outlined,
-                                  color: AppColors.primary,
+                                  color: AppColors.brandText,
                                 ),
                               ),
                         ),
@@ -5310,7 +5308,7 @@ class _InteractiveClothingItemCardState
                           style: const TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w800,
-                            color: AppColors.primary,
+                            color: AppColors.brandText,
                           ),
                         ),
                       ),
@@ -5330,7 +5328,7 @@ class _InteractiveClothingItemCardState
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontWeight: FontWeight.w800,
-                      color: AppColors.primary,
+                      color: AppColors.brandText,
                       fontSize: 13,
                     ),
                   ),

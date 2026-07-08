@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_colors.dart';
@@ -103,7 +103,7 @@ class _PayOSPaymentPageState extends State<PayOSPaymentPage> {
             Text(
               widget.planName,
               style: const TextStyle(
-                color: AppColors.primary,
+                color: AppColors.brandText,
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
               ),
@@ -122,7 +122,7 @@ class _PayOSPaymentPageState extends State<PayOSPaymentPage> {
         elevation: 0.5,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.close_rounded, color: AppColors.primary),
+          icon: const Icon(Icons.close_rounded, color: AppColors.brandText),
           onPressed: () =>
               Navigator.of(context).pop(), // Trả về null khi bấm nút đóng
         ),
@@ -138,13 +138,13 @@ class _PayOSPaymentPageState extends State<PayOSPaymentPage> {
               child: LinearProgressIndicator(
                 value: _loadingProgress,
                 backgroundColor: Colors.grey[200],
-                color: AppColors.primary,
+                color: AppColors.brandText,
                 minHeight: 3,
               ),
             ),
           if (_isLoading && _loadingProgress < 0.3)
             const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
+              child: CircularProgressIndicator(color: AppColors.brandText),
             ),
         ],
       ),

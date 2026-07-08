@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -184,7 +184,7 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
         title: const Text('Xác thực tài khoản'),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        foregroundColor: AppColors.primary,
+        foregroundColor: AppColors.brandText,
         toolbarHeight: isSmallScreen ? 48 : 56,
       ),
       body: SafeArea(
@@ -202,7 +202,7 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
                 child: Icon(
                   Icons.mark_email_read_outlined,
                   size: logoSize,
-                  color: AppColors.primary,
+                  color: AppColors.brandText,
                 ),
               ),
               SizedBox(height: spacingMedium),
@@ -215,7 +215,7 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
                       style: TextStyle(
                         fontSize: titleFontSize,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.primary,
+                        color: AppColors.brandText,
                       ),
                     ),
                     SizedBox(height: spacingTiny),
@@ -236,7 +236,7 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
                             text: widget.email,
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
-                              color: AppColors.primary,
+                              color: AppColors.brandText,
                             ),
                           ),
                           const TextSpan(
@@ -324,7 +324,7 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
                                         style: TextStyle(
                                           fontSize: isSmallScreen ? 18.0 : 22.0,
                                           fontWeight: FontWeight.bold,
-                                          color: AppColors.primary,
+                                          color: AppColors.brandText,
                                         ),
                                       ),
                                     ),
@@ -339,7 +339,7 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
                       if (_isLoading)
                         const Center(
                           child: CircularProgressIndicator(
-                            color: AppColors.primary,
+                            color: AppColors.brandText,
                           ),
                         )
                       else
@@ -393,7 +393,7 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
                                 child: Text(
                                   'Gửi lại ngay',
                                   style: TextStyle(
-                                    color: AppColors.primary,
+                                    color: AppColors.brandText,
                                     fontWeight: FontWeight.bold,
                                     decoration: TextDecoration.underline,
                                     fontSize: isSmallScreen ? 13.0 : 15.0,

@@ -156,7 +156,7 @@ class _NotificationPageState extends State<NotificationPage> {
         return const Color(0xFFD4AF37); // Gold
       case 'system':
       default:
-        return AppColors.primaryLight;
+        return AppColors.notificationIcon;
     }
   }
 
@@ -166,7 +166,7 @@ class _NotificationPageState extends State<NotificationPage> {
         return const Color(0xFFFCF8F2);
       case 'system':
       default:
-        return AppColors.primary.withOpacity(0.06);
+        return AppColors.notificationIconBg;
     }
   }
 
@@ -181,14 +181,14 @@ class _NotificationPageState extends State<NotificationPage> {
           onPressed: () => Navigator.pop(context),
           icon: const Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: AppColors.primary,
+            color: AppColors.brandText,
             size: 20,
           ),
         ),
         title: const Text(
           'Thông báo',
           style: TextStyle(
-            color: AppColors.primary,
+            color: AppColors.brandText,
             fontSize: 18,
             fontWeight: FontWeight.w800,
           ),
@@ -200,14 +200,14 @@ class _NotificationPageState extends State<NotificationPage> {
               icon: const Icon(
                 Icons.done_all_rounded,
                 size: 18,
-                color: AppColors.primaryLight,
+                color: AppColors.notificationAction,
               ),
               label: const Text(
                 'Đọc tất cả',
                 style: TextStyle(
                   fontWeight: FontWeight.w800,
                   fontSize: 13,
-                  color: AppColors.primaryLight,
+                  color: AppColors.notificationAction,
                 ),
               ),
             ),
@@ -215,7 +215,7 @@ class _NotificationPageState extends State<NotificationPage> {
       ),
       body: _isLoading
           ? const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
+              child: CircularProgressIndicator(color: AppColors.brandText),
             )
           : _errorMessage != null
           ? Center(
@@ -234,7 +234,7 @@ class _NotificationPageState extends State<NotificationPage> {
                       _errorMessage!,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
-                        color: AppColors.primary,
+                        color: AppColors.brandText,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -281,7 +281,7 @@ class _NotificationPageState extends State<NotificationPage> {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.primary,
+                        color: AppColors.brandText,
                       ),
                     ),
                     const SizedBox(height: 6),
@@ -300,7 +300,7 @@ class _NotificationPageState extends State<NotificationPage> {
             )
           : RefreshIndicator(
               onRefresh: _fetchNotifications,
-              color: AppColors.primary,
+              color: AppColors.brandText,
               child: ListView.builder(
                 physics: const AlwaysScrollableScrollPhysics(),
                 itemCount: _notifications.length,
@@ -383,7 +383,7 @@ class _NotificationPageState extends State<NotificationPage> {
                             fontWeight: item.isRead
                                 ? FontWeight.w700
                                 : FontWeight.w900,
-                            color: AppColors.primary,
+                            color: AppColors.brandText,
                           ),
                         ),
                       ),
@@ -458,7 +458,7 @@ class _NotificationPageState extends State<NotificationPage> {
                 child: Text(
                   item.title,
                   style: const TextStyle(
-                    color: AppColors.primary,
+                    color: AppColors.brandText,
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                   ),
@@ -473,7 +473,7 @@ class _NotificationPageState extends State<NotificationPage> {
               Text(
                 item.body,
                 style: const TextStyle(
-                  color: AppColors.primary,
+                  color: AppColors.brandText,
                   fontSize: 14,
                   height: 1.4,
                 ),

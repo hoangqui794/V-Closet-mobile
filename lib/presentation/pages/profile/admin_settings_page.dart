@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../data/datasources/auth_local_storage.dart';
@@ -78,7 +78,7 @@ class _AdminSettingsPageState extends State<AdminSettingsPage> {
         title: const Text(
           'Cấu hình hệ thống (Admin)',
           style: TextStyle(
-            color: AppColors.primary,
+            color: AppColors.brandText,
             fontWeight: FontWeight.w800,
             fontSize: 18,
           ),
@@ -89,7 +89,7 @@ class _AdminSettingsPageState extends State<AdminSettingsPage> {
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: AppColors.primary,
+            color: AppColors.brandText,
             size: 20,
           ),
           onPressed: () => Navigator.pop(context),
@@ -118,7 +118,7 @@ class _AdminSettingsPageState extends State<AdminSettingsPage> {
                     children: [
                       const Icon(
                         Icons.admin_panel_settings_rounded,
-                        color: AppColors.primary,
+                        color: AppColors.brandText,
                         size: 28,
                       ),
                       const SizedBox(width: 12),
@@ -143,7 +143,7 @@ class _AdminSettingsPageState extends State<AdminSettingsPage> {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
+                    color: AppColors.brandText,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -174,7 +174,7 @@ class _AdminSettingsPageState extends State<AdminSettingsPage> {
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
                       borderSide: const BorderSide(
-                        color: AppColors.primary,
+                        color: AppColors.brandText,
                         width: 1.5,
                       ),
                     ),

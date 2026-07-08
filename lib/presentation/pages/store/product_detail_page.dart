@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -205,7 +205,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w800,
-                    color: AppColors.primary,
+                    color: AppColors.brandText,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -470,7 +470,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                     style: const TextStyle(
                                       fontSize: 22,
                                       fontWeight: FontWeight.w900,
-                                      color: AppColors.primary,
+                                      color: AppColors.brandText,
                                     ),
                                   ),
                                 ),
@@ -490,7 +490,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                         style: const TextStyle(
                                           fontSize: 13,
                                           fontWeight: FontWeight.bold,
-                                          color: AppColors.primary,
+                                          color: AppColors.brandText,
                                         ),
                                       ),
                                     ],
@@ -513,7 +513,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                 style: const TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w700,
-                                  color: AppColors.primary,
+                                  color: AppColors.brandText,
                                 ),
                               ),
                             ),
@@ -538,7 +538,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                               style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w800,
-                                color: AppColors.primary,
+                                color: AppColors.brandText,
                               ),
                             ),
                             const SizedBox(height: 8),
@@ -561,7 +561,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                 style: TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.w800,
-                                  color: AppColors.primary,
+                                  color: AppColors.brandText,
                                 ),
                               ),
                               const SizedBox(height: 10),
@@ -651,8 +651,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                   ),
                                 ),
                                 style: OutlinedButton.styleFrom(
-                                  foregroundColor: AppColors.primary,
-                                  side: const BorderSide(color: AppColors.primary, width: 1.5),
+                                  foregroundColor: AppColors.brandText,
+                                  side: const BorderSide(color: AppColors.brandText, width: 1.5),
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
                                 ),
                               ),
@@ -863,21 +863,21 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
               children: [
                 const Row(
                   children: [
-                    Icon(Icons.info_outline_rounded, color: AppColors.primary, size: 22),
+                    Icon(Icons.info_outline_rounded, color: AppColors.brandText, size: 22),
                     SizedBox(width: 8),
                     Text(
                       'Lưu ý chọn ảnh người mẫu',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.primary,
+                        color: AppColors.brandText,
                       ),
                     ),
                   ],
                 ),
                 IconButton(
                   onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.close_rounded, color: AppColors.primary),
+                  icon: const Icon(Icons.close_rounded, color: AppColors.brandText),
                 ),
               ],
             ),
@@ -912,7 +912,7 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
                         style: const TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w800,
-                          color: AppColors.primary,
+                          color: AppColors.brandText,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -1527,14 +1527,14 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
           style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.bold,
-            color: AppColors.primary,
+            color: AppColors.brandText,
           ),
         ),
         const SizedBox(height: 12),
         if (_isLoadingWardrobe)
           const SizedBox(
             height: 90,
-            child: Center(child: CircularProgressIndicator(color: AppColors.primary)),
+            child: Center(child: CircularProgressIndicator(color: AppColors.brandText)),
           )
         else if (_wardrobeItems.isEmpty)
           Container(
@@ -1775,7 +1775,7 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(color: AppColors.primary),
+            CircularProgressIndicator(color: AppColors.brandText),
             SizedBox(height: 16),
             Text(
               'Đang tải cấu hình...',
@@ -1863,7 +1863,7 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: AppColors.primary,
+                color: AppColors.brandText,
               ),
             ),
             const SizedBox(height: 8),
@@ -1944,8 +1944,8 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
                       icon: const Icon(Icons.refresh_rounded),
                       label: const Text('Thử lại'),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.primary,
-                        side: const BorderSide(color: AppColors.primary),
+                        foregroundColor: AppColors.brandText,
+                        side: const BorderSide(color: AppColors.brandText),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       ),
                     ),
@@ -1990,7 +1990,7 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
             const SizedBox(height: 16),
             const Text(
               'Không thể hoàn tất mặc thử',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primary),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.brandText),
             ),
             const SizedBox(height: 8),
             Text(
@@ -2096,7 +2096,7 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.primary,
+                      color: AppColors.brandText,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -2270,11 +2270,11 @@ class _ProductTryOnSheetState extends State<_ProductTryOnSheet> with SingleTicke
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.w900,
-                        color: AppColors.primary,
+                        color: AppColors.brandText,
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close_rounded, color: AppColors.primary),
+                      icon: const Icon(Icons.close_rounded, color: AppColors.brandText),
                       onPressed: () => Navigator.pop(context),
                     ),
                   ],
@@ -2317,7 +2317,7 @@ class _CircleButton extends StatelessWidget {
             ),
           ],
         ),
-        child: Icon(icon, color: AppColors.primary, size: 20),
+        child: Icon(icon, color: AppColors.brandText, size: 20),
       ),
     );
   }

@@ -1,4 +1,4 @@
-import 'package:animate_do/animate_do.dart';
+﻿import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import '../../../core/theme/app_colors.dart';
@@ -128,7 +128,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
         title: Text(hasPassword ? 'Đổi mật khẩu' : 'Tạo mật khẩu'),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        foregroundColor: AppColors.primary,
+        foregroundColor: AppColors.brandText,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -142,7 +142,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                   style: const TextStyle(
                     fontSize: 26,
                     fontWeight: FontWeight.w800,
-                    color: AppColors.primary,
+                    color: AppColors.brandText,
                   ),
                 ),
               ),
@@ -262,7 +262,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                       if (_isLoading)
                         const Center(
                           child: CircularProgressIndicator(
-                            color: AppColors.primary,
+                            color: AppColors.brandText,
                           ),
                         )
                       else

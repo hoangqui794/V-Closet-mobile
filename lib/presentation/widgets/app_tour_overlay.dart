@@ -291,7 +291,7 @@ class _CoachCard extends StatelessWidget {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: AppColors.primary,
+                  color: AppColors.brandText,
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Icon(icon, color: Colors.white, size: 22),
@@ -301,7 +301,7 @@ class _CoachCard extends StatelessWidget {
                 child: Text(
                   title,
                   style: const TextStyle(
-                    color: AppColors.primary,
+                    color: AppColors.brandText,
                     fontSize: 18,
                     fontWeight: FontWeight.w900,
                     height: 1.18,
@@ -343,7 +343,7 @@ class _CoachCard extends StatelessWidget {
                     children: [
                       const Icon(
                         Icons.touch_app_rounded,
-                        color: AppColors.primary,
+                        color: AppColors.brandText,
                         size: 18,
                       ),
                       const SizedBox(width: 8),
@@ -351,7 +351,7 @@ class _CoachCard extends StatelessWidget {
                         child: Text(
                           primaryLabel,
                           style: const TextStyle(
-                            color: AppColors.primary,
+                            color: AppColors.brandText,
                             fontSize: 12,
                             fontWeight: FontWeight.w900,
                             height: 1.2,
@@ -367,7 +367,7 @@ class _CoachCard extends StatelessWidget {
                 width: 104,
                 child: OutlinedButton(
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.primary,
+                    foregroundColor: AppColors.brandText,
                     side: BorderSide(
                       color: AppColors.primary.withOpacity(0.20),
                     ),
